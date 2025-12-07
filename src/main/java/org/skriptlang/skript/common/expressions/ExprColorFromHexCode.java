@@ -29,7 +29,6 @@ public class ExprColorFromHexCode extends SimplePropertyExpression<String, Color
 				"[the] colo[u]r[s] (from|of) hex[adecimal] code[s] %strings%");
 	}
 
-
 	@Override
 	public @Nullable Color convert(String from) {
 		if (from.startsWith("#")) // strip leading #

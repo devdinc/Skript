@@ -17,5 +17,3 @@ test "bases":
 
 	assert toBase(1, 0), toBase(1, -1), toBase(1, 1), and toBase(1, 64) are not set with "too-small bases and too-large bases returned values"
 	assert fromBase("1", 0), fromBase("1", -1), fromBase("1", 1), and fromBase("1", 64) are not set with "too-small bases and too-large bases returned values"
-
-
