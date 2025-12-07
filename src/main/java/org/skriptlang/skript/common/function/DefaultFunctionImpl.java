@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.skriptlang.skript.addon.SkriptAddon;
 import org.skriptlang.skript.common.function.Parameter.Modifier;
+import org.skriptlang.skript.common.function.Parameter.Modifier.RangedModifier;
 
 import java.lang.reflect.Array;
 import java.util.*;
@@ -69,7 +70,14 @@ final class DefaultFunctionImpl<T> extends ch.njol.skript.lang.function.Function
 				}
 			}
 
-			if (arg.length == 1 || parameter.single()) {
+			if (parameter.hasModifier(Modifier.RANGED)) {
+				RangedModifier<?> range = parameter.getModifier(RangedModifier.class);
+				if (!range.inRange(arg)) {
+					return null;
+				}
+			}
+
+			if (arg.length == 1 && parameter.single()) {
 				assert parameter.type().isAssignableFrom(arg[0].getClass())
 						: "argument type %s does not match parameter type %s".formatted(parameter.type().getSimpleName(),
 						arg[0].getClass().getSimpleName());
