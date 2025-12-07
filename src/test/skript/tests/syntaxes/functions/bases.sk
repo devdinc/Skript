@@ -15,5 +15,6 @@ test "bases":
 	assert toBase(-1, 16) is "-1" with "negative toBase failed"
 	assert fromBase(toBase(-1, 16), 16) is -1 with "negative toBase/fromBase failed"
 
-	assert toBase(1, 0), toBase(1, -1), toBase(1, 1), and toBase(1, 64) are not set with "too-small bases and too-large bases returned values"
-	assert fromBase("1", 0), fromBase("1", -1), fromBase("1", 1), and fromBase("1", 64) are not set with "too-small bases and too-large bases returned values"
+	loop 0, -1, 1, and 64:
+		assert toBase(1, loop-value) is not set with "too-small bases and too-large bases returned values"
+		assert fromBase("1", loop-value) is not set with "too-small bases and too-large bases returned values"
