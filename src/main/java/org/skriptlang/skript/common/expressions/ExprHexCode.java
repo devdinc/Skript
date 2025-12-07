@@ -5,6 +5,9 @@ import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.SimplePropertyExpression;
+import ch.njol.skript.lang.Expression;
+import ch.njol.skript.lang.Literal;
+import ch.njol.skript.lang.simplification.SimplifiedLiteral;
 import ch.njol.skript.util.Color;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +38,14 @@ public class ExprHexCode extends SimplePropertyExpression<Color, String> {
 	@Override
 	protected String getPropertyName() {
 		return "hexadecimal code";
+	}
+
+	@Override
+	public Expression<? extends String> simplify() {
+		if (getExpr() instanceof Literal<?>) {
+			return SimplifiedLiteral.fromExpression(this);
+		}
+		return this;
 	}
 
 }
