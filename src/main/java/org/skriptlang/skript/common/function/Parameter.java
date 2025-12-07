@@ -166,7 +166,7 @@ public interface Parameter<T> {
 			@Override
 			public boolean equals(Object obj) {
 				// equal to the RANGED singleton for hasModifier checks
-				return obj == Modifier.RANGED || ((obj instanceof RangedModifier<?> range) && range.max == this.max && range.min  == this.min);
+				return obj == Modifier.RANGED || ((obj instanceof RangedModifier<?> range) && (this == Modifier.RANGED || range.max == this.max && range.min  == this.min));
 			}
 
 			@Override
@@ -176,7 +176,7 @@ public interface Parameter<T> {
 
 			@Override
 			public String toString() {
-				return "RangeModifier(min=" + min + ", max=" + max + ")";
+				return "RangedModifier(min=" + min + ", max=" + max + ")";
 			}
 
 		}
