@@ -49,7 +49,6 @@ import org.skriptlang.skript.lang.converter.Converters;
 import org.skriptlang.skript.lang.experiment.ExperimentSet;
 import org.skriptlang.skript.lang.experiment.ExperimentalSyntax;
 import org.skriptlang.skript.lang.script.ScriptWarning;
-import org.skriptlang.skript.log.runtime.RuntimeError;
 import org.skriptlang.skript.log.runtime.RuntimeErrorCatcher;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
@@ -58,6 +57,7 @@ import java.lang.reflect.Array;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.MatchResult;
@@ -302,15 +302,23 @@ public final class SkriptParser {
 		T simplified;
 		try (RuntimeErrorCatcher catcher = new RuntimeErrorCatcher().start()) {
 			simplified = element.simplify();
-			// we can assume that if a single simplification throws many errors, the first non-warning will be at least somewhat representative
-			RuntimeError error = catcher.getCachedErrors().stream()
+			// we can assume that if a single simplification throws many errors, the first will be at least somewhat representative
+			AtomicBoolean error = new AtomicBoolean(false);
+			catcher.getCachedErrors().stream()
 				.filter(err -> err.level() == Level.SEVERE)
-				.findFirst().orElse(null);
-			if (error == null)
-				return simplified;
-			// found errors
-			Skript.error(error.error());
-			return null;
+				.findFirst()
+				.ifPresent(err -> {
+					Skript.error(err.error());
+					error.set(true);
+				});
+			// same for warnings.
+			catcher.getCachedErrors().stream()
+				.filter(err -> err.level() == Level.WARNING)
+				.findFirst()
+				.ifPresent(warning -> Skript.warning(warning.error()));
+			if (error.get())
+				return null;
+			return simplified;
 		}
 	}
 
