@@ -1,7 +1,10 @@
 package ch.njol.skript.expressions;
 
 import ch.njol.skript.Skript;
-import ch.njol.skript.doc.*;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Example;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.KeyProviderExpression;
@@ -94,8 +97,13 @@ public class ExprIndices extends SimpleExpression<String> {
 	}
 
 	@Override
-	public boolean allowNestedStructures() {
-		return keyedExpression.allowNestedStructures();
+	public boolean returnNestedStructures(boolean value) {
+		return keyedExpression.returnNestedStructures(true);
+	}
+
+	@Override
+	public boolean returnsNestedStructures() {
+		return keyedExpression.returnsNestedStructures();
 	}
 
 	@Override

@@ -698,11 +698,16 @@ public class Variable<T> implements Expression<T>, KeyReceiverExpression<T>, Key
 	}
 
 	@Override
-	public boolean allowNestedStructures() {
+	public boolean returnNestedStructures(boolean value) {
 		if (!canReturnKeys())
 			return false;
 		listProvider = new RecursiveListProvider();
 		return true;
+	}
+
+	@Override
+	public boolean returnsNestedStructures() {
+		return listProvider.getClass() == RecursiveListProvider.class;
 	}
 
 	@Override

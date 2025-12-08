@@ -1,7 +1,6 @@
 package ch.njol.skript.expressions;
 
 import ch.njol.skript.Skript;
-import ch.njol.skript.SkriptAPIException;
 import ch.njol.skript.doc.*;
 import ch.njol.skript.expressions.base.WrapperExpression;
 import ch.njol.skript.lang.Expression;
@@ -43,7 +42,7 @@ public class ExprRecursive extends WrapperExpression<Object> implements KeyProvi
 
 	@Override
 	public boolean init(Expression<?>[] expressions, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
-		if (!expressions[0].allowNestedStructures()) {
+		if (!expressions[0].returnNestedStructures(true)) {
 			Skript.error(expressions[0] + " does not support nested structures.");
 			return false;
 		}

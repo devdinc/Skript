@@ -92,8 +92,13 @@ public abstract class WrapperExpression<T> extends SimpleExpression<T> {
 	}
 
 	@Override
-	public boolean allowNestedStructures() {
-		return expr.allowNestedStructures();
+	public boolean returnNestedStructures(boolean value) {
+		return expr.returnNestedStructures(true);
+	}
+
+	@Override
+	public boolean returnsNestedStructures() {
+		return expr.returnsNestedStructures();
 	}
 
 	@Override
