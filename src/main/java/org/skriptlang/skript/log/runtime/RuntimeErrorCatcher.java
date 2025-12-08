@@ -15,7 +15,7 @@ import java.util.logging.Level;
  * A {@link RuntimeErrorConsumer} to be used in {@link RuntimeErrorManager} to catch {@link RuntimeError}s.
  * This should always be used with {@link #start()} and {@link #stop()}.
  */
-public class RuntimeErrorCatcher implements RuntimeErrorConsumer {
+public class RuntimeErrorCatcher implements RuntimeErrorConsumer, AutoCloseable{
 
 	private List<RuntimeErrorConsumer> storedConsumers = new ArrayList<>();
 
@@ -23,6 +23,8 @@ public class RuntimeErrorCatcher implements RuntimeErrorConsumer {
 
 	// hard limit on stored errors to prevent a runaway loop from filling up memory, for example.
 	private static final int ERROR_LIMIT = 1000;
+
+	private boolean stopped = false;
 
 	public RuntimeErrorCatcher() {}
 
@@ -57,6 +59,7 @@ public class RuntimeErrorCatcher implements RuntimeErrorConsumer {
 	 * Prints all cached {@link RuntimeError}s, {@link #cachedErrors}.
 	 */
 	public void stop() {
+		stopped = true;
 		if (!getManager().removeConsumer(this)) {
 			SkriptLogger.LOGGER.severe("[Skript] A 'RuntimeErrorCatcher' was stopped incorrectly.");
 			return;
@@ -90,6 +93,15 @@ public class RuntimeErrorCatcher implements RuntimeErrorConsumer {
 	@Override
 	public void printFrameOutput(FrameOutput output, Level level) {
 		// do nothing, this won't be called since we have no filter.
+	}
+
+	/**
+	 * Stops the catcher and clears the cached errors.
+	 */
+	@Override
+	public void close() {
+		if (!stopped)
+			this.clearCachedErrors().stop();
 	}
 
 }

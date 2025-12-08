@@ -26,5 +26,6 @@ test "colour hex codes":
 	assert colour of hexadecimal code "C74EBD" is magenta with "magenta hex code was not correct"
 
 	catch runtime errors:
-		assert colour of hex code "hello!" is not set with "hello! should not be a valid hex code"
+		set {_hello} to "hello!"
+		assert colour of hex code {_hello} is not set with "hello! should not be a valid hex code"
 	assert last caught errors is "Could not parse 'hello!' as a hex code!" with "hello! should error"
