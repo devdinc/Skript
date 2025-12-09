@@ -258,6 +258,11 @@ final class SkriptImpl implements Skript {
 			unmodifiableAddon.loadModules(modules);
 		}
 
+		@Override
+		public Skript unmodifiableView() {
+			return this;
+		}
+
 	}
 
 }
