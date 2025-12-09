@@ -253,7 +253,8 @@ public sealed class SkriptEventInfo<E extends SkriptEvent> extends StructureInfo
 
 		@Override
 		public BukkitSyntaxInfos.Event.Builder<? extends BukkitSyntaxInfos.Event.Builder<?, E>, E> toBuilder() {
-			return BukkitSyntaxInfos.Event.builder(type(), name())
+			// add asterisk to prevent prepending "on" again
+			return BukkitSyntaxInfos.Event.builder(type(), "*" + name())
 				.origin(origin)
 				.addPatterns(patterns())
 				.priority(priority())
@@ -265,6 +266,11 @@ public sealed class SkriptEventInfo<E extends SkriptEvent> extends StructureInfo
 				.addKeywords(keywords())
 				.addRequiredPlugins(requiredPlugins())
 				.addEvents(events());
+		}
+
+		@Override
+		public Origin origin() {
+			return origin;
 		}
 
 		@Override

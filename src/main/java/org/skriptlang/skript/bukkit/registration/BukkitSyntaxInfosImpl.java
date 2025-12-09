@@ -57,7 +57,8 @@ final class BukkitSyntaxInfosImpl {
 
 		@Override
 		public Builder<? extends Builder<?, E>, E> toBuilder() {
-			var builder = new BuilderImpl<>(type(), name);
+			// add asterisk to prevent prepending "on" again
+			var builder = new BuilderImpl<>(type(), "*" + name);
 			defaultInfo.toBuilder().applyTo(builder);
 			builder.listeningBehavior(listeningBehavior);
 			builder.documentationId(id);
