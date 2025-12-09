@@ -1,6 +1,5 @@
 package org.skriptlang.skript;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.skriptlang.skript.addon.SkriptAddon;
@@ -10,7 +9,6 @@ import java.util.Collection;
 /**
  * The main class for everything related to Skript.
  */
-@ApiStatus.Experimental
 public interface Skript extends SkriptAddon {
 
 	/**

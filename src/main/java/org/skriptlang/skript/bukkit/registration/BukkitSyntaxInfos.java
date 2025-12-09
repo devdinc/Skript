@@ -13,7 +13,6 @@ import java.util.Collection;
 /**
  * A class containing the interfaces representing Bukkit-specific SyntaxInfo implementations.
  */
-@ApiStatus.Experimental
 public final class BukkitSyntaxInfos {
 
 	private BukkitSyntaxInfos() { }

@@ -9,7 +9,6 @@ import org.skriptlang.skript.registration.SyntaxRegistry.Key;
 /**
  * A class containing {@link SyntaxRegistry} keys for Bukkit-specific syntax elements.
  */
-@ApiStatus.Experimental
 public final class BukkitRegistryKeys {
 
 	private BukkitRegistryKeys() { }

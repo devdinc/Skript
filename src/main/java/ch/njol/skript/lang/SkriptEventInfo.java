@@ -17,6 +17,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * @deprecated Use {@link BukkitSyntaxInfos.Event} ({@link BukkitSyntaxInfos.Event#builder(Class, String)} instead.
+ */
+@Deprecated(since = "INSERT VERSION", forRemoval = true)
 public sealed class SkriptEventInfo<E extends SkriptEvent> extends StructureInfo<E> permits ModernSkriptEventInfo {
 
 	public Class<? extends Event>[] events;
@@ -232,9 +236,10 @@ public sealed class SkriptEventInfo<E extends SkriptEvent> extends StructureInfo
 
 	/**
 	 * Internal wrapper class for providing compatibility with the new Registration API.
+	 * @deprecated This class exists solely for compatibility reasons.
 	 */
 	@ApiStatus.Internal
-	@ApiStatus.Experimental
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static final class ModernSkriptEventInfo<E extends SkriptEvent>
 			extends SkriptEventInfo<E>
 			implements BukkitSyntaxInfos.Event<E> {

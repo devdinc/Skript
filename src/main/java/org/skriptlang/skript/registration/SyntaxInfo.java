@@ -1,7 +1,6 @@
 package org.skriptlang.skript.registration;
 
 import ch.njol.skript.lang.SyntaxElement;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
 import org.skriptlang.skript.registration.SyntaxInfoImpl.BuilderImpl;
@@ -14,7 +13,6 @@ import java.util.function.Supplier;
  * A syntax info contains the details of a syntax, including its origin and patterns.
  * @param <E> The class providing the implementation of the syntax this info represents.
  */
-@ApiStatus.Experimental
 public interface SyntaxInfo<E extends SyntaxElement> extends DefaultSyntaxInfos {
 
 	/**

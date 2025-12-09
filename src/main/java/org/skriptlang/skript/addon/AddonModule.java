@@ -1,6 +1,5 @@
 package org.skriptlang.skript.addon;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.skriptlang.skript.Skript;
 
 /**
@@ -15,7 +14,6 @@ import org.skriptlang.skript.Skript;
  * @see SkriptAddon#loadModules(AddonModule...)
  */
 @FunctionalInterface
-@ApiStatus.Experimental
 public interface AddonModule {
 
 	/**

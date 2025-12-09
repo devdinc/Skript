@@ -1,6 +1,5 @@
 package org.skriptlang.skript.registration;
 
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.skriptlang.skript.addon.SkriptAddon;
 
@@ -8,7 +7,6 @@ import org.skriptlang.skript.addon.SkriptAddon;
  * The origin of a syntax, currently only used for documentation purposes.
  */
 @FunctionalInterface
-@ApiStatus.Experimental
 public interface SyntaxOrigin {
 
 	/**

@@ -20,7 +20,10 @@ import java.util.List;
 
 /**
  * @param <E> the syntax element this info is for
+ * @deprecated Use {@link SyntaxInfo} ({@link SyntaxInfo#builder(Class)}) instead.
+ * Note that some syntax types have specific {@link SyntaxInfo} implementations that they require.
  */
+@Deprecated(since = "INSERT VERSION", forRemoval = true)
 public class SyntaxElementInfo<E extends SyntaxElement> implements SyntaxInfo<E> {
 
 	private final @Nullable SyntaxInfo<E> source;
@@ -80,9 +83,8 @@ public class SyntaxElementInfo<E extends SyntaxElement> implements SyntaxInfo<E>
 		return originClassPath;
 	}
 
-	@Contract("_ -> new")
 	@ApiStatus.Internal
-	@ApiStatus.Experimental
+	@Contract("_ -> new")
 	@SuppressWarnings("unchecked")
 	public static <I extends SyntaxElementInfo<E>, E extends SyntaxElement> I fromModern(SyntaxInfo<? extends E> info) {
 		if (info instanceof SyntaxElementInfo<? extends E> oldInfo) {
