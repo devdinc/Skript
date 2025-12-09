@@ -101,7 +101,6 @@ import org.skriptlang.skript.bukkit.input.InputModule;
 import org.skriptlang.skript.bukkit.itemcomponents.ItemComponentModule;
 import org.skriptlang.skript.bukkit.log.runtime.BukkitRuntimeErrorConsumer;
 import org.skriptlang.skript.bukkit.loottables.LootTableModule;
-import org.skriptlang.skript.bukkit.registration.BukkitRegistryKeys;
 import org.skriptlang.skript.bukkit.registration.BukkitSyntaxInfos;
 import org.skriptlang.skript.bukkit.tags.TagModule;
 import org.skriptlang.skript.common.CommonModule;
@@ -1728,7 +1727,7 @@ public final class Skript extends JavaPlugin implements Listener {
 	 * @param event The Bukkit event this event applies to
 	 * @param patterns Skript patterns to match this event
 	 * @return A SkriptEventInfo representing the registered event. Used to generate Skript's documentation.
-	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link BukkitRegistryKeys#EVENT}.
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link BukkitSyntaxInfos.Event#KEY}.
 	 * Create a {@link BukkitSyntaxInfos.Event} with {@link BukkitSyntaxInfos.Event#builder(Class, String)}.
 	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
 	 */
@@ -1746,7 +1745,7 @@ public final class Skript extends JavaPlugin implements Listener {
 	 * @param events The Bukkit events this event applies to
 	 * @param patterns Skript patterns to match this event
 	 * @return A SkriptEventInfo representing the registered event. Used to generate Skript's documentation.
-	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link BukkitRegistryKeys#EVENT}.
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link BukkitSyntaxInfos.Event#KEY}.
 	 * Create a {@link BukkitSyntaxInfos.Event} with {@link BukkitSyntaxInfos.Event#builder(Class, String)}.
 	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
 	 */
@@ -1759,7 +1758,7 @@ public final class Skript extends JavaPlugin implements Listener {
 		for (int i = 0; i < patterns.length; i++)
 			patterns[i] = BukkitSyntaxInfos.fixPattern(patterns[i]);
 		var legacy = new SkriptEventInfo.ModernSkriptEventInfo<>(name, patterns, eventClass, "", events);
-		skript.syntaxRegistry().register(BukkitRegistryKeys.EVENT, legacy);
+		skript.syntaxRegistry().register(BukkitSyntaxInfos.Event.KEY, legacy);
 		return legacy;
 	}
 
@@ -1826,13 +1825,13 @@ public final class Skript extends JavaPlugin implements Listener {
 	}
 
 	/**
-	 * @deprecated Use {@link SyntaxRegistry#syntaxes(Key)} with {@link BukkitRegistryKeys#EVENT}.
+	 * @deprecated Use {@link SyntaxRegistry#syntaxes(Key)} with {@link BukkitSyntaxInfos.Event#KEY}.
 	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
 	 */
 	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static @Unmodifiable Collection<SkriptEventInfo<?>> getEvents() {
 		return instance().syntaxRegistry()
-				.syntaxes(BukkitRegistryKeys.EVENT).stream()
+				.syntaxes(BukkitSyntaxInfos.Event.KEY).stream()
 				.map(SyntaxElementInfo::<SkriptEventInfo<SkriptEvent>, SkriptEvent>fromModern)
 				.collect(Collectors.toUnmodifiableList());
 	}
