@@ -88,9 +88,15 @@ class SyntaxInfoImpl<T extends SyntaxElement> implements SyntaxInfo<T> {
 		if (this == other) {
 			return true;
 		}
-		return other instanceof SyntaxInfo<?> info &&
-				Objects.equals(origin(), info.origin()) &&
-				Objects.equals(type(), info.type()) &&
+		if (!(other instanceof SyntaxInfo<?> info)) {
+			return false;
+		}
+		// if 'other' is a custom implementation, have it compare against this to ensure symmetry
+		if (other.getClass() != SyntaxInfoImpl.class && !other.equals(this)) {
+			return false;
+		}
+		// compare known data
+		return type() == info.type() &&
 				Objects.equals(patterns(), info.patterns()) &&
 				Objects.equals(priority(), info.priority());
 	}

@@ -130,10 +130,19 @@ final class BukkitSyntaxInfosImpl {
 			if (this == other) {
 				return true;
 			}
-			return (other instanceof Event<?> event) &&
-					Objects.equals(defaultInfo, other) &&
-					Objects.equals(name(), event.name()) &&
-					Objects.equals(events(), event.events());
+			if (!(other instanceof Event<?> info)) {
+				return false;
+			}
+			// if 'other' is a custom implementation, have it compare against this to ensure symmetry
+			if (other.getClass() != EventImpl.class && !other.equals(this)) {
+				return false;
+			}
+			// compare known data
+			return type() == info.type() &&
+					Objects.equals(patterns(), info.patterns()) &&
+					Objects.equals(priority(), info.priority()) &&
+					Objects.equals(name(), info.name()) &&
+					Objects.equals(events(), info.events());
 		}
 
 		@Override

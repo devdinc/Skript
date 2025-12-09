@@ -16,7 +16,7 @@ final class DefaultSyntaxInfosImpl {
 	/**
 	 * {@inheritDoc}
 	 */
-	static class ExpressionImpl<E extends ch.njol.skript.lang.Expression<R>, R>
+	static final class ExpressionImpl<E extends ch.njol.skript.lang.Expression<R>, R>
 		extends SyntaxInfoImpl<E> implements DefaultSyntaxInfos.Expression<E, R> {
 
 		private final Class<R> returnType;
@@ -47,9 +47,18 @@ final class DefaultSyntaxInfosImpl {
 			if (this == other) {
 				return true;
 			}
-			return other instanceof Expression<?, ?> expression &&
-					super.equals(other) &&
-					returnType() == expression.returnType();
+			if (!(other instanceof Expression<?, ?> info)) {
+				return false;
+			}
+			// if 'other' is a custom implementation, have it compare against this to ensure symmetry
+			if (other.getClass() != ExpressionImpl.class && !other.equals(this)) {
+				return false;
+			}
+			// compare known data
+			return type() == info.type() &&
+				Objects.equals(patterns(), info.patterns()) &&
+				Objects.equals(priority(), info.priority()) &&
+				returnType() == info.returnType();
 		}
 
 		@Override
@@ -92,7 +101,7 @@ final class DefaultSyntaxInfosImpl {
 	/**
 	 * {@inheritDoc}
 	 */
-	static class StructureImpl<E extends org.skriptlang.skript.lang.structure.Structure>
+	static final class StructureImpl<E extends org.skriptlang.skript.lang.structure.Structure>
 		extends SyntaxInfoImpl<E> implements DefaultSyntaxInfos.Structure<E> {
 
 		private final @Nullable EntryValidator entryValidator;
@@ -136,10 +145,19 @@ final class DefaultSyntaxInfosImpl {
 			if (this == other) {
 				return true;
 			}
-			return other instanceof Structure<?> structure &&
-					super.equals(other) &&
-					Objects.equals(entryValidator(), structure.entryValidator()) &&
-					Objects.equals(nodeType(), structure.nodeType());
+			if (!(other instanceof Structure<?> info)) {
+				return false;
+			}
+			// if 'other' is a custom implementation, have it compare against this to ensure symmetry
+			if (other.getClass() != StructureImpl.class && !other.equals(this)) {
+				return false;
+			}
+			// compare known data
+			return type() == info.type() &&
+				Objects.equals(patterns(), info.patterns()) &&
+				Objects.equals(priority(), info.priority()) &&
+				Objects.equals(entryValidator(), info.entryValidator()) &&
+				nodeType() == info.nodeType();
 		}
 
 		@Override
@@ -192,8 +210,7 @@ final class DefaultSyntaxInfosImpl {
 			@Override
 			public void applyTo(SyntaxInfo.Builder<?, ?> builder) {
 				super.applyTo(builder);
-				//noinspection rawtypes - Should be safe, generics will not influence this
-				if (builder instanceof Structure.Builder structureBuilder) {
+				if (builder instanceof Structure.Builder<?, ?> structureBuilder) {
 					if (entryValidator != null) {
 						structureBuilder.entryValidator(entryValidator);
 					}
