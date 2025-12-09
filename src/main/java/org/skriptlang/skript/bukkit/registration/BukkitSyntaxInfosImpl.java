@@ -7,8 +7,8 @@ import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.skriptlang.skript.bukkit.registration.BukkitSyntaxInfos.Event;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.util.Priority;
 
 import java.util.ArrayList;
@@ -157,7 +157,7 @@ final class BukkitSyntaxInfosImpl {
 		//
 
 		@Override
-		public SyntaxOrigin origin() {
+		public Origin origin() {
 			return defaultInfo.origin();
 		}
 
@@ -358,7 +358,7 @@ final class BukkitSyntaxInfosImpl {
 			}
 
 			@Override
-			public B origin(SyntaxOrigin origin) {
+			public B origin(Origin origin) {
 				defaultBuilder.origin(origin);
 				return (B) this;
 			}

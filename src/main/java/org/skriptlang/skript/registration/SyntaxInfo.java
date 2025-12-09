@@ -3,6 +3,7 @@ package org.skriptlang.skript.registration;
 import ch.njol.skript.lang.SyntaxElement;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Unmodifiable;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfoImpl.BuilderImpl;
 import org.skriptlang.skript.util.Priority;
 
@@ -54,7 +55,7 @@ public interface SyntaxInfo<E extends SyntaxElement> extends DefaultSyntaxInfos 
 	/**
 	 * @return The origin of this syntax.
 	 */
-	SyntaxOrigin origin();
+	Origin origin();
 
 	/**
 	 * @return The class providing the implementation of this syntax.
@@ -92,7 +93,7 @@ public interface SyntaxInfo<E extends SyntaxElement> extends DefaultSyntaxInfos 
 		 * @see SyntaxInfo#origin()
 		 */
 		@Contract("_ -> this")
-		B origin(SyntaxOrigin origin);
+		B origin(Origin origin);
 
 		/**
 		 * Sets the supplier the syntax info will use to create new instances of the implementing class.

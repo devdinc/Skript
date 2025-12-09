@@ -10,8 +10,8 @@ import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.registration.BukkitSyntaxInfos;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.lang.structure.StructureInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 
 import java.util.Collection;
 import java.util.List;
@@ -244,7 +244,7 @@ public sealed class SkriptEventInfo<E extends SkriptEvent> extends StructureInfo
 			extends SkriptEventInfo<E>
 			implements BukkitSyntaxInfos.Event<E> {
 
-		private final SyntaxOrigin origin;
+		private final Origin origin;
 
 		public ModernSkriptEventInfo(String name, String[] patterns, Class<E> eventClass, String originClassPath, Class<? extends Event>[] events) {
 			super(name, patterns, eventClass, originClassPath, events);

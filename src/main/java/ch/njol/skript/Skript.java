@@ -104,6 +104,7 @@ import org.skriptlang.skript.bukkit.loottables.LootTableModule;
 import org.skriptlang.skript.bukkit.registration.BukkitSyntaxInfos;
 import org.skriptlang.skript.bukkit.tags.TagModule;
 import org.skriptlang.skript.common.CommonModule;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.lang.comparator.Comparator;
 import org.skriptlang.skript.lang.comparator.Comparators;
 import org.skriptlang.skript.lang.converter.Converter;
@@ -118,7 +119,6 @@ import org.skriptlang.skript.lang.structure.StructureInfo;
 import org.skriptlang.skript.log.runtime.RuntimeErrorManager;
 import org.skriptlang.skript.registration.DefaultSyntaxInfos;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skript.registration.SyntaxRegistry.Key;
 import org.skriptlang.skript.util.ClassLoader;
@@ -1507,31 +1507,24 @@ public final class Skript extends JavaPlugin implements Listener {
 
 	// ================ CONDITIONS & EFFECTS & SECTIONS ================
 
-	@Deprecated(since = "INSERT VERSION", forRemoval = true)
-	private record BukkitOrigin(String name) implements SyntaxOrigin {
-			private BukkitOrigin(Plugin plugin) {
-				this(plugin.getName());
-			}
-	}
-
 	/**
 	 * Attempts to create a SyntaxOrigin from a provided class.
 	 * @deprecated This method exists solely for compatibility reasons.
 	 */
 	@ApiStatus.Internal
 	@Deprecated(since = "INSERT VERSION", forRemoval = true)
-	public static SyntaxOrigin getSyntaxOrigin(Class<?> source) {
+	public static Origin getSyntaxOrigin(Class<?> source) {
 		JavaPlugin plugin;
 		try {
 			plugin = JavaPlugin.getProvidingPlugin(source);
 		} catch (IllegalArgumentException e) { // Occurs when the method fails to determine the providing plugin
-			return () -> source.getName();
+			return Origin.UNKNOWN;
 		}
 		SkriptAddon addon = getAddon(plugin);
 		if (addon != null) {
-			return SyntaxOrigin.of(addon);
+			return Origin.of(addon);
 		}
-		return new BukkitOrigin(plugin);
+		return Origin.UNKNOWN;
 	}
 
 	/**

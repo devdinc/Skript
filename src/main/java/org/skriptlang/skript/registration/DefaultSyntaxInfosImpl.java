@@ -3,6 +3,7 @@ package org.skriptlang.skript.registration;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.lang.entry.EntryValidator;
 import org.skriptlang.skript.util.Priority;
 
@@ -21,7 +22,7 @@ final class DefaultSyntaxInfosImpl {
 		private final Class<R> returnType;
 
 		ExpressionImpl(
-			SyntaxOrigin origin, Class<E> type, @Nullable Supplier<E> supplier,
+			Origin origin, Class<E> type, @Nullable Supplier<E> supplier,
 			Collection<String> patterns, Priority priority, @Nullable Class<R> returnType
 		) {
 			super(origin, type, supplier, patterns, priority);
@@ -98,7 +99,7 @@ final class DefaultSyntaxInfosImpl {
 		private final NodeType nodeType;
 
 		StructureImpl(
-			SyntaxOrigin origin, Class<E> type, @Nullable Supplier<E> supplier,
+			Origin origin, Class<E> type, @Nullable Supplier<E> supplier,
 			Collection<String> patterns, Priority priority,
 			@Nullable EntryValidator entryValidator, NodeType nodeType
 		) {
