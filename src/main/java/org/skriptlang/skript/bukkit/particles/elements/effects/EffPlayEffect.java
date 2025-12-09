@@ -40,12 +40,12 @@ import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 @Example("draw 2 smoke particles at player")
 @Example("force draw 10 red dust particles of size 3 for player")
 @Example("play blue instant splash potion break effect with a view radius of 10")
-@Example("show ravager attack animation on player's target")
+@Example("play ravager attack animation on player's target")
 public class EffPlayEffect extends Effect {
 	static {
 		Skript.registerEffect(EffPlayEffect.class,
 		"[:force] (play|show|draw) %gameeffects/particles% [%-directions% %locations%] [as %-player%]",
-			"[:force] (play|show|draw) %gameeffects/particles% [%-directions% %locations%] (for|to) %-players% [as %-player%]",
+			"[:force] (play|draw) %gameeffects/particles% [%-directions% %locations%] (for|to) %-players% [as %-player%]", // show is omitted to avoid conflicts with EffOpenInv
 			"(play|show|draw) %gameeffects% [%-directions% %locations%] (in|with) [a] [view] (radius|range) [of] %number%",
 			"(play|show|draw) %entityeffects% on %entities%");
 	}
