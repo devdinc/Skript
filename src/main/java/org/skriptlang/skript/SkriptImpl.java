@@ -164,9 +164,9 @@ final class SkriptImpl implements Skript {
 		@Override
 		public <R extends Registry<?>> R registry(Class<R> registryClass) {
 			R registry = skript.registry(registryClass);
-			if (registry instanceof SyntaxRegistry storedSyntaxRegistry) {
-				if (syntaxRegistry.syntaxRegistry != storedSyntaxRegistry) { // stored syntax registry has changed...
-					this.syntaxRegistry = new AddonAwareSyntaxRegistry(storedSyntaxRegistry, this);
+			if (registryClass == SyntaxRegistry.class) {
+				if (syntaxRegistry == null || syntaxRegistry.syntaxRegistry != registry) { // stored syntax registry has changed...
+					this.syntaxRegistry = new AddonAwareSyntaxRegistry((SyntaxRegistry) registry, this);
 				}
 				//noinspection unchecked
 				return (R) syntaxRegistry;
@@ -181,7 +181,7 @@ final class SkriptImpl implements Skript {
 
 		@Override
 		public SyntaxRegistry syntaxRegistry() {
-			return skript.syntaxRegistry();
+			return registry(SyntaxRegistry.class);
 		}
 
 		@Override
