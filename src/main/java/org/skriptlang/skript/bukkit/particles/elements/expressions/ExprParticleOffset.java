@@ -1,6 +1,10 @@
 package org.skriptlang.skript.bukkit.particles.elements.expressions;
 
 import ch.njol.skript.classes.Changer.ChangeMode;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Example;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import org.bukkit.event.Event;
 import org.bukkit.util.Vector;
@@ -8,6 +12,18 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 
+@Name("Particle Offset")
+@Description("""
+	Determines the offset value for a particle.
+	Offsets are treated as distributions if particle count is greater than 0.
+	Offsets are treated as velocity or some other special behavior if particle count is 0.
+	Setting distribution/velocity with this method may change the particle count to 1/0 respectively.
+	
+	More detailed information on particle behavior can be found at \
+	<a href="https://docs.papermc.io/paper/dev/particles/#count-argument-behavior">Paper's particle documentation</a>.
+	""")
+@Example("set the particle offset of {_my-particle} to vector(1, 2, 1)")
+@Since("INSERT VERSION")
 public class ExprParticleOffset extends SimplePropertyExpression<ParticleEffect, Vector> {
 
 	static {

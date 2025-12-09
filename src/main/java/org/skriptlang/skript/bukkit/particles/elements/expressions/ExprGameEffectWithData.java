@@ -1,6 +1,10 @@
 package org.skriptlang.skript.bukkit.particles.elements.expressions;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Example;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
@@ -15,6 +19,17 @@ import org.skriptlang.skript.bukkit.particles.GameEffect;
 import org.skriptlang.skript.bukkit.particles.registration.DataGameEffects;
 import org.skriptlang.skript.bukkit.particles.registration.EffectInfo;
 
+@Name("Game Effects with Data")
+@Description("""
+	Creates game effects that require some extra information, such as colors, particle counts, or block data.
+	Game effects consist of combinations particles and/or sounds that are used in Minecraft, such as \
+	the bone meal particles, the sound of footsteps on a specific block, or the particles and sound of breaking a splash potion.
+	Game effects not present here do not require data and can be found in the Game Effect type.
+	Data requirements vary from version to version, so these docs are only accurate for the most recent Minecraft \
+	version at time of release.
+	""")
+@Example("play compost success sound effect to player")
+@Since("INSERT VERSION")
 public class ExprGameEffectWithData extends SimpleExpression<GameEffect> {
 
 	private static final Patterns<EffectInfo<Effect, Object>> PATTERNS;

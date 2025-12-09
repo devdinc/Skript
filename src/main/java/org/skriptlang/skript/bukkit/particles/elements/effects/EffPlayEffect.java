@@ -2,6 +2,9 @@ package org.skriptlang.skript.bukkit.particles.elements.effects;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.config.Node;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Example;
+import ch.njol.skript.doc.Name;
 import ch.njol.skript.entity.EntityData;
 import ch.njol.skript.lang.Effect;
 import ch.njol.skript.lang.Expression;
@@ -20,12 +23,30 @@ import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.particles.GameEffect;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 
+@Name("Play or Draw an Effect")
+@Description("""
+	Plays or draws a specific effect at a location, to a player, or on an entity.
+	Effects can be:
+	* Particles.
+	* Game effects, which consist of combinations of particles and sounds, like the bone meal particles, \
+	the sound of footsteps on a specific block, or the particles and sound of breaking a splash potion.
+	* Entity effects, which are particles or animations that are entity-specific and can only be played on \
+	a compatible entity. For example, the ravager attack animation can be played with this effect.
+
+	All effects vary significantly in availability from version to version, and some may simply not function on your \
+	version of Minecraft. Some effects, like the death animation entity effect, may cause client glitches and should be \
+	used carefully!
+	""")
+@Example("draw 2 smoke particles at player")
+@Example("force draw 10 red dust particles of size 3 for player")
+@Example("play blue instant splash potion break effect with a view radius of 10")
+@Example("show ravager attack animation on player's target")
 public class EffPlayEffect extends Effect {
 	static {
 		Skript.registerEffect(EffPlayEffect.class,
 		"[:force] (play|show|draw) %gameeffects/particles% [%-directions% %locations%] [as %-player%]",
 			"[:force] (play|show|draw) %gameeffects/particles% [%-directions% %locations%] (for|to) %-players% [as %-player%]",
-			"(play|show|draw) %gameeffects% [%-directions% %locations%] (in|with) [a] [view] (radius|range) of %-number%)",
+			"(play|show|draw) %gameeffects% [%-directions% %locations%] (in|with) [a] [view] (radius|range) [of] %number%",
 			"(play|show|draw) %entityeffects% on %entities%");
 	}
 

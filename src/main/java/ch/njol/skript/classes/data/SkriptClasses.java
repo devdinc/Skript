@@ -473,35 +473,6 @@ public class SkriptClasses {
 				})
 				.serializer(new YggdrasilSerializer<>()));
 
-//		Classes.registerClass(new ClassInfo<>(VisualEffect.class, "visualeffect")
-//				.name("Visual Effect")
-//				.description("A visible effect, e.g. particles.")
-//				.examples("show wolf hearts on the clicked wolf",
-//						"play mob spawner flames at the targeted block to the player")
-//				.usage(VisualEffects.getAllNames())
-//				.since("2.1")
-//				.user("(visual|particle) effects?")
-//				.after("itemtype")
-//				.parser(new Parser<VisualEffect>() {
-//					@Override
-//					@Nullable
-//					public VisualEffect parse(String s, ParseContext context) {
-//						return VisualEffects.parse(s);
-//					}
-//
-//					@Override
-//					public String toString(VisualEffect e, int flags) {
-//						return e.toString(flags);
-//					}
-//
-//					@Override
-//					public String toVariableNameString(VisualEffect e) {
-//						return e.toString();
-//					}
-//
-//				})
-//				.serializer(new YggdrasilSerializer<>()));
-
 		Classes.registerClass(new ClassInfo<>(GameruleValue.class, "gamerulevalue")
 				.user("gamerule values?")
 				.name("Gamerule Value")

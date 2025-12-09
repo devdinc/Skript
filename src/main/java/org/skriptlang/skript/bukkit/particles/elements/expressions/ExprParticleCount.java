@@ -1,11 +1,29 @@
 package org.skriptlang.skript.bukkit.particles.elements.expressions;
 
 import ch.njol.skript.classes.Changer.ChangeMode;
+import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Example;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 
+@Name("Particle Count")
+@Description("""
+	Sets how many particles to draw.
+	Particle count has an influence on how the 'offset' and 'extra' values of a particle apply.
+	Offsets are treated as distributions if particle count is greater than 0.
+	Offsets are treated as velocity or some other special behavior if particle count is 0.
+	
+	This means that setting the particle count may change how your particle behaves. Be careful!
+	
+	More detailed information on particle behavior can be found at \
+	<a href="https://docs.papermc.io/paper/dev/particles/#count-argument-behavior">Paper's particle documentation</a>.
+	""")
+@Example("draw 7 blue dust particles at player")
+@Since("INSERT VERSION")
 public class ExprParticleCount extends SimplePropertyExpression<ParticleEffect, Number> {
 
 	static {

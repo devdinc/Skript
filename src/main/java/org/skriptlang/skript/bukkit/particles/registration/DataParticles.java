@@ -26,7 +26,7 @@ public class DataParticles {
 	/**
 	 * Registers a new particle with a single data parameter, and a default value for when none is provided.
 	 * @param particle the particle
-	 * @param pattern the pattern to use (must contain exactly one expression, which may be nullable)
+	 * @param pattern the pattern to use (must contain exactly one expression, which may be nullable).  Will be prefixed by "[%-*number%|a[n]]"
 	 * @param defaultData the default data to use if the expression is null or evaluates to null
 	 * @param dataFunction the function to convert the expression value to the data type (use input->input if they are the same)
 	 * @param toStringFunction the toString function for this pattern
@@ -48,8 +48,8 @@ public class DataParticles {
 	/**
 	 * Registers a new particle with a custom data supplier.
 	 * @param particle the particle
-	 * @param pattern the pattern to use
-	 * @param dataSupplier the data supplier for this particle
+	 * @param pattern the pattern to use. Will be prefixed by "[%-*number%|a[n]]"
+	 * @param dataSupplier the data supplier for this particle.
 	 * @param toStringFunction the toString function for this pattern
 	 * @param <D> the data type
 	 */
@@ -86,31 +86,31 @@ public class DataParticles {
 					return new Particle.Spell(color.asBukkitColor(), power.floatValue());
 				}; //</editor-fold>
 
-			registerParticle(Particle.EFFECT, "[a[n]] %color% effect particle[s] (of|with) power %number%",
+			registerParticle(Particle.EFFECT, "%color% effect particle[s] (of|with) power %number%",
 				spellData,
 				(exprs, parseResult, builder) -> builder.append(exprs[0], "effect particle of power", exprs[1]));
 
-			registerParticle(Particle.INSTANT_EFFECT, "[a[n]] %color% instant effect particle[s] (of|with) power %number%",
+			registerParticle(Particle.INSTANT_EFFECT, "%color% instant effect particle[s] (of|with) power %number%",
 				spellData,
 				(exprs, parseResult, builder) -> builder.append(exprs[0], "instant effect particle of power", exprs[1]));
 
-			registerParticle(Particle.FLASH, "[a[n]] %color% flash particle[s]", org.bukkit.Color.WHITE,
+			registerParticle(Particle.FLASH, "%color% flash particle[s]", org.bukkit.Color.WHITE,
 				color -> ((ch.njol.skript.util.Color) color).asBukkitColor(),
 				(exprs, parseResult, builder) -> builder.append(exprs[0], "flash particle"));
 
 		}
 
-		registerParticle(Particle.ENTITY_EFFECT, "[a[n]] %color% (potion|entity) effect particle[s]", org.bukkit.Color.WHITE,
+		registerParticle(Particle.ENTITY_EFFECT, "%color% (potion|entity) effect particle[s]", org.bukkit.Color.WHITE,
 			color -> ((ch.njol.skript.util.Color) color).asBukkitColor(),
 			(exprs, parseResult, builder) -> builder.append(exprs[0], "potion effect particle"));
 
 		if (Skript.isRunningMinecraft(1, 21, 5)) {
-			registerParticle(Particle.TINTED_LEAVES, "[a[n]] %color% tinted leaves particle[s]", org.bukkit.Color.WHITE,
+			registerParticle(Particle.TINTED_LEAVES, "%color% tinted leaves particle[s]", org.bukkit.Color.WHITE,
 				color -> ((ch.njol.skript.util.Color) color).asBukkitColor(),
 				(exprs, parseResult, builder) -> builder.append(exprs[0], "tinted leaves particle"));
 		}
 
-		registerParticle(Particle.DUST, "[a[n]] %color% dust particle[s] [of size %number%]",
+		registerParticle(Particle.DUST, "%color% dust particle[s] [of size %number%]",
 			//<editor-fold desc="dust options lambda" defaultstate="collapsed">
 			(event, expressions, parseResult) -> {
 				org.bukkit.Color bukkitColor;
@@ -131,7 +131,7 @@ public class DataParticles {
 			(exprs, parseResult, builder) -> builder.append(exprs[0], "dust particle of size", exprs[1]));
 
 		// dust color transition particle
-		registerParticle(Particle.DUST_COLOR_TRANSITION, "[a[n]] %color% dust particle[s] [of size %number%] that transitions to %color%",
+		registerParticle(Particle.DUST_COLOR_TRANSITION, "%color% dust particle[s] [of size %number%] that transitions to %color%",
 			//<editor-fold desc="dust color transition options lambda" defaultstate="collapsed">
 			(event, expressions, parseResult) -> {
 				org.bukkit.Color bukkitColor;
@@ -160,31 +160,31 @@ public class DataParticles {
 			(exprs, parseResult, builder) -> builder.append(exprs[0], "dust particle of size", exprs[1], "that transitions to", exprs[2]));
 
 		// blockdata
-		registerParticle(Particle.BLOCK, "[a[n]] %itemtype/blockdata% block particle[s]",
+		registerParticle(Particle.BLOCK, "%itemtype/blockdata% block particle[s]",
 			DataSupplier::getBlockData,
 			(exprs, parseResult, builder) -> builder.append(exprs[0], "block particle"));
 
 		if (Skript.isRunningMinecraft(1, 21, 2)) {
-			registerParticle(Particle.BLOCK_CRUMBLE, "[a[n]] %itemtype/blockdata% [block] crumble particle[s]",
+			registerParticle(Particle.BLOCK_CRUMBLE, "%itemtype/blockdata% [block] crumble particle[s]",
 				DataSupplier::getBlockData,
 				(exprs, parseResult, builder) -> builder.append(exprs[0], "block crumble particle"));
 		}
 
-		registerParticle(Particle.BLOCK_MARKER, "[a[n]] %itemtype/blockdata% [block] marker particle[s]",
+		registerParticle(Particle.BLOCK_MARKER, "%itemtype/blockdata% [block] marker particle[s]",
 			DataSupplier::getBlockData,
 			(exprs, parseResult, builder) -> builder.append(exprs[0], "block marker particle"));
 
-		registerParticle(Particle.DUST_PILLAR, "[a[n]] %itemtype/blockdata% dust pillar particle[s]",
+		registerParticle(Particle.DUST_PILLAR, "%itemtype/blockdata% dust pillar particle[s]",
 			DataSupplier::getBlockData,
 			(exprs, parseResult, builder) -> builder.append(exprs[0], "dust pillar particle"));
 
-		registerParticle(Particle.FALLING_DUST, "[a] falling %itemtype/blockdata% dust particle[s]",
+		registerParticle(Particle.FALLING_DUST, "falling %itemtype/blockdata% dust particle[s]",
 			DataSupplier::getBlockData,
 			(exprs, parseResult, builder) -> builder.append("falling", exprs[0], "dust particle"));
 
 		// misc
 
-		registerParticle(Particle.ITEM, "[an] %itemtype% item particle[s]",
+		registerParticle(Particle.ITEM, "%itemtype% item particle[s]",
 			//<editor-fold desc="item stack data lamba" defaultstate="collapsed">
 			(event, expressions, parseResult) -> {
 				ItemType itemType = (ItemType) expressions[0].getSingle(event);
@@ -194,7 +194,7 @@ public class DataParticles {
 			}, //</editor-fold>
 			(exprs, parseResult, builder) -> builder.append(exprs[0], "item particle"));
 
-		registerParticle(Particle.SCULK_CHARGE, "[a] sculk charge particle[s] [with [a] roll angle [of] %-number%]",
+		registerParticle(Particle.SCULK_CHARGE, "sculk charge particle[s] [with [a] roll angle [of] %-number%]",
 			//<editor-fold desc="charge lambda" defaultstate="collapsed">
 			(event, expressions, parseResult) -> {
 				if (expressions[0] == null)
@@ -207,12 +207,12 @@ public class DataParticles {
 			(exprs, parseResult, builder) -> builder.append("sculk charge particle)")
 													.appendIf(exprs[0] != null, "with a roll angle of", exprs[0]));
 
-		registerParticle(Particle.SHRIEK, "[a] shriek particle[s] [delayed by %-timespan%]", 0,
+		registerParticle(Particle.SHRIEK, "shriek particle[s] [delayed by %-timespan%]", 0,
 			timespan -> ((Timespan) timespan).getAs(Timespan.TimePeriod.TICK),
 			(exprs, parseResult, builder) -> builder.append("shriek particle")
 													.appendIf(exprs[0] != null, "delayed by", exprs[0]));
 
-		registerParticle(Particle.VIBRATION, "[a] vibration particle moving to[wards] %entity/location% [over [a duration of] %-timespan%]",
+		registerParticle(Particle.VIBRATION, "vibration particle moving to[wards] %entity/location% [over [a duration of] %-timespan%]",
 			//<editor-fold desc="vibration lambda">
 			(event, expressions, parseResult) -> {
 				Object target = expressions[0].getSingle(event);
@@ -238,7 +238,7 @@ public class DataParticles {
 													.appendIf(exprs[1] != null, "over", exprs[1]));
 
 		if (Skript.isRunningMinecraft(1, 21, 4)) {
-			registerParticle(Particle.TRAIL, "[a[n]] %color% trail particle moving to[wards] %location% [over [a duration of] %-timespan%]",
+			registerParticle(Particle.TRAIL, "%color% trail particle moving to[wards] %location% [over [a duration of] %-timespan%]",
 				//<editor-fold desc="trail lambda" defaultstate="collapsed">
 				(event, expressions, parseResult) -> {
 					org.bukkit.Color bukkitColor;
@@ -308,7 +308,7 @@ public class DataParticles {
 		}
 
 		if (Skript.isRunningMinecraft(1, 21, 9)) {
-			registerParticle(Particle.DRAGON_BREATH, "[a] dragon breath particle[s] [of power %-number%]",
+			registerParticle(Particle.DRAGON_BREATH, "dragon breath particle[s] [of power %-number%]",
 				0.5f, input -> input,
 				(exprs, parseResult, builder) -> builder.append("dragon breath particle")
 														.appendIf(exprs[0] != null, "of power", exprs[0]));

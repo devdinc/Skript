@@ -22,6 +22,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A wrapper around Paper's ParticleBuilder to provide additional functionality
@@ -83,6 +85,8 @@ public class ParticleEffect extends ParticleBuilder implements Debuggable {
 	 */
 	private static final ParticleParser ENUM_PARSER = new ParticleParser();
 
+	private static final Pattern LEADING_NUMBER_PATTERN = Pattern.compile("(\\d+) (.+)");
+
 	/**
 	 * Parses a particle effect from a string input. Prints errors if the particle requires data.
 	 * @param input the input string
@@ -90,6 +94,12 @@ public class ParticleEffect extends ParticleBuilder implements Debuggable {
 	 * @return the parsed ParticleEffect, or null if parsing failed
 	 */
 	public static @Nullable ParticleEffect parse(String input, ParseContext context) {
+		Matcher matcher = LEADING_NUMBER_PATTERN.matcher(input);
+		int count = 1;
+		if (matcher.matches()) {
+			count = Math.clamp(Integer.parseInt(matcher.group(1)), 0, 16_384); // drawing more than the maximum display count of 16,384 is likely unintended and can crash users.
+			input = matcher.group(2);
+		}
 		Particle particle = ENUM_PARSER.parse(input.toLowerCase(Locale.ENGLISH), context);
 		if (particle == null)
 			return null;
@@ -97,7 +107,7 @@ public class ParticleEffect extends ParticleBuilder implements Debuggable {
 			Skript.error("The " + Classes.toString(particle) + " requires data and cannot be parsed directly. Use the Particle With Data expression instead.");
 			return null;
 		}
-		return ParticleEffect.of(particle);
+		return ParticleEffect.of(particle).count(count);
 	}
 
 	/**
@@ -195,7 +205,7 @@ public class ParticleEffect extends ParticleBuilder implements Debuggable {
 	 * @return the distribution of this particle. The distribution is defined as 3 normal distributions in the x/y/z axes,
 	 * 	       with the returned vector containing the standard deviations. The mean will always be 0.
 	 */
-	public Vector3d getDistribution() {
+	public Vector3d distribution() {
 		return offset();
 	}
 
@@ -205,11 +215,11 @@ public class ParticleEffect extends ParticleBuilder implements Debuggable {
 	 * Sets the count to 1 if it was 0.
 	 * @param distribution The new standard deviations to use.
 	 */
-	public void setDistribution(Vector3d distribution) {
+	public ParticleEffect distribution(Vector3d distribution) {
 		if (!isUsingNormalDistribution()) {
 			count(1);
 		}
-		offset(distribution);
+		return offset(distribution);
 	}
 
 	@Override
