@@ -698,10 +698,10 @@ public class Variable<T> implements Expression<T>, KeyReceiverExpression<T>, Key
 	}
 
 	@Override
-	public boolean returnNestedStructures(boolean value) {
+	public boolean returnNestedStructures(boolean nested) {
 		if (!canReturnKeys())
 			return false;
-		listProvider = new RecursiveListProvider();
+		listProvider = nested ? new RecursiveListProvider() : new ShallowListProvider();
 		return true;
 	}
 

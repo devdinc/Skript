@@ -250,7 +250,7 @@ public interface Expression<T> extends SyntaxElement, Debuggable, Loopable<T>, S
 	 * @return Whether this expression supports nested structures.
 	 * @see #returnsNestedStructures()
 	 */
-	default boolean returnNestedStructures(boolean value) {
+	default boolean returnNestedStructures(boolean nested) {
 		return false;
 	}
 

@@ -250,8 +250,8 @@ public class ConvertedExpression<F, T> implements Expression<T> {
 	}
 
 	@Override
-	public boolean returnNestedStructures(boolean value) {
-		return source.returnNestedStructures(true);
+	public boolean returnNestedStructures(boolean nested) {
+		return source.returnNestedStructures(nested);
 	}
 
 	@Override

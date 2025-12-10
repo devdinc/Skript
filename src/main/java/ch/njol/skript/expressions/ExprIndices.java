@@ -97,8 +97,8 @@ public class ExprIndices extends SimpleExpression<String> {
 	}
 
 	@Override
-	public boolean returnNestedStructures(boolean value) {
-		return keyedExpression.returnNestedStructures(true);
+	public boolean returnNestedStructures(boolean nested) {
+		return keyedExpression.returnNestedStructures(nested);
 	}
 
 	@Override
