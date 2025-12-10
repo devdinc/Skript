@@ -19,8 +19,8 @@ final class OriginImpl {
 	public record AddonOriginImpl(SkriptAddon addon) implements AddonOrigin {
 
 		public AddonOriginImpl(SkriptAddon addon) {
-				this.addon = addon.unmodifiableView();
-			}
+			this.addon = addon.unmodifiableView();
+		}
 
 	}
 
