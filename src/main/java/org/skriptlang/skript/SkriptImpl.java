@@ -74,6 +74,11 @@ final class SkriptImpl implements Skript {
 
 	@Override
 	public SkriptAddon registerAddon(Class<?> source, String name) {
+		if (addon.name().equals(name)) {
+			throw new SkriptAPIException(
+				"Registering an addon with the same name as the Skript instance is not possible"
+			);
+		}
 		// make sure an addon is not already registered with this name
 		SkriptAddon existing = addons.get(name);
 		if (existing != null) {

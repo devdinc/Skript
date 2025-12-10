@@ -3,7 +3,7 @@ package org.skriptlang.skript.docs;
 import org.skriptlang.skript.addon.SkriptAddon;
 import org.skriptlang.skript.docs.Origin.AddonOrigin;
 
-class OriginImpl {
+final class OriginImpl {
 
 	public static final class UnknownOrigin implements Origin {
 
