@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 @Name("Hex Code")
 @Description("""
-	Returns the hexadecimal value representing the given color[s].
+	Returns the hexadecimal value representing the given color(s).
 	The hex value of a colour does not contain a leading #, just the RRGGBB value.
 	For those looking for hex values of numbers, see the asBase and fromBase functions.
 	""")

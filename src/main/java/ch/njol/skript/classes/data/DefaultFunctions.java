@@ -379,10 +379,6 @@ public class DefaultFunctions {
 			.build(args -> {
 				Long[] n = args.get("n");
 				Long base = args.get("base");
-				if (n == null || base == null)
-					return null;
-				if (base > Character.MAX_RADIX || base < Character.MIN_RADIX)
-					return null;
 				String[] results = new String[n.length];
 				for (int i = 0; i < n.length; i++) {
 					results[i] = Long.toString(n[i], base.intValue());
@@ -423,10 +419,6 @@ public class DefaultFunctions {
 			.build(args -> {
 				String[] n = args.get("string value");
 				Long base = args.get("base");
-				if (n == null || base == null)
-					return null;
-				if (base > Character.MAX_RADIX || base < Character.MIN_RADIX)
-					return null;
 				Long[] results = new Long[n.length];
 				try {
 					for (int i = 0; i < n.length; i++) {

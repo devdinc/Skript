@@ -281,7 +281,10 @@ public final class Parameter<T> implements org.skriptlang.skript.common.function
 		return toString(Skript.debug());
 	}
 
+	// toString output format:
 	// name: type between min and max = default
+	//
+	// Example:
 	// ns: numbers between 0 and 100 = 3
 	public String toString(boolean debug) {
 		String result = name + ": " + Utils.toEnglishPlural(type.getCodeName(), !single);
