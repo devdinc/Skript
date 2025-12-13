@@ -20,7 +20,7 @@ import java.util.*;
 /**
  * Function signature: name, parameter types and a return type.
  */
-public class Signature<T> implements org.skriptlang.skript.common.function.Signature<T>, Documentable {
+public class Signature<T> implements org.skriptlang.skript.common.function.Signature<T> {
 
 	/**
 	 * Name of the script that the function is inside.
@@ -64,6 +64,11 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	 */
 	final @Nullable Contract contract;
 
+	/**
+	 * The class path for the origin of this signature.
+	 */
+	@Nullable String originClassPath;
+
 	public Signature(@Nullable String script, String name, Parameter<?>[] parameters, boolean local, @Nullable ClassInfo<T> returnType, boolean single, @Nullable Contract contract) {
 		this.script = script;
 		this.name = name;
@@ -86,10 +91,13 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 
 	public Signature(@Nullable String script, String name, Parameter<?>[] parameters, boolean local, @Nullable ClassInfo<T> returnType, boolean single, String stacktrace) {
 		this(script, name, parameters, local, returnType, single, (Contract) null);
+		this.originClassPath = stacktrace;
 	}
 
 	public Signature(String script, String name, Parameter<?>[] parameters, boolean local, ClassInfo<T> returnType, boolean single, String stacktrace, @Nullable Contract contract) {
 		this(script, name, parameters, local, returnType, single, contract);
+
+		this.originClassPath = stacktrace;
 	}
 
 	public Signature(@Nullable String script, String name, SequencedMap<String, org.skriptlang.skript.common.function.Parameter<?>> parameters, Class<T> returnType, boolean local) {
@@ -126,7 +134,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	 * @param parameter The parameter to use to convert.
 	 * @return The converted parameter.
 	 */
-	private static Parameter<?> toParameter(org.skriptlang.skript.common.function.Parameter<?> parameter) {
+	private static Parameter<?> toOldParameter(org.skriptlang.skript.common.function.Parameter<?> parameter) {
 		if (parameter == null) {
 			return null;
 		}
@@ -147,7 +155,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
 	public Parameter<?> getParameter(int index) {
 		return parameters.values()
-				.stream().map(Signature::toParameter)
+				.stream().map(Signature::toOldParameter)
 				.toList().get(index);
 	}
 
@@ -156,16 +164,13 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	 */
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
 	public Parameter<?>[] getParameters() {
-		return parameters.values().stream().map(Signature::toParameter)
+		return parameters.values().stream().map(Signature::toOldParameter)
 				.toList()
 				.toArray(new Parameter[0]);
 	}
 
 	@Override
 	public Class<T> returnType() {
-		if (returns == null) {
-			return null;
-		}
 		//noinspection unchecked
 		return (Class<T>) returns;
 	}
@@ -229,7 +234,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	 */
 	@Deprecated(forRemoval = true, since = "2.13")
 	public String getOriginClassPath() {
-		return "";
+		return originClassPath;
 	}
 
 	public @Nullable Contract getContract() {
@@ -299,36 +304,6 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 		}
 
 		return signatureBuilder.toString();
-	}
-
-	@Override
-	public @NotNull String name() {
-		return name;
-	}
-
-	@Override
-	public @Unmodifiable @NotNull List<String> description() {
-		return List.of();
-	}
-
-	@Override
-	public @Unmodifiable @NotNull List<String> since() {
-		return List.of();
-	}
-
-	@Override
-	public @Unmodifiable @NotNull List<String> examples() {
-		return List.of();
-	}
-
-	@Override
-	public @Unmodifiable @NotNull List<String> keywords() {
-		return List.of();
-	}
-
-	@Override
-	public @Unmodifiable @NotNull List<String> requires() {
-		return List.of();
 	}
 
 }

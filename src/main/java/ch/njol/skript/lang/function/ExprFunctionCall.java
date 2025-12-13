@@ -27,6 +27,10 @@ public class ExprFunctionCall<T> extends SimpleExpression<T> implements KeyProvi
 	private final Class<T> returnType;
 	private final Map<Event, String[]> cache = Collections.synchronizedMap(new WeakHashMap<>());
 
+	public ExprFunctionCall(FunctionReference<T> function) {
+		this(function, CollectionUtils.array(function.signature().returnType()));
+	}
+
 	@SuppressWarnings("unchecked")
 	public ExprFunctionCall(FunctionReference<?> reference, Class<? extends T>[] expectedReturnTypes) {
 		this.reference = reference;

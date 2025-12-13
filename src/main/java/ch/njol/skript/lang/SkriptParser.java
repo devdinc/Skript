@@ -1149,11 +1149,10 @@ public final class SkriptParser {
 	 * @return A {@link FunctionReference} if a function is found, or {@code null} if none is found.
 	 */
 	public <T> org.skriptlang.skript.common.function.FunctionReference<T> parseFunctionReference() {
-		if (context != ParseContext.DEFAULT && context != ParseContext.EVENT) {
-			return null;
+		if (context == ParseContext.DEFAULT || context == ParseContext.EVENT) {
+			return new FunctionReferenceParser(context, flags).parseFunctionReference(expr);
 		}
-
-		return new FunctionReferenceParser(context, flags).parseFunctionReference(expr);
+		return null;
 	}
  
 	private final static Pattern FUNCTION_CALL_PATTERN = Pattern.compile("(" + Functions.functionNamePattern + ")\\((.*)\\)");

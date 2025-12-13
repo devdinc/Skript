@@ -3,7 +3,6 @@ package org.skriptlang.skript.common.function;
 import ch.njol.skript.lang.function.FunctionEvent;
 import ch.njol.skript.lang.function.Signature;
 import com.google.common.base.Preconditions;
-import org.enginehub.piston.converter.MapArgumentConverter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;

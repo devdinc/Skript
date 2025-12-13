@@ -42,7 +42,7 @@ public final class FunctionRegistry implements Registry<Function<?>> {
 	 * The pattern for a valid function name.
 	 * Functions must start with a letter or underscore and can only contain letters, numbers, and underscores.
 	 */
-	final static Pattern FUNCTION_NAME_PATTERN = Pattern.compile("[A-z_][A-z_0-9]*");
+	final static Pattern FUNCTION_NAME_PATTERN = Pattern.compile("[\\p{IsAlphabetic}_][\\p{IsAlphabetic}\\d_]*");
 
 	/**
 	 * The namespace for registered global functions.
@@ -718,7 +718,7 @@ public final class FunctionRegistry implements Registry<Function<?>> {
 			int optionalArgs = 0;
 			for (int i = 0; i < signatureParams.length; i++) {
 				Parameter<?> param = signatureParams[i];
-				if (param.modifiers().contains(Modifier.OPTIONAL)) {
+				if (param.hasModifier(Modifier.OPTIONAL)) {
 					optionalArgs++;
 				}
 

@@ -316,4 +316,5 @@ public final class Parameter<T> implements org.skriptlang.skript.common.function
 	public boolean single() {
 		return single;
 	}
+
 }

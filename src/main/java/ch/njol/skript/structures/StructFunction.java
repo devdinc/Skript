@@ -18,15 +18,14 @@ import ch.njol.skript.lang.function.Functions;
 import ch.njol.skript.lang.function.Signature;
 import ch.njol.skript.lang.parser.ParserInstance;
 import ch.njol.skript.registrations.Classes;
-import ch.njol.skript.util.Contract;
 import ch.njol.skript.util.Utils;
 import ch.njol.skript.util.Utils.PluralResult;
 import ch.njol.util.StringUtils;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.lang.entry.EntryContainer;
 import org.skriptlang.skript.common.function.Parameter;
 import org.skriptlang.skript.common.function.ScriptParameter;
+import org.skriptlang.skript.lang.entry.EntryContainer;
 import org.skriptlang.skript.lang.structure.Structure;
 
 import java.util.LinkedHashMap;
@@ -177,7 +176,7 @@ public class StructFunction extends Structure {
 		 * @param script  Script file name (<b>might</b> be used for some checks).
 		 * @param name    The name of the function.
 		 * @param args    The parameters of the function.
-		 * @param returns The return type of the function
+		 * @param returns The return type of the function, or null if the function should not return anything.
 		 * @param local   If the signature of function is local.
 		 * @return Parsed signature or null if something went wrong.
 		 * @see Functions#registerSignature(Signature)
@@ -223,6 +222,11 @@ public class StructFunction extends Structure {
 		 * the type is specified in the {@code type} group. If a default value is present, this is specified
 		 * with the least amount of tokens as possible.
 		 * </p>
+		 * <p>
+		 * Format:
+		 * name: type = default
+		 * [^:(){}\",]+?: [a-zA-Z ]+? = .+
+		 * </p>
 		 */
 		private final static Pattern SCRIPT_PARAMETER_PATTERN =
 			Pattern.compile("^\\s*(?<name>[^:(){}\",]+?)\\s*:\\s*(?<type>[a-zA-Z ]+?)\\s*(?:\\s*=\\s*(?<def>.+))?\\s*$");
@@ -249,13 +253,13 @@ public class StructFunction extends Structure {
 				String arg = args.substring(j, i);
 
                 // One or more arguments for this function
-                Matcher n = SCRIPT_PARAMETER_PATTERN.matcher(arg);
-                if (!n.matches()) {
+                Matcher matcher = SCRIPT_PARAMETER_PATTERN.matcher(arg);
+                if (!matcher.matches()) {
                     Skript.error("The " + StringUtils.fancyOrderNumber(params.size() + 1) + " argument's definition is invalid. It should look like 'name: type' or 'name: type = default value'.");
                     return null;
                 }
 
-                String paramName = n.group("name");
+                String paramName = matcher.group("name");
                 // for comparing without affecting the original name, in case the config option for case insensitivity changes.
                 String lowerParamName = paramName.toLowerCase(Locale.ENGLISH);
                 for (String otherName : params.keySet()) {
@@ -267,14 +271,14 @@ public class StructFunction extends Structure {
                     }
                 }
 
-                ClassInfo<?> c = Classes.getClassInfoFromUserInput(n.group("type"));
-                PluralResult result = Utils.isPlural(n.group("type"));
+                ClassInfo<?> c = Classes.getClassInfoFromUserInput(matcher.group("type"));
+                PluralResult result = Utils.isPlural(matcher.group("type"));
 
                 if (c == null)
                     c = Classes.getClassInfoFromUserInput(result.updated());
 
                 if (c == null) {
-                    Skript.error("Cannot recognise the type '%s'", n.group("type"));
+                    Skript.error("Cannot recognise the type '%s'", matcher.group("type"));
                     return null;
                 }
 
@@ -288,7 +292,7 @@ public class StructFunction extends Structure {
                     type = c.getC();
                 }
 
-                Parameter<?> parameter = ScriptParameter.parse(variableName, type, n.group("def"));
+                Parameter<?> parameter = ScriptParameter.parse(variableName, type, matcher.group("def"));
 
                 if (parameter == null)
                     return null;

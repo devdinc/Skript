@@ -255,7 +255,7 @@ public abstract class Utils {
 	/**
 	 * Stores the result of {@link #isPlural(String)}.
 	 *
-	 * @param updated The single exist of the passed word, if a single variant exists.
+	 * @param updated The singular version of the passed word, if a single variant exists.
 	 * @param plural Whether the word is plural.
 	 */
 	public record PluralResult(String updated, boolean plural) {
