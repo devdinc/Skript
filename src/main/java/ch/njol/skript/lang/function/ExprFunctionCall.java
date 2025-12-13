@@ -36,13 +36,7 @@ public class ExprFunctionCall<T> extends SimpleExpression<T> implements KeyProvi
 		this.reference = reference;
 
 		Class<?> functionReturnType = reference.signature().returnType();
-		Class<?> returnType;
-		if (functionReturnType != null && functionReturnType.isArray()) {
-			returnType = functionReturnType.componentType();
-		} else {
-			returnType = functionReturnType;
-		}
-
+		Class<?> returnType = Function.getComponent(functionReturnType);
 		if (CollectionUtils.containsSuperclass(expectedReturnTypes, returnType)) {
 			// Function returns expected type already
 			this.returnTypes = new Class[] {returnType};
@@ -110,12 +104,7 @@ public class ExprFunctionCall<T> extends SimpleExpression<T> implements KeyProvi
 			return (Expression<? extends R>) this;
 
 		Class<?> returns = reference.signature().returnType();
-		Class<?> converterType;
-		if (returns != null && returns.isArray()) {
-			converterType = returns.componentType();
-		} else {
-			converterType = returns;
-		}
+		Class<?> converterType = Function.getComponent(returns);
 
 		if (Converters.converterExists(converterType, to))
 			return new ExprFunctionCall<>(reference, to);

@@ -167,12 +167,8 @@ public class ScriptFunction<T> extends Function<T> implements ReturnHandler<T> {
 			return null;
 		}
 
-		if (type().isArray()) {
-			//noinspection unchecked
-			return (Class<? extends T>) type().componentType();
-		} else {
-			return type();
-		}
+		//noinspection unchecked
+		return (Class<? extends T>) Function.getComponent(type());
 	}
 
 }

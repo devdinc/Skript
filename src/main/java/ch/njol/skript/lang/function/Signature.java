@@ -2,7 +2,6 @@ package ch.njol.skript.lang.function;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.classes.ClassInfo;
-import ch.njol.skript.doc.Documentable;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.Contract;
 import ch.njol.skript.util.Utils;
@@ -11,7 +10,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 import org.skriptlang.skript.common.function.FunctionReference;
 import org.skriptlang.skript.common.function.Parameter.Modifier;
 
@@ -139,13 +137,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 			return null;
 		}
 
-		ClassInfo<?> classInfo;
-		if (parameter.type().isArray()) {
-			classInfo = Classes.getExactClassInfo(parameter.type().componentType());
-		} else {
-			classInfo = Classes.getExactClassInfo(parameter.type());
-		}
-
+		ClassInfo<?> classInfo = Classes.getExactClassInfo(Function.getComponent(parameter.type()));
 		return new Parameter<>(parameter.name(), classInfo, !parameter.type().isArray(), null, parameter.modifiers().toArray(new Modifier[0]));
 	}
 

@@ -177,13 +177,8 @@ public class DynamicFunctionReference<Result>
 		for (int i = 0; i < parameters.length; i++) {
 			Parameter<?> parameter = signature.parameters().values().toArray(new Parameter<?>[0])[varArgs ? 0 : i];
 
-			Class<?> target;
-			if (parameter.type().isArray()) {
-				target = parameter.type().componentType();
-			} else {
-				target = parameter.type();
-			}
-
+			Class<?> target = Function.getComponent(parameter.type());
+			//noinspection unchecked
 			Expression<?> expression = parameters[i].getConvertedExpression(target);
 			if (expression == null) {
 				return null;

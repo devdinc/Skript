@@ -15,13 +15,23 @@ import org.skriptlang.skript.common.function.Parameter.Modifier;
 import org.skriptlang.skript.common.function.ScriptParameter;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.SequencedMap;
 
 /**
  * Functions can be called using arguments.
  */
 public abstract class Function<T> implements org.skriptlang.skript.common.function.Function<T> {
+
+	/**
+	 * @param cls The class.
+	 * @return The component of cls if cls is an array, otherwise cls.
+	 */
+	static Class<?> getComponent(Class<?> cls) {
+		if (cls != null && cls.isArray()) {
+			return cls.componentType();
+		}
+		return cls;
+	}
 
 	/**
 	 * Execute functions even when some parameters are not present.
