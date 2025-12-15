@@ -13,6 +13,7 @@ import ch.njol.skript.lang.ParseContext;
 import ch.njol.skript.util.Experience;
 import ch.njol.skript.util.Utils;
 import ch.njol.util.coll.CollectionUtils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -50,14 +51,10 @@ public class EntityClassInfo extends ClassInfo<Entity> {
 			.defaultExpression(new EventValueExpression<>(Entity.class))
 			.parser(new EntityParser())
 			.changer(new EntityChanger())
-			.property(Property.NAME,
-				"The entity's custom name, if it has one, as text. Can be set or reset.",
-				Skript.instance(),
-				new EntityNameHandler(Property.NAME))
 			.property(Property.DISPLAY_NAME,
 				"The entity's custom name, if it has one, as text. Can be set or reset.",
 				Skript.instance(),
-				new EntityNameHandler(Property.DISPLAY_NAME));
+				new EntityNameHandler());
 	}
 
 	private static class EntityParser extends Parser<Entity> {
@@ -152,21 +149,11 @@ public class EntityClassInfo extends ClassInfo<Entity> {
 		//</editor-fold>
 	}
 
-	private static class EntityNameHandler implements ExpressionPropertyHandler<Entity, String> {
+	private static class EntityNameHandler implements ExpressionPropertyHandler<Entity, Component> {
 		//<editor-fold desc="entity name handler" defaultstate="collapsed">
-		private final boolean displayName;
-
-		public EntityNameHandler(Property<ExpressionPropertyHandler<?, ?>> property) {
-			this.displayName = switch (property.name()) {
-				case "name" -> false;
-				case "display name" -> true;
-				default -> throw new IllegalArgumentException("Property must be either NAME or DISPLAY_NAME");
-			};
-		}
-
 		@Override
-		public String convert(Entity propertyHolder) {
-			return propertyHolder.getName();
+		public Component convert(Entity entity) {
+			return entity.customName();
 		}
 
 		@Override
@@ -177,26 +164,19 @@ public class EntityClassInfo extends ClassInfo<Entity> {
 		}
 
 		@Override
-		@SuppressWarnings("deprecation")
 		public void change(Entity entity, Object @Nullable [] delta, ChangeMode mode) {
 			assert mode == ChangeMode.SET || mode == ChangeMode.RESET;
-			String name;
-			if (mode == ChangeMode.RESET) {
-				name = null;
-			} else {
-				assert delta != null;
-				name = (String) delta[0];
-			}
-			entity.setCustomName(name);
-			if (displayName || mode == ChangeMode.RESET)
-				entity.setCustomNameVisible(name != null);
+			Component name = delta == null ? null : (Component) delta[0];
+
+			entity.customName(name);
+			entity.setCustomNameVisible(name != null);
 			if (entity instanceof LivingEntity living)
 				living.setRemoveWhenFarAway(name == null);
 		}
 
 		@Override
-		public @NotNull Class<String> returnType() {
-			return String.class;
+		public @NotNull Class<Component> returnType() {
+			return Component.class;
 		}
 		//</editor-fold>
 	}

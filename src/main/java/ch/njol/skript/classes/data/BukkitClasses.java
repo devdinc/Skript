@@ -15,6 +15,7 @@ import ch.njol.skript.util.BlockUtils;
 import ch.njol.skript.util.PotionEffectUtils;
 import ch.njol.yggdrasil.Fields;
 import io.papermc.paper.world.MoonPhase;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.World.Environment;
 import org.bukkit.attribute.Attribute;
@@ -484,7 +485,7 @@ public class BukkitClasses {
 				.property(Property.NAME,
 					"A command sender's name, as text. Cannot be changed.",
 					Skript.instance(),
-					ExpressionPropertyHandler.of(CommandSender::getName, String.class)));
+					ExpressionPropertyHandler.of(CommandSender::name, Component.class)));
 
 		Classes.registerClass(new NameableClassInfo());
 

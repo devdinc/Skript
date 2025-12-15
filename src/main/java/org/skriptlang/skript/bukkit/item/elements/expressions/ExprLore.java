@@ -1,35 +1,34 @@
 package org.skriptlang.skript.bukkit.item.elements.expressions;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import ch.njol.skript.aliases.ItemType;
+import ch.njol.skript.classes.Changer.ChangeMode;
+import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
+import ch.njol.skript.doc.Name;
+import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.PropertyExpression;
+import ch.njol.skript.lang.Expression;
+import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.SyntaxStringBuilder;
+import ch.njol.skript.lang.util.SimpleExpression;
+import ch.njol.util.Kleenean;
+import ch.njol.util.coll.CollectionUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextDecoration.State;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
-
-import ch.njol.skript.aliases.ItemType;
-import ch.njol.skript.classes.Changer.ChangeMode;
-import ch.njol.skript.doc.Description;
-import ch.njol.skript.doc.Name;
-import ch.njol.skript.doc.Since;
-import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.SkriptParser.ParseResult;
-import ch.njol.skript.lang.util.SimpleExpression;
-import ch.njol.util.Kleenean;
-import ch.njol.util.coll.CollectionUtils;
 import org.skriptlang.skript.bukkit.text.TextComponentParser;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Name("Lore")
 @Description("Returns the lore of an item.")
-@Example("set the 1st line of the item's lore to \"&lt;orange&gt;Excalibur 2.0\"")
+@Example("set the 1st line of the item's lore to \"<orange>Excalibur 2.0\"")
 @Since("2.1")
 public class ExprLore extends SimpleExpression<Component> {
 

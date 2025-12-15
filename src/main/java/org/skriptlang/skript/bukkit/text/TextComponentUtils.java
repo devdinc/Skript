@@ -45,7 +45,7 @@ public final class TextComponentUtils {
 	 * Attempts to convert an expression into one that is guaranteed to return a component.
 	 * @param expression The expression to convert.
 	 * @return An expression that will wrap the output of {@code expression} in a {@link Component}.
-	 * Will return null if {@code expression} is unable to be defended (see {@link LiteralUtils#defendExpression(Expression)}.
+	 * Will return null if {@code expression} is unable to be defended (see {@link LiteralUtils#defendExpression(Expression)}).
 	 */
 	public static @Nullable Expression<? extends Component> asComponentExpression(Expression<?> expression) {
 		expression = LiteralUtils.defendExpression(expression);

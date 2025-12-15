@@ -170,6 +170,7 @@ public class TextModule implements AddonModule {
 		EffResetTitle.register(syntaxRegistry);
 		EffSendTitle.register(syntaxRegistry);
 		ExprColored.register(syntaxRegistry);
+		ExprPlayerlistHeaderFooter.register(syntaxRegistry);
 		ExprRawString.register(syntaxRegistry);
 	}
 
