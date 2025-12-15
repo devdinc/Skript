@@ -15,14 +15,9 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.function.DynamicFunctionReference;
 import ch.njol.skript.lang.util.common.AnyNamed;
 import ch.njol.skript.registrations.Feature;
-import ch.njol.skript.util.chat.BungeeConverter;
-import ch.njol.skript.util.chat.ChatMessages;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Nameable;
 import org.bukkit.OfflinePlayer;
@@ -35,7 +30,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.common.properties.expressions.PropExprName;
 import org.skriptlang.skript.lang.script.Script;
@@ -95,16 +89,8 @@ import java.util.List;
 @Deprecated(since="2.13", forRemoval = true)
 public class ExprName extends SimplePropertyExpression<Object, String> {
 
-	@Nullable
-	private static BungeeComponentSerializer serializer;
-
 	static {
 		if (!SkriptConfig.useTypeProperties.value()) {
-			// Check for Adventure API
-			if (Skript.classExists("net.kyori.adventure.text.Component") &&
-				Skript.methodExists(Bukkit.class, "createInventory", InventoryHolder.class, int.class, Component.class))
-				serializer = BungeeComponentSerializer.get();
-
 			List<String> patterns = new ArrayList<>();
 			patterns.addAll(Arrays.asList(getPatterns("name[s]", "offlineplayers/entities/nameds/inventories")));
 			patterns.addAll(Arrays.asList(getPatterns("(display|nick|chat|custom)[ ]name[s]", "offlineplayers/entities/nameds/inventories")));
@@ -182,26 +168,26 @@ public class ExprName extends SimplePropertyExpression<Object, String> {
 					return null;
 				}
 			}
-			return CollectionUtils.array(String.class);
+			return CollectionUtils.array(Component.class);
 		}
 		return null;
 	}
 
 	@Override
 	public void change(Event event, @Nullable Object[] delta, ChangeMode mode) {
-		String name = delta != null ? (String) delta[0] : null;
+		Component name = delta != null ? (Component) delta[0] : null;
 		for (Object object : getExpr().getArray(event)) {
 			if (object instanceof Player player) {
 				switch (mark) {
 					case 2:
-						player.setDisplayName(name != null ? name + ChatColor.RESET : ((Player) object).getName());
+						player.displayName(name);
 						break;
 					case 3: // Null check not necessary. This method will use the player's name if 'name' is null.
-						player.setPlayerListName(name);
+						player.playerListName(name);
 						break;
 				}
 			} else if (object instanceof Entity entity) {
-				entity.setCustomName(name);
+				entity.customName(name);
 				if (mark == 2 || mode == ChangeMode.RESET) // Using "display name"
 					entity.setCustomNameVisible(name != null);
 				if (object instanceof LivingEntity living)
@@ -220,27 +206,16 @@ public class ExprName extends SimplePropertyExpression<Object, String> {
 				if (!type.isCreatable())
 					return;
 
-				Inventory copy;
-				if (serializer == null) {
-					if (name == null)
-						name = type.getDefaultTitle();
-					if (type == InventoryType.CHEST) {
-						copy = Bukkit.createInventory(inventory.getHolder(), inventory.getSize(), name);
-					} else {
-						copy = Bukkit.createInventory(inventory.getHolder(), type, name);
-					}
-				} else {
-					Component component = type.defaultTitle();
-					if (name != null) {
-						BaseComponent[] components = BungeeConverter.convert(ChatMessages.parseToArray(name));
-						component = serializer.deserialize(components);
-					}
-					if (type == InventoryType.CHEST) {
-						copy = Bukkit.createInventory(inventory.getHolder(), inventory.getSize(), component);
-					} else {
-						copy = Bukkit.createInventory(inventory.getHolder(), type, component);
-					}
+				if (name == null) {
+					name = type.defaultTitle();
 				}
+				Inventory copy;
+				if (type == InventoryType.CHEST) {
+					copy = Bukkit.createInventory(inventory.getHolder(), inventory.getSize(), name);
+				} else {
+					copy = Bukkit.createInventory(inventory.getHolder(), type, name);
+				}
+
 				copy.setContents(inventory.getContents());
 				viewers.forEach(viewer -> viewer.openInventory(copy));
 			}
