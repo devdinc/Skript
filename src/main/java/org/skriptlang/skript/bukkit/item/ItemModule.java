@@ -2,7 +2,7 @@ package org.skriptlang.skript.bukkit.item;
 
 import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.addon.SkriptAddon;
-import org.skriptlang.skript.bukkit.item.elements.*;
+import org.skriptlang.skript.bukkit.item.elements.expressions.*;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 public class ItemModule implements AddonModule {

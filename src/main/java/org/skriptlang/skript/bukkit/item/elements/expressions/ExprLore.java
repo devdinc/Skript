@@ -1,4 +1,4 @@
-package org.skriptlang.skript.bukkit.item.elements;
+package org.skriptlang.skript.bukkit.item.elements.expressions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +31,10 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 @Description("Returns the lore of an item.")
 @Example("set the 1st line of the item's lore to \"&lt;orange&gt;Excalibur 2.0\"")
 @Since("2.1")
-public class ExprLore extends SimpleExpression<String> {
+public class ExprLore extends SimpleExpression<Component> {
 
 	public static void register(SyntaxRegistry syntaxRegistry) {
-		syntaxRegistry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprLore.class, String.class)
+		syntaxRegistry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprLore.class, Component.class)
 			.supplier(ExprLore::new)
 			.priority(PropertyExpression.DEFAULT_PRIORITY)
 			.addPatterns("[the] lore of %itemtype%",
@@ -59,25 +59,25 @@ public class ExprLore extends SimpleExpression<String> {
 
 	@Override
 	@Nullable
-	protected String[] get(Event event) {
+	protected Component[] get(Event event) {
 		ItemType itemType = item.getSingle(event);
 		if (itemType == null) {
 			return null;
 		}
 		ItemMeta itemMeta = itemType.getItemMeta();
 		if (!itemMeta.hasLore()) {
-			return new String[0];
+			return new Component[0];
 		}
-		List<String> lore = itemMeta.getLore();
+		List<Component> lore = itemMeta.lore();
 		assert lore != null; // NotNull by hasLore check
 		if (line == null) {
-			return lore.toArray(new String[0]);
+			return lore.toArray(new Component[0]);
 		}
 		int line = this.line.getOptionalSingle(event).orElse(0).intValue() - 1;
 		if (line < 0 || line >= lore.size()) {
-			return new String[0];
+			return new Component[0];
 		}
-		return new String[]{lore.get(line)};
+		return new Component[]{lore.get(line)};
 	}
 
 	@Override
@@ -181,8 +181,8 @@ public class ExprLore extends SimpleExpression<String> {
 	}
 
 	@Override
-	public Class<? extends String> getReturnType() {
-		return String.class;
+	public Class<? extends Component> getReturnType() {
+		return Component.class;
 	}
 
 	@Override

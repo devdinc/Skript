@@ -1,23 +1,22 @@
-package org.skriptlang.skript.bukkit.item.elements;
-
-import java.util.List;
-
-import ch.njol.skript.doc.Example;
-import net.kyori.adventure.text.Component;
-import org.bukkit.event.Event;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Nullable;
+package org.skriptlang.skript.bukkit.item.elements.expressions;
 
 import ch.njol.skript.aliases.ItemType;
 import ch.njol.skript.doc.Description;
+import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.PropertyExpression;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
+import net.kyori.adventure.text.Component;
+import org.bukkit.event.Event;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
+
+import java.util.List;
 
 @Name("Item with Lore")
 @Description({
