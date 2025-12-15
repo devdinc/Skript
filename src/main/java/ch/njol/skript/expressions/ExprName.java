@@ -1,6 +1,7 @@
 package ch.njol.skript.expressions;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.SkriptConfig;
 import ch.njol.skript.bukkitutil.InventoryUtils;
 import ch.njol.skript.classes.Changer.ChangeMode;
 import ch.njol.skript.doc.Description;
@@ -14,10 +15,14 @@ import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.function.DynamicFunctionReference;
 import ch.njol.skript.lang.util.common.AnyNamed;
 import ch.njol.skript.registrations.Feature;
+import ch.njol.skript.util.chat.BungeeConverter;
+import ch.njol.skript.util.chat.ChatMessages;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.bungeecord.BungeeComponentSerializer;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Nameable;
 import org.bukkit.OfflinePlayer;
@@ -30,14 +35,18 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.bukkit.text.TextComponentParser;
+import org.skriptlang.skript.common.properties.expressions.PropExprName;
 import org.skriptlang.skript.lang.script.Script;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * @deprecated This is being removed in favor of {@link PropExprName}
+ */
 @Name("Name / Display Name / Tab List Name")
 @Description({
 	"Represents the Minecraft account, display or tab list name of a player, or the custom name of an item, entity, "
@@ -83,16 +92,26 @@ import java.util.List;
 	"2.4 (non-living entity support, changeable inventory name)",
 	"2.7 (worlds)"
 })
+@Deprecated(since="2.13", forRemoval = true)
 public class ExprName extends SimplePropertyExpression<Object, String> {
 
-	static {
-		List<String> patterns = new ArrayList<>();
-		patterns.addAll(Arrays.asList(getPatterns("name[s]", "offlineplayers/entities/nameds/inventories")));
-		patterns.addAll(Arrays.asList(getPatterns("(display|nick|chat|custom)[ ]name[s]", "offlineplayers/entities/nameds/inventories")));
-		patterns.addAll(Arrays.asList(getPatterns("(player|tab)[ ]list name[s]", "players")));
+	@Nullable
+	private static BungeeComponentSerializer serializer;
 
-		Skript.registerExpression(ExprName.class, String.class, ExpressionType.COMBINED, patterns.toArray(new String[0]));
-		// we keep the entity input because we want to do something special with entities
+	static {
+		if (!SkriptConfig.useTypeProperties.value()) {
+			// Check for Adventure API
+			if (Skript.classExists("net.kyori.adventure.text.Component") &&
+				Skript.methodExists(Bukkit.class, "createInventory", InventoryHolder.class, int.class, Component.class))
+				serializer = BungeeComponentSerializer.get();
+
+			List<String> patterns = new ArrayList<>();
+			patterns.addAll(Arrays.asList(getPatterns("name[s]", "offlineplayers/entities/nameds/inventories")));
+			patterns.addAll(Arrays.asList(getPatterns("(display|nick|chat|custom)[ ]name[s]", "offlineplayers/entities/nameds/inventories")));
+
+			Skript.registerExpression(ExprName.class, String.class, ExpressionType.COMBINED, patterns.toArray(new String[0]));
+			// we keep the entity input because we want to do something special with entities
+		}
 	}
 
 	/*
@@ -202,14 +221,25 @@ public class ExprName extends SimplePropertyExpression<Object, String> {
 					return;
 
 				Inventory copy;
-				Component component = type.defaultTitle();
-				if (name != null) {
-					component = TextComponentParser.instance().parse(name, false);
-				}
-				if (type == InventoryType.CHEST) {
-					copy = Bukkit.createInventory(inventory.getHolder(), inventory.getSize(), component);
+				if (serializer == null) {
+					if (name == null)
+						name = type.getDefaultTitle();
+					if (type == InventoryType.CHEST) {
+						copy = Bukkit.createInventory(inventory.getHolder(), inventory.getSize(), name);
+					} else {
+						copy = Bukkit.createInventory(inventory.getHolder(), type, name);
+					}
 				} else {
-					copy = Bukkit.createInventory(inventory.getHolder(), type, component);
+					Component component = type.defaultTitle();
+					if (name != null) {
+						BaseComponent[] components = BungeeConverter.convert(ChatMessages.parseToArray(name));
+						component = serializer.deserialize(components);
+					}
+					if (type == InventoryType.CHEST) {
+						copy = Bukkit.createInventory(inventory.getHolder(), inventory.getSize(), component);
+					} else {
+						copy = Bukkit.createInventory(inventory.getHolder(), type, component);
+					}
 				}
 				copy.setContents(inventory.getContents());
 				viewers.forEach(viewer -> viewer.openInventory(copy));

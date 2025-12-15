@@ -28,11 +28,11 @@ import java.util.List;
 @Name("Item/Inventory Type With Name")
 @Description({
 	"Returns a copy of an item with a new name or creates a new inventory with a specific name.",
-	"If you want to change the name of an existing item or inventory, use the <a href='#ExprName'>name</a> expression.",
+	"If you want to change the name of an existing item or inventory, use the <a href='#PropExprName'>name</a> expression.",
 })
-@Example("give a diamond sword of sharpness 100 named \"&lt;gold&gt;Excalibur\" to the player")
-@Example("set tool of player to the player's tool named \"&lt;gold&gt;Wand\"")
-@Example("set the name of the player's tool to \"&lt;gold&gt;Wand\"")
+@Example("give a diamond sword of sharpness 100 named \"<gold>Excalibur\" to the player")
+@Example("set tool of player to the player's tool named \"<gold>Wand\"")
+@Example("set the name of the player's tool to \"<gold>Wand\"")
 @Example("open hopper inventory named \"Magic Hopper\" to player")
 @Since("2.0, 2.2-dev34 (inventories)")
 public class ExprNamed extends PropertyExpression<Object, Object> {
