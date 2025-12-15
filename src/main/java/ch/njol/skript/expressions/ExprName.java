@@ -2,7 +2,6 @@ package ch.njol.skript.expressions;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptConfig;
-import ch.njol.skript.bukkitutil.InventoryUtils;
 import ch.njol.skript.classes.Changer.ChangeMode;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Examples;
@@ -30,7 +29,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.bukkit.text.TextComponentUtils;
 import org.skriptlang.skript.common.properties.expressions.PropExprName;
 import org.skriptlang.skript.lang.script.Script;
 
@@ -87,7 +88,7 @@ import java.util.List;
 	"2.7 (worlds)"
 })
 @Deprecated(since="2.13", forRemoval = true)
-public class ExprName extends SimplePropertyExpression<Object, String> {
+public class ExprName extends SimplePropertyExpression<Object, Object> {
 
 	static {
 		if (!SkriptConfig.useTypeProperties.value()) {
@@ -95,7 +96,7 @@ public class ExprName extends SimplePropertyExpression<Object, String> {
 			patterns.addAll(Arrays.asList(getPatterns("name[s]", "offlineplayers/entities/nameds/inventories")));
 			patterns.addAll(Arrays.asList(getPatterns("(display|nick|chat|custom)[ ]name[s]", "offlineplayers/entities/nameds/inventories")));
 
-			Skript.registerExpression(ExprName.class, String.class, ExpressionType.COMBINED, patterns.toArray(new String[0]));
+			Skript.registerExpression(ExprName.class, Object.class, ExpressionType.COMBINED, patterns.toArray(new String[0]));
 			// we keep the entity input because we want to do something special with entities
 		}
 	}
@@ -108,6 +109,8 @@ public class ExprName extends SimplePropertyExpression<Object, String> {
 	private int mark;
 	private boolean scriptResolvedName;
 
+	private boolean isComponent;
+
 	@Override
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
 		this.mark = (matchedPattern / 2) + 1;
@@ -117,12 +120,15 @@ public class ExprName extends SimplePropertyExpression<Object, String> {
 	}
 
 	@Override
-	public @Nullable String convert(Object object) {
+	public @Nullable Object convert(Object object) {
 		if (object instanceof OfflinePlayer offlinePlayer) {
 			if (offlinePlayer.isOnline()) { // Defer to player check below
 				object = offlinePlayer.getPlayer();
 			} else { // We can only support "name"
-				return mark == 1 ? offlinePlayer.getName() : null;
+				if (mark != 1) {
+					return null;
+				}
+				return isComponent ? TextComponentUtils.plain(offlinePlayer.getName()) : offlinePlayer.getName();
 			}
 		}
 
@@ -132,21 +138,22 @@ public class ExprName extends SimplePropertyExpression<Object, String> {
 
 		if (object instanceof Player player) {
 			return switch (mark) {
-				case 1 -> player.getName();
-				case 2 -> player.getDisplayName();
-				case 3 -> player.getPlayerListName();
+				case 1 -> isComponent ? player.name() : player.getName();
+				case 2 -> isComponent ? player.displayName() : player.getDisplayName();
+				case 3 -> isComponent ? player.playerListName() : player.getPlayerListName();
 				default -> throw new IllegalStateException("Unexpected value: " + mark);
 			};
 		} else if (object instanceof Nameable nameable) {
 			if (mark == 1 && nameable instanceof CommandSender sender)
-				return sender.getName();
-			return nameable.getCustomName();
+				return isComponent ? sender.name() : sender.getName();
+			return isComponent ? nameable.customName() : nameable.getCustomName();
 		} else if (object instanceof Inventory inventory) {
 			if (inventory.getViewers().isEmpty())
 				return null;
-			return InventoryUtils.getTitle(inventory.getViewers().get(0).getOpenInventory());
+			InventoryView view = inventory.getViewers().getFirst().getOpenInventory();
+			return isComponent ? view.title() : view.getTitle();
 		} else if (object instanceof AnyNamed named) {
-			return named.name();
+			return isComponent ? named.nameComponent() : named.name();
 		}
 		return null;
 	}
@@ -223,8 +230,8 @@ public class ExprName extends SimplePropertyExpression<Object, String> {
 	}
 
 	@Override
-	public Class<String> getReturnType() {
-		return String.class;
+	public Class<?> getReturnType() {
+		return isComponent ? Component.class : String.class;
 	}
 
 	@Override
@@ -234,6 +241,23 @@ public class ExprName extends SimplePropertyExpression<Object, String> {
 			case 3 -> "tablist name";
 			default -> "name";
 		};
+	}
+
+	@Override
+	@SafeVarargs
+	public final @Nullable <R> Expression<? extends R> getConvertedExpression(Class<R>... to) {
+		for (Class<R> clazz : to) {
+			if (Component.class.isAssignableFrom(clazz)) {
+				ExprName converted = new ExprName();
+				converted.setExpr(this.getExpr());
+				converted.mark = this.mark;
+				converted.scriptResolvedName = this.scriptResolvedName;
+				converted.isComponent = true;
+				//noinspection unchecked
+				return (Expression<? extends R>) converted;
+			}
+		}
+		return super.getConvertedExpression(to);
 	}
 
 }
