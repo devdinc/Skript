@@ -362,9 +362,6 @@ public class SkriptCommand implements CommandExecutor {
 				info(sender, "info.addons", addons.isEmpty() ? "None" : "");
 				for (SkriptAddon addon : addons) {
 					JavaPlugin plugin = JavaPlugin.getProvidingPlugin(addon.source());
-					if (plugin == Skript.instance()) {
-						continue;
-					}
 					PluginDescriptionFile desc = plugin.getDescription();
 					String web = desc.getWebsite();
 					Skript.info(sender, " - " + desc.getFullName() + (web != null ? " (" + web + ")" : ""));

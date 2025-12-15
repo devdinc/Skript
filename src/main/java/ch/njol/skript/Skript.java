@@ -1441,7 +1441,7 @@ public final class Skript extends JavaPlugin implements Listener {
 
 	/**
 	 * @deprecated There is no exact replacement for this method.
-	 * Consider using {@link org.skriptlang.skript.Skript#addons()} and filtering for an addon named {@link JavaPlugin#getName()}.
+	 * Consider using {@link #getAddon(String)} with the name of the plugin ({@link JavaPlugin#getName()}).
 	 * Obtain a Skript instance with {@link #instance()}.
 	 */
 	@Deprecated(since = "INSERT VERSION", forRemoval = true)
