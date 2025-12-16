@@ -23,23 +23,25 @@ import java.util.Arrays;
 })
 @Example("set text of the last spawned text display to \"example\"")
 @Since("2.10")
-public class ExprTextOf extends SimplePropertyExpression<Object, String> {
+public class ExprTextOf extends SimplePropertyExpression<Object, Component> {
 
 	static {
 		String types = "";
 		if (Skript.classExists("org.bukkit.entity.Display")) {
 			types += "displays";
 		}
-		// This is because this expression is setup to support future types.
+		// This is because this expression is set up to support future types.
 		// Remove this if non-versioning.
 		if (!types.isEmpty())
-			register(ExprTextOf.class, String.class, "text[s]", types);
+			register(ExprTextOf.class, Component.class, "text[s]", types);
 	}
 
 	@Override
-	public @Nullable String convert(Object object) {
-		if (object instanceof TextDisplay textDisplay)
-			return textDisplay.getText();
+	public @Nullable Component convert(Object object) {
+		if (object instanceof TextDisplay textDisplay) {
+			System.out.println("pure text: " + textDisplay.text());
+			return textDisplay.text();
+		}
 		return null;
 	}
 
@@ -62,8 +64,8 @@ public class ExprTextOf extends SimplePropertyExpression<Object, String> {
 	}
 
 	@Override
-	public Class<? extends String> getReturnType() {
-		return String.class;
+	public Class<? extends Component> getReturnType() {
+		return Component.class;
 	}
 
 	@Override

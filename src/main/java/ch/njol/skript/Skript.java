@@ -90,7 +90,9 @@ import org.junit.runner.Result;
 import org.junit.runner.notification.Failure;
 import org.skriptlang.skript.bukkit.SkriptMetrics;
 import org.skriptlang.skript.bukkit.breeding.BreedingModule;
+import org.skriptlang.skript.bukkit.entity.EntityModule;
 import org.skriptlang.skript.bukkit.item.ItemModule;
+import org.skriptlang.skript.bukkit.misc.MiscModule;
 import org.skriptlang.skript.bukkit.text.TextComponentParser;
 import org.skriptlang.skript.bukkit.text.TextModule;
 import org.skriptlang.skript.bukkit.brewing.BrewingModule;
@@ -597,11 +599,13 @@ public final class Skript extends JavaPlugin implements Listener {
 			FurnaceModule.load();
 			LootTableModule.load();
 			skript.loadModules(
-					new DamageSourceModule(),
-					new ItemModule(),
-					new ItemComponentModule(),
 					new BrewingModule(),
 					new CommonModule(),
+					new DamageSourceModule(),
+					new EntityModule(),
+					new ItemModule(),
+					new ItemComponentModule(),
+					new MiscModule(),
 					new TextModule()
 				);
 		} catch (final Exception e) {

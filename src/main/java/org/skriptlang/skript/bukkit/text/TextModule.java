@@ -10,8 +10,6 @@ import org.skriptlang.skript.addon.SkriptAddon;
 import org.skriptlang.skript.bukkit.text.elements.*;
 import org.skriptlang.skript.lang.arithmetic.Arithmetics;
 import org.skriptlang.skript.lang.arithmetic.Operator;
-import org.skriptlang.skript.lang.comparator.Comparators;
-import org.skriptlang.skript.lang.comparator.Relation;
 import org.skriptlang.skript.lang.converter.Converters;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
@@ -49,11 +47,6 @@ public class TextModule implements AddonModule {
 		Converters.registerConverter(Component.class, String.class,
 			component -> TextComponentParser.instance().toLegacyString(component));
 
-		// TODO ideally this is not needed. at parse time, literal strings should be converted into Components
-		// for Component-Component comparison
-		Comparators.registerComparator(Component.class, String.class, (component, string) ->
-			Relation.get(component.equals(TextComponentParser.instance().parse(string))));
-
 		Arithmetics.registerOperation(Operator.ADDITION, Component.class, Component.class, Component::append);
 	}
 
@@ -67,7 +60,6 @@ public class TextModule implements AddonModule {
 		EffResetTitle.register(syntaxRegistry);
 		EffSendTitle.register(syntaxRegistry);
 		ExprColored.register(syntaxRegistry);
-		ExprPlayerlistHeaderFooter.register(syntaxRegistry);
 		ExprRawString.register(syntaxRegistry);
 		ExprStringColor.register(syntaxRegistry);
 	}

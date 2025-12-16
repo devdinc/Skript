@@ -1,4 +1,4 @@
-package org.skriptlang.skript.bukkit.item.elements.expressions;
+package org.skriptlang.skript.bukkit.item.misc;
 
 import ch.njol.skript.aliases.ItemType;
 import ch.njol.skript.doc.Description;
