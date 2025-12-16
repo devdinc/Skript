@@ -212,11 +212,6 @@ public final class TextComponentParser {
 					}
 				}
 
-				// attempt built in resolver
-				if (builtInResolver.has(name)) {
-					return builtInResolver.resolve(name, arguments, ctx);
-				}
-
 				// attempt our simple placeholders
 				SkriptTag simple = simplePlaceholders.get(name);
 				if (simple != null) {
@@ -229,6 +224,12 @@ public final class TextComponentParser {
 						continue;
 					}
 					return skriptResolver.resolver.resolve(name, arguments, ctx);
+				}
+
+				// attempt built in resolver
+				// we do this last to allow overriding default tags
+				if (builtInResolver.has(name)) {
+					return builtInResolver.resolve(name, arguments, ctx);
 				}
 
 				return null;
@@ -311,55 +312,41 @@ public final class TextComponentParser {
 			return Component.empty();
 		}
 
+		// reformat for maximum compatibility
+		realMessage = reformatText(realMessage);
+
+		// parse as component
+		Component component = safe ? safeParser.deserialize(realMessage) : parser.deserialize(realMessage);
+
+		// replace links based on configuration setting
+		if (linkParseMode != LinkParseMode.DISABLED) {
+			component = component.replaceText(linkParseMode.textReplacementConfig());
+		}
+
+		return component;
+	}
+
+	/**
+	 * Reformats user component text for maximum compatibility with MiniMessage.
+	 * @param text The text to reformat.
+	 * @return Reformatted {@code text}.
+	 */
+	public String reformatText(String text) {
 		// TODO improve...
 		// replace spaces with underscores for simple tags
-		realMessage = StringUtils.replaceAll(realMessage, COLOR_PATTERN, matcher -> {
+		text = StringUtils.replaceAll(text, COLOR_PATTERN, matcher -> {
 			String mappedTag = matcher.group(1).replace(" ", "_");
 			if (simplePlaceholders.containsKey(mappedTag) || StandardTags.color().has(mappedTag)) { // only replace if it makes a valid tag
 				return "<" + mappedTag + ">";
 			}
 			return matcher.group();
 		});
-		assert realMessage != null;
+		assert text != null;
 
 		// legacy compatibility, transform color codes into tags
-		if (realMessage.contains("&") || realMessage.contains("§")) {
-			StringBuilder reconstructedMessage = new StringBuilder();
-			char[] messageChars = realMessage.toCharArray();
-			for (int i = 0; i < messageChars.length; i++) {
-				char current = messageChars[i];
-				if (current == '§') {
-					current = '&';
-				}
-				char next = (i + 1 != messageChars.length) ? messageChars[i + 1] : ' ';
-				boolean isCode = current == '&' && (i == 0 || messageChars[i - 1] != '\\');
-				if (isCode && next == 'x' && i + 13 <= messageChars.length) { // try to parse as hex -> &x&1&2&3&4&5&6
-					reconstructedMessage.append("<#");
-					for (int i2 = i + 3; i2 < i + 14; i2 += 2) { // isolate the specific numbers
-						reconstructedMessage.append(messageChars[i2]);
-					}
-					reconstructedMessage.append('>');
-					i += 13; // skip to the end
-				} else if (isCode) {
-					ChatColor color = ChatColor.getByChar(next);
-					if (color != null) { // this is a valid code
-						reconstructedMessage.append('<').append(color.asBungee().getName()).append('>');
-						i++; // skip to the end
-					} else { // not a valid color :(
-						reconstructedMessage.append(current);
-					}
-				} else {
-					reconstructedMessage.append(current);
-				}
-			}
-			realMessage = reconstructedMessage.toString();
-		}
+		text = TextComponentUtils.replaceLegacyFormattingCodes(text);
 
-		Component component = safe ? safeParser.deserialize(realMessage) : parser.deserialize(realMessage);
-		if (linkParseMode != LinkParseMode.DISABLED) {
-			component = component.replaceText(linkParseMode.textReplacementConfig);
-		}
-		return component;
+		return text;
 	}
 
 	/**
@@ -401,7 +388,15 @@ public final class TextComponentParser {
 	 * @return The stripped string.
 	 */
 	public String stripFormatting(String string, boolean all) {
-		return (all ? parser : safeParser).stripTags(string);
+		// TODO this is expensive...
+		while (true) {
+			String stripped = (all ? parser : safeParser).stripTags(reformatText(string));
+			if (string.equals(stripped)) { // nothing more to strip
+				break;
+			}
+			string = stripped;
+		}
+		return string;
 	}
 
 	/**
@@ -448,7 +443,7 @@ public final class TextComponentParser {
 	}
 
 	/**
-	 * Converts a component into a legacy formatted string.
+	 * Converts a component into a legacy formatted string using the section character ({@code §}) for formatting codes.
 	 * @param component The component to convert.
 	 * @return The legacy string.
 	 */

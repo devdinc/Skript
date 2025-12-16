@@ -598,6 +598,7 @@ public final class Skript extends JavaPlugin implements Listener {
 			LootTableModule.load();
 			skript.loadModules(
 					new DamageSourceModule(),
+					new ItemModule(),
 					new ItemComponentModule(),
 					new BrewingModule(),
 					new CommonModule(),

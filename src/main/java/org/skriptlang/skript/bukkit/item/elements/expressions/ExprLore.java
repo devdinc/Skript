@@ -1,5 +1,6 @@
 package org.skriptlang.skript.bukkit.item.elements.expressions;
 
+import ch.njol.skript.SkriptConfig;
 import ch.njol.skript.aliases.ItemType;
 import ch.njol.skript.classes.Changer.ChangeMode;
 import ch.njol.skript.doc.Description;
@@ -8,12 +9,15 @@ import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.PropertyExpression;
 import ch.njol.skript.lang.Expression;
+import ch.njol.skript.lang.ExpressionList;
+import ch.njol.skript.lang.Literal;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.format.TextDecoration.State;
 import org.bukkit.event.Event;
@@ -25,6 +29,7 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Name("Lore")
 @Description("Returns the lore of an item.")
@@ -81,9 +86,12 @@ public class ExprLore extends SimpleExpression<Component> {
 
 	@Override
 	public Class<?> @Nullable [] acceptChange(ChangeMode mode) {
+		// TODO we need access to string inputs for newline splitting
+		// However, this prevents parse time component parsing which is not ideal
+		// Need to find a way to change delta...
 		return switch (mode) {
-			case ADD, SET -> CollectionUtils.array(line == null ? Component[].class : Component.class);
-			case REMOVE, DELETE, REMOVE_ALL -> CollectionUtils.array(Component.class);
+			case ADD, SET -> line == null ? CollectionUtils.array(Component[].class, String[].class) : CollectionUtils.array(Component.class);
+			case REMOVE, DELETE, REMOVE_ALL -> CollectionUtils.array(line == null ? Component.class : String.class);
 			default -> null;
 		};
 	}
@@ -117,13 +125,11 @@ public class ExprLore extends SimpleExpression<Component> {
 			switch (mode) {
 				case ADD -> {
 					assert delta != null;
-					//noinspection unchecked, rawtypes
-					lore.addAll((List<Component>) (List) List.of(delta));
+					lore.addAll(parseLore(delta));
 				}
 				case SET -> {
 					assert delta != null;
-					//noinspection unchecked, rawtypes
-					lore = (List<Component>) (List) List.of(delta);
+					lore = parseLore(delta);
 				}
 				case REMOVE, REMOVE_ALL -> {
 					assert delta != null;
@@ -158,9 +164,14 @@ public class ExprLore extends SimpleExpression<Component> {
 				}
 				case REMOVE, REMOVE_ALL -> {
 					assert delta != null;
-					if (lore.get(line).equals(delta[0])) {
-						lore.remove(line);
+					TextReplacementConfig.Builder builder = TextReplacementConfig.builder();
+					if (mode == ChangeMode.REMOVE) {
+						builder.once();
 					}
+					int flags = SkriptConfig.caseSensitive.value() ? 0 : Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE;
+					builder.match(Pattern.compile(Pattern.quote((String) delta[0]), flags));
+					builder.replacement(Component.empty());
+					lore.set(line, lore.get(line).replaceText(builder.build()));
 				}
 				case DELETE -> lore.remove(line);
 				default -> {
@@ -192,6 +203,39 @@ public class ExprLore extends SimpleExpression<Component> {
 		}
 		builder.append("the lore of", item);
 		return builder.toString();
+	}
+
+	static Expression<?> convertStrings(Expression<?> expression) {
+		boolean isString = String.class.isAssignableFrom(expression.getReturnType());
+		if (expression instanceof ExpressionList<?> list) {
+			boolean hasComponent = false;
+			Expression<?>[] expressions = list.getExpressions();
+			for (int i = 0; i < expressions.length; i++) {
+				expressions[i] = convertStrings(expressions[i]);
+				hasComponent |= Component.class.isAssignableFrom(expressions[i].getReturnType());
+			}
+			if (isString && hasComponent) { // return type has changed, rebuild expression list
+				return new ExpressionList<>(expressions, Object.class, list.getAnd());
+			}
+		} else if (isString && expression instanceof Literal<?> string) {
+			return string.getConvertedExpression(Component.class);
+		}
+		return expression;
+	}
+
+	static List<Component> parseLore(Object[] lore) {
+		List<Component> loreList = new ArrayList<>();
+		// process runtime resolved strings
+		for (Object line : lore) {
+			if (line instanceof Component component) {
+				loreList.add(component);
+			} else {
+				for (String textLine : ((String) line).split("\n")) {
+					loreList.add(TextComponentParser.instance().parse(textLine));
+				}
+			}
+		}
+		return loreList;
 	}
 
 }

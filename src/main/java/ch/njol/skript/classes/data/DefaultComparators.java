@@ -31,6 +31,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffectType;
+import org.skriptlang.skript.bukkit.text.TextComponentParser;
 import org.skriptlang.skript.lang.comparator.Comparator;
 import org.skriptlang.skript.lang.comparator.Comparators;
 import org.skriptlang.skript.lang.comparator.Relation;
@@ -387,6 +388,9 @@ public class DefaultComparators {
 		Comparators.registerComparator(String.class, String.class, new Comparator<String, String>() {
 			@Override
 			public Relation compare(String s1, String s2) {
+				// process color codes for string comparisons
+				s1 = TextComponentParser.instance().toLegacyString(s1, false);
+				s2 = TextComponentParser.instance().toLegacyString(s2, false);
 				return Relation.get(StringUtils.equals(s1, s2, SkriptConfig.caseSensitive.value()));
 			}
 

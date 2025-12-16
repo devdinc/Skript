@@ -34,23 +34,23 @@ public class ExprItemWithLore extends PropertyExpression<ItemType, ItemType> {
 		syntaxRegistry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprItemWithLore.class, ItemType.class)
 			.supplier(ExprItemWithLore::new)
 			.priority(DEFAULT_PRIORITY)
-			.addPattern("%itemtype% with [a|the] lore %textcomponents%")
+			.addPattern("%itemtype% with [a|the] lore %textcomponents/strings%")
 			.build());
 	}
 
-	private Expression<Component> lore;
+	private Expression<?> lore;
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean kleenean, ParseResult parseResult) {
 		setExpr((Expression<ItemType>) exprs[0]);
-		lore = (Expression<Component>) exprs[1];
+		lore = ExprLore.convertStrings(exprs[1]);
 		return true;
 	}
 
 	@Override
 	protected ItemType[] get(Event event, ItemType[] source) {
-		List<Component> lore = List.of(this.lore.getArray(event));
+		List<Component> lore = ExprLore.parseLore(this.lore.getArray(event));
 		return get(source, item -> {
 			item = item.clone();
 			ItemMeta meta = item.getItemMeta();

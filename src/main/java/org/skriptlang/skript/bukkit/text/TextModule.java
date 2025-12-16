@@ -16,6 +16,10 @@ import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
 import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.addon.SkriptAddon;
 import org.skriptlang.skript.bukkit.text.elements.*;
+import org.skriptlang.skript.lang.arithmetic.Arithmetics;
+import org.skriptlang.skript.lang.arithmetic.Operator;
+import org.skriptlang.skript.lang.comparator.Comparators;
+import org.skriptlang.skript.lang.comparator.Relation;
 import org.skriptlang.skript.lang.converter.Converters;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
@@ -57,6 +61,13 @@ public class TextModule implements AddonModule {
 			string -> TextComponentParser.instance().parse(string));
 		Converters.registerConverter(Component.class, String.class,
 			component -> TextComponentParser.instance().toLegacyString(component));
+
+		// TODO ideally this is not needed. at parse time, literal strings should be converted into Components
+		// for Component-Component comparison
+		Comparators.registerComparator(Component.class, String.class, (component, string) ->
+			Relation.get(component.equals(TextComponentParser.instance().parse(string))));
+
+		Arithmetics.registerOperation(Operator.ADDITION, Component.class, Component.class, Component::append);
 	}
 
 	@Override
@@ -153,7 +164,8 @@ public class TextModule implements AddonModule {
 			(argumentQueue, context) -> StandardTags.keybind().resolve("key", argumentQueue, context)), false);
 
 		Pattern unicodePattern = Pattern.compile("[0-9a-f]{4,}");
-		textComponentParser.registerResolver(TagResolver.resolver("unicode", (argumentQueue, context) -> {
+		// note: "u" is already reserved by MiniMessage for underline, we override it
+		textComponentParser.registerResolver(TagResolver.resolver(Set.of("unicode", "u"), (argumentQueue, context) -> {
 			String argument = argumentQueue.popOr("A unicode tag must have an argument of the unicode").value();
 			Matcher matcher = unicodePattern.matcher(argument.toLowerCase(Locale.ENGLISH));
 			if (!matcher.matches())
@@ -172,6 +184,7 @@ public class TextModule implements AddonModule {
 		ExprColored.register(syntaxRegistry);
 		ExprPlayerlistHeaderFooter.register(syntaxRegistry);
 		ExprRawString.register(syntaxRegistry);
+		ExprStringColor.register(syntaxRegistry);
 	}
 
 }

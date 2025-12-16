@@ -7,6 +7,7 @@ import ch.njol.skript.util.LiteralUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.JoinConfiguration;
+import org.bukkit.ChatColor;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.lang.converter.ConverterInfo;
 
@@ -39,6 +40,51 @@ public final class TextComponentUtils {
 	 */
 	public static Component joinByNewLine(ComponentLike... components) {
 		return Component.join(NEW_LINE_CONFIGURATION, components);
+	}
+
+	/**
+	 * Replaces all legacy formatting codes in a string with {@link net.kyori.adventure.text.minimessage.MiniMessage} equivalents.
+	 * @param text The string to reformat.
+	 * @return Reformatted {@code text}.
+	 */
+	public static String replaceLegacyFormattingCodes(String text) {
+		char[] chars = text.toCharArray();
+		boolean hasLegacyFormatting = false;
+		for (char ch : chars) {
+			if (ch == '&' || ch == '§') {
+				hasLegacyFormatting = true;
+				break;
+			}
+		}
+		if (!hasLegacyFormatting) {
+			return text;
+		}
+
+		StringBuilder reconstructedMessage = new StringBuilder();
+		for (int i = 0; i < chars.length; i++) {
+			char current = chars[i];
+			char next = (i + 1 != chars.length) ? chars[i + 1] : ' ';
+			boolean isCode = (current == '&' || current == '§') && (i == 0 || chars[i - 1] != '\\');
+			if (isCode && next == 'x' && i + 13 <= chars.length) { // try to parse as hex -> &x&1&2&3&4&5&6
+				reconstructedMessage.append("<#");
+				for (int i2 = i + 3; i2 < i + 14; i2 += 2) { // isolate the specific numbers
+					reconstructedMessage.append(chars[i2]);
+				}
+				reconstructedMessage.append('>');
+				i += 13; // skip to the end
+			} else if (isCode) {
+				ChatColor color = ChatColor.getByChar(next);
+				if (color != null) { // this is a valid code
+					reconstructedMessage.append('<').append(color.asBungee().getName()).append('>');
+					i++; // skip to the end
+				} else { // not a valid color :(
+					reconstructedMessage.append(current);
+				}
+			} else {
+				reconstructedMessage.append(current);
+			}
+		}
+		return reconstructedMessage.toString();
 	}
 
 	/**
