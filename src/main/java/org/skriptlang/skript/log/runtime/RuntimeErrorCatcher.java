@@ -15,7 +15,7 @@ import java.util.logging.Level;
  * A {@link RuntimeErrorConsumer} to be used in {@link RuntimeErrorManager} to catch {@link RuntimeError}s.
  * This should always be used with {@link #start()} and {@link #stop()}.
  */
-public class RuntimeErrorCatcher implements RuntimeErrorConsumer, AutoCloseable{
+public class RuntimeErrorCatcher implements RuntimeErrorConsumer, AutoCloseable {
 
 	private List<RuntimeErrorConsumer> storedConsumers = new ArrayList<>();
 
