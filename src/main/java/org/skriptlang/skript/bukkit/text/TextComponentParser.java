@@ -1,5 +1,6 @@
 package org.skriptlang.skript.bukkit.text;
 
+import ch.njol.skript.Skript;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.util.StringUtils;
 import net.kyori.adventure.text.Component;
@@ -293,11 +294,14 @@ public final class TextComponentParser {
 			return string;
 		})
 		.tags(TagResolver.builder()
-			.resolver(createSkriptTagResolver(true, TagResolver.resolver(
-				StandardTags.color(), StandardTags.decorations(), StandardTags.font(),
-				StandardTags.gradient(), StandardTags.rainbow(), StandardTags.newline(),
-				StandardTags.reset(), StandardTags.transition(), StandardTags.pride(),
-				StandardTags.shadowColor())))
+			.resolver(createSkriptTagResolver(true, TagResolver.builder()
+				.resolvers(
+					StandardTags.color(), StandardTags.decorations(), StandardTags.font(),
+					StandardTags.gradient(), StandardTags.rainbow(), StandardTags.newline(),
+					StandardTags.reset(), StandardTags.transition())
+				.resolvers(Skript.methodExists(StandardTags.class, "pride") ?
+					new TagResolver[]{StandardTags.pride(), StandardTags.shadowColor()} : new TagResolver[0])
+				.build()))
 			.build())
 		.build();
 
