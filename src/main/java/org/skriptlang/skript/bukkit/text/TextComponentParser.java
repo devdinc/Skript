@@ -152,7 +152,8 @@ public final class TextComponentParser {
 
 	/**
 	 * Registers a simple key-value placeholder with Skript's message parsers.
-	 * The registered placeholder will instruct the parser to reset existing formatting before applying the tag.
+	 * The registered placeholder will instruct the parser to reset existing formatting before applying the tag
+	 *  if {@link #colorsCauseReset()} is true.
 	 * @param name The name/key of the placeholder.
 	 * @param result The result/value of the placeholder.
 	 * @param safe Whether the placeholder can be used in the safe parser.
@@ -188,7 +189,7 @@ public final class TextComponentParser {
 		resolvers.remove(new SkriptTagResolver(resolver, true));
 	}
 
-	private boolean wasLastReset;
+	private final ThreadLocal<Boolean> wasLastReset = new ThreadLocal<>();
 
 	private TagResolver createSkriptTagResolver(boolean safe, TagResolver builtInResolver) {
 		return new TagResolver() {
@@ -196,27 +197,27 @@ public final class TextComponentParser {
 			@Override
 			public @Nullable Tag resolve(@NotNull String name, @NotNull ArgumentQueue arguments, @NotNull Context ctx) throws ParsingException {
 				Tag tag = resolve_i(name, arguments, ctx);
-				wasLastReset = tag == ParserDirective.RESET;
+				if (colorsCauseReset) {
+					wasLastReset.set(tag == ParserDirective.RESET);
+				}
 				return tag;
 			}
 
 			public @Nullable Tag resolve_i(@TagPattern @NotNull String name, @NotNull ArgumentQueue arguments, @NotNull Context ctx) throws ParsingException {
-				if (colorsCauseReset) {
-					// for colors to cause a reset, we want to prepend a reset tag behind all color tags
-					// we track whether the last tag was a reset tag to determine if prepending is necessary
-					if (!wasLastReset) {
-						SkriptTag simple = simplePlaceholders.get(name);
-						if ((simple != null && simple.reset && (!safe || simple.safe)) || StandardTags.color().has(name)) {
-							StringBuilder tagBuilder = new StringBuilder();
-							tagBuilder.append("<reset><")
-								.append(name);
-							while (arguments.hasNext()) {
-								tagBuilder.append(":")
-									.append(arguments.pop().value());
-							}
-							tagBuilder.append(">");
-							return Tag.preProcessParsed(tagBuilder.toString());
+				// for colors to cause a reset, we want to prepend a reset tag behind all color tags
+				// we track whether the last tag was a reset tag to determine if prepending is necessary
+				if (colorsCauseReset && !wasLastReset.get()) {
+					SkriptTag simple = simplePlaceholders.get(name);
+					if ((simple != null && simple.reset && (!safe || simple.safe)) || StandardTags.color().has(name)) {
+						StringBuilder tagBuilder = new StringBuilder();
+						tagBuilder.append("<reset><")
+							.append(name);
+						while (arguments.hasNext()) {
+							tagBuilder.append(":")
+								.append(arguments.pop().value());
 						}
+						tagBuilder.append(">");
+						return Tag.preProcessParsed(tagBuilder.toString());
 					}
 				}
 
@@ -272,7 +273,9 @@ public final class TextComponentParser {
 	private final MiniMessage parser = MiniMessage.builder()
 		.strict(false)
 		.preProcessor(string -> {
-			wasLastReset = false;
+			if (colorsCauseReset) {
+				wasLastReset.set(false);
+			}
 			return string;
 		})
 		.tags(TagResolver.builder()
@@ -284,7 +287,9 @@ public final class TextComponentParser {
 	private final MiniMessage safeParser = MiniMessage.builder()
 		.strict(false)
 		.preProcessor(string -> {
-			wasLastReset = false;
+			if (colorsCauseReset) {
+				wasLastReset.set(false);
+			}
 			return string;
 		})
 		.tags(TagResolver.builder()
@@ -496,7 +501,8 @@ public final class TextComponentParser {
 
 		textComponentParser.registerResettingPlaceholder("light_yellow", Tag.styling(NamedTextColor.YELLOW), true);
 
-		textComponentParser.registerResettingPlaceholder("brown", Tag.styling(TextColor.color(137, 81, 41)), true);
+		// taken from DyeColor.BROWN
+		textComponentParser.registerResettingPlaceholder("brown", Tag.styling(TextColor.color(0x835432)), true);
 
 		textComponentParser.registerPlaceholder("magic", Tag.styling(TextDecoration.OBFUSCATED), true);
 
