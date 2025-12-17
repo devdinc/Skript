@@ -83,7 +83,7 @@ public final class TextComponentParser {
 
 	private static final TextComponentParser INSTANCE;
 
-	private static final Pattern COLOR_PATTERN = Pattern.compile("<([a-zA-Z]+ [a-zA-Z]+)>");
+	private static final Pattern COLOR_PATTERN = Pattern.compile("(\\\\*)<([a-zA-Z]+ [a-zA-Z]+)>");
 
 	static {
 		INSTANCE = new TextComponentParser();
@@ -342,11 +342,14 @@ public final class TextComponentParser {
 		// TODO improve...
 		// replace spaces with underscores for simple tags
 		text = StringUtils.replaceAll(text, COLOR_PATTERN, matcher -> {
-			String mappedTag = matcher.group(1).replace(" ", "_");
-			if (simplePlaceholders.containsKey(mappedTag) || StandardTags.color().has(mappedTag)) { // only replace if it makes a valid tag
-				return "<" + mappedTag + ">";
+			if (matcher.group(1).length() % 2 == 1) { // tag is escaped
+				return Matcher.quoteReplacement(matcher.group());
 			}
-			return matcher.group();
+			String mappedTag = matcher.group(2).replace(" ", "_");
+			if (simplePlaceholders.containsKey(mappedTag) || StandardTags.color().has(mappedTag)) { // only replace if it makes a valid tag
+				return Matcher.quoteReplacement(matcher.group(1) + "<" + mappedTag + ">");
+			}
+			return Matcher.quoteReplacement(matcher.group());
 		});
 		assert text != null;
 

@@ -39,7 +39,6 @@ public class ExprTextOf extends SimplePropertyExpression<Object, Component> {
 	@Override
 	public @Nullable Component convert(Object object) {
 		if (object instanceof TextDisplay textDisplay) {
-			System.out.println("pure text: " + textDisplay.text());
 			return textDisplay.text();
 		}
 		return null;
