@@ -9,7 +9,6 @@ import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.util.Kleenean;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.text.TextComponentParser;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
@@ -73,6 +72,14 @@ public class ExprColored extends SimplePropertyExpression<String, Object> {
 			return isFormat ? "formatted" : "colored";
 		}
 		return isFormat ? "unformatted" : "uncolored";
+	}
+
+	/**
+	 * @deprecated This method is only available for compatibility purposes.
+	 */
+	@Deprecated(since = "", forRemoval = true)
+	public boolean isUnsafeFormat() {
+		return isColor && isFormat;
 	}
 
 }

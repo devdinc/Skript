@@ -13,6 +13,8 @@ import ch.njol.skript.log.SkriptLogger;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.structures.StructVariables.DefaultVariables;
 import ch.njol.skript.util.StringMode;
+import ch.njol.skript.util.chat.ChatMessages;
+import ch.njol.skript.util.chat.MessageComponent;
 import ch.njol.util.Kleenean;
 import ch.njol.util.StringUtils;
 import ch.njol.util.coll.CollectionUtils;
@@ -21,6 +23,7 @@ import com.google.common.collect.Lists;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.bukkit.text.elements.ExprColored;
 import org.skriptlang.skript.lang.script.Script;
 import ch.njol.skript.lang.simplification.SimplifiedLiteral;
 
@@ -592,6 +595,100 @@ public class VariableString implements Expression<String> {
 		if (this.strings == null || Arrays.stream(this.strings).allMatch(o -> o instanceof Literal))
 			return SimplifiedLiteral.fromExpression(this);
 		return this;
+	}
+
+	/**
+	 * Gets message components from this string. Formatting is parsed only
+	 * in simple parts for security reasons.
+	 * @param event Currently running event.
+	 * @return Message components.
+	 * @deprecated See {@link org.skriptlang.skript.bukkit.text.TextComponentParser}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
+	public List<MessageComponent> getMessageComponents(Event event) {
+		return getMessageComponents(event, null);
+	}
+
+	/**
+	 * Gets message components from this string. Formatting is parsed only
+	 * in simple parts for security reasons. Providing a StringBuilder allows an unformatted output
+	 * identical to {@link #toUnformattedString(Event)} while only evaluating any expressions once.
+	 *
+	 * @param event Currently running event.
+	 * @param unformattedBuilder Unformatted string to append to.
+	 * @return Message components.
+	 * @deprecated See {@link org.skriptlang.skript.bukkit.text.TextComponentParser}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
+	public List<MessageComponent> getMessageComponents(Event event, @Nullable StringBuilder unformattedBuilder) {
+		if (isSimple) { // Trusted, constant string in a script
+			assert simple != null;
+			return ChatMessages.parse(simple);
+		}
+
+		// Parse formatting
+		Object[] strings = this.strings;
+		assert strings != null;
+		List<MessageComponent> message = new ArrayList<>(); // At least this much space
+		for (Object string : strings) {
+			// Convert it to plain text
+			String text = null;
+			if (string instanceof Expression<?> expression) {
+				text = Classes.toString(expression.getArray(event), true, mode);
+				if (unformattedBuilder != null)
+					unformattedBuilder.append(text);
+				// Special case: user wants to process formatting
+				if (string instanceof ExprColored exprColored && exprColored.isUnsafeFormat()) {
+					message.addAll(ChatMessages.parse(text));
+					continue;
+				}
+			}
+
+			assert text != null;
+			List<MessageComponent> components = ChatMessages.fromParsedString(text);
+			if (!message.isEmpty()) { // Copy styles from previous component
+				int startSize = message.size();
+				for (int i = 0; i < components.size(); i++) {
+					MessageComponent plain = components.get(i);
+					ChatMessages.copyStyles(message.get(startSize + i - 1), plain);
+					message.add(plain);
+				}
+			} else {
+				message.addAll(components);
+			}
+		}
+
+		return message;
+	}
+
+	/**
+	 * Gets message components from this string. Formatting is parsed
+	 * everywhere, which is a potential security risk.
+	 * @param event Currently running event.
+	 * @return Message components.
+	 * @deprecated See {@link org.skriptlang.skript.bukkit.text.TextComponentParser}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
+	public List<MessageComponent> getMessageComponentsUnsafe(Event event) {
+		if (isSimple) { // Trusted, constant string in a script
+			assert simple != null;
+			return ChatMessages.parse(simple);
+		}
+
+		return ChatMessages.parse(toUnformattedString(event));
+	}
+
+	/**
+	 * Parses all expressions in the string and returns it in chat JSON format.
+	 *
+	 * @param event Event to pass to the expressions.
+	 * @return The input string with all expressions replaced.
+	 * @deprecated See {@link org.skriptlang.skript.bukkit.text.TextComponentParser} and
+	 *  {@link net.kyori.adventure.text.serializer.json.JSONComponentSerializer}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
+	public String toChatString(Event event) {
+		return ChatMessages.toJson(getMessageComponents(event));
 	}
 
 }
