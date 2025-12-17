@@ -76,13 +76,12 @@ public class ScriptCommand implements TabExecutor {
 	private final List<String> aliases;
 	private List<String> activeAliases;
 	private String permission;
-	private final VariableString permissionMessage;
-	private final Expression<? extends Component> permissionMessageComponent;
+	private final Expression<? extends Component> permissionMessage;
 	private final String description;
 	private final String prefix;
 	@Nullable
 	private final Timespan cooldown;
-	private final Expression<String> cooldownMessage;
+	private final Expression<? extends Component> cooldownMessage;
 	private final String cooldownBypass;
 	@Nullable
 	private final Expression<String> cooldownStorage;
@@ -163,11 +162,10 @@ public class ScriptCommand implements TabExecutor {
 		if (permissionMessage == null) {
 			VariableString defaultMsg = VariableString.newInstance(Language.get("commands.no permission message"));
 			assert defaultMsg != null;
-			this.permissionMessage = defaultMsg;
-		} else {
-			this.permissionMessage = permissionMessage;
+			permissionMessage = defaultMsg;
 		}
-		this.permissionMessageComponent = this.permissionMessage.getConvertedExpression(Component.class);
+		//noinspection unchecked
+		this.permissionMessage = permissionMessage.getConvertedExpression(Component.class);
 
 		if (prefix != null) {
 			for (char c : prefix.toCharArray()) {
@@ -189,9 +187,13 @@ public class ScriptCommand implements TabExecutor {
 		this.prefix = prefix;
 
 		this.cooldown = cooldown;
-		this.cooldownMessage = cooldownMessage == null
-				? new SimpleLiteral<>(Language.get("commands.cooldown message"),false)
-				: cooldownMessage;
+		if (cooldownMessage == null) {
+			VariableString defaultMsg = VariableString.newInstance(Language.get("commands.cooldown message"));
+			assert defaultMsg != null;
+			cooldownMessage = defaultMsg;
+		}
+		//noinspection unchecked
+		this.cooldownMessage = cooldownMessage.getConvertedExpression(Component.class);
 		this.cooldownBypass = cooldownBypass;
 		this.cooldownStorage = cooldownStorage;
 
@@ -239,9 +241,6 @@ public class ScriptCommand implements TabExecutor {
 			bukkitCommand.setDescription(description);
 			bukkitCommand.setLabel(label);
 			bukkitCommand.setPermission(permission);
-			// We can only set the message if it's simple (doesn't contains expressions)
-			if (permissionMessage.isSimple())
-				bukkitCommand.setPermissionMessage(permissionMessage.toString(null));
 			bukkitCommand.setUsage(usage.getUsage());
 			bukkitCommand.setExecutor(this);
 			return bukkitCommand;
@@ -293,7 +292,7 @@ public class ScriptCommand implements TabExecutor {
 						if (!SkriptConfig.keepLastUsageDates.value())
 							setLastUsage(uuid, event, null);
 					} else {
-						String msg = cooldownMessage.getSingle(event);
+						Component msg = cooldownMessage.getSingle(event);
 						if (msg != null)
 							sender.sendMessage(msg);
 						return false;
@@ -364,7 +363,7 @@ public class ScriptCommand implements TabExecutor {
 
 	public boolean checkPermissions(CommandSender sender, Event event) {
 		if (!permission.isEmpty() && !sender.hasPermission(permission)) {
-			Component message = permissionMessageComponent.getSingle(event);
+			Component message = permissionMessage.getSingle(event);
 			assert message != null;
 			sender.sendMessage(message);
 			return false;
