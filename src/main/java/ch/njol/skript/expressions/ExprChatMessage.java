@@ -33,11 +33,8 @@ public class ExprChatMessage extends SimpleExpression<String> implements EventRe
 		Skript.registerExpression(ExprChatMessage.class, String.class, ExpressionType.SIMPLE, "[the] [chat( |-)]message");
 	}
 
-	private boolean isDelayed;
-
 	@Override
 	public boolean init(Expression<?>[] expressions, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
-		this.isDelayed = isDelayed.isTrue();
 		return true;
 	}
 
@@ -51,8 +48,8 @@ public class ExprChatMessage extends SimpleExpression<String> implements EventRe
 
 	@Override
 	public Class<?> @Nullable [] acceptChange(ChangeMode mode) {
-		if (isDelayed) {
-			Skript.error("'" + toString(null, false) + "' can't be changed after the event has already passed!");
+		if (getParser().getHasDelayBefore().isTrue()) {
+			Skript.error("'" + toString(null, false) + "' can't be changed after the event has passed");
 			return null;
 		}
 		return switch (mode) {
