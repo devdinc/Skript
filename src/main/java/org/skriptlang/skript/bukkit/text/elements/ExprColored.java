@@ -46,7 +46,6 @@ public class ExprColored extends SimplePropertyExpression<String, Object> {
 
 	private boolean isColor;
 	private boolean isFormat;
-	private boolean isComponent;
 
 	@Override
 	public boolean init(Expression<?>[] expressions, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
@@ -57,51 +56,23 @@ public class ExprColored extends SimplePropertyExpression<String, Object> {
 
 	@Override
 	public Object convert(String string) {
-		if (isComponent) {
-			return TextComponentParser.instance().parse(string, !isFormat);
-		}
 		if (isColor) {
-			return TextComponentParser.instance().toLegacyString(string, isFormat);
+			return TextComponentParser.instance().parse(string, !isFormat);
 		}
 		return TextComponentParser.instance().stripFormatting(string, isFormat);
 	}
 
 	@Override
 	public Class<?> getReturnType() {
-		return isComponent ? Component.class : String.class;
+		return isColor ? Component.class : String.class;
 	}
 
 	@Override
 	protected String getPropertyName() {
-		if (isColor && isFormat) {
-			return "formatted";
-		}
 		if (isColor) {
-			return "colored";
+			return isFormat ? "formatted" : "colored";
 		}
-		if (isFormat) {
-			return "unformatted";
-		}
-		return "uncolored";
-	}
-
-	@Override
-	@SafeVarargs
-	public final @Nullable <R> Expression<? extends R> getConvertedExpression(Class<R>... to) {
-		if (isColor) {
-			for (Class<R> clazz : to) {
-				if (Component.class.isAssignableFrom(clazz)) {
-					ExprColored converted = new ExprColored();
-					converted.setExpr(this.getExpr());
-					converted.isColor = true;
-					converted.isFormat = this.isFormat;
-					converted.isComponent = true;
-					//noinspection unchecked
-					return (Expression<? extends R>) converted;
-				}
-			}
-		}
-		return super.getConvertedExpression(to);
+		return isFormat ? "unformatted" : "uncolored";
 	}
 
 }

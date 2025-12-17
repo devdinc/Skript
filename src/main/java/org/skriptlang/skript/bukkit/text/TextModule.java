@@ -48,6 +48,8 @@ public class TextModule implements AddonModule {
 			component -> TextComponentParser.instance().toLegacyString(component));
 
 		Arithmetics.registerOperation(Operator.ADDITION, Component.class, Component.class, Component::append);
+		Arithmetics.registerOperation(Operator.ADDITION, Component.class, String.class,
+			(component, string) -> component.append(TextComponentParser.instance().parse(string)));
 	}
 
 	@Override

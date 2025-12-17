@@ -10,6 +10,9 @@ import net.kyori.adventure.text.JoinConfiguration;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.lang.converter.ConverterInfo;
+import org.skriptlang.skript.lang.converter.Converters;
+
+import java.util.Arrays;
 
 /**
  * Utilities for working with {@link Component}s.
@@ -17,19 +20,25 @@ import org.skriptlang.skript.lang.converter.ConverterInfo;
 public final class TextComponentUtils {
 
 	private static final ConverterInfo<Object, Component> OBJECT_COMPONENT_CONVERTER =
-		new ConverterInfo<>(Object.class, Component.class, TextComponentUtils::plain, 0);
+		new ConverterInfo<>(Object.class, Component.class, TextComponentUtils::from, 0);
 
 	private static final JoinConfiguration NEW_LINE_CONFIGURATION = JoinConfiguration.builder()
 		.separator(Component.newline())
 		.build();
 
 	/**
-	 * Creates a plain text component from an object.
+	 * Creates a component from an object.
+	 * If {@code message} is a component, {@code message} is simply returned.
+	 * Otherwise, a plain text component is returned.
 	 * @param message The message to create a component from.
-	 * @return An unprocessed component from the given message.
+	 * @return A component from the given message.
 	 */
-	public static Component plain(Object message) {
-		return Component.text(message instanceof String ? (String) message : Classes.toString(message));
+	public static Component from(Object message) {
+		return switch (message) {
+			case Component component -> component;
+			case String string -> Component.text(string);
+			default -> Component.text(Classes.toString(message));
+		};
 	}
 
 	/**
@@ -99,10 +108,16 @@ public final class TextComponentUtils {
 			return null;
 		}
 
-		//noinspection unchecked
-		Expression<? extends Component> componentExpression = expression.getConvertedExpression(Component.class);
-		if (componentExpression != null) {
-			return componentExpression;
+		// we need to be absolutely sure this expression will only return things that can be Components
+		// certain types, like Variables, will always accept getConvertedExpression, even if the conversion is not possible
+		boolean canReturnComponent = Arrays.stream(expression.possibleReturnTypes())
+			.allMatch(type -> type != Object.class && Converters.converterExists(type, Component.class));
+		if (canReturnComponent) {
+			//noinspection unchecked
+			Expression<? extends Component> componentExpression = expression.getConvertedExpression(Component.class);
+			if (componentExpression != null) {
+				return componentExpression;
+			}
 		}
 
 		return new ConvertedExpression<>(expression, Component.class, OBJECT_COMPONENT_CONVERTER);

@@ -7,6 +7,7 @@ import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.Context;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -494,6 +495,8 @@ public final class TextComponentParser {
 		textComponentParser.registerResettingPlaceholder("magenta", Tag.styling(NamedTextColor.LIGHT_PURPLE), true);
 
 		textComponentParser.registerResettingPlaceholder("light_yellow", Tag.styling(NamedTextColor.YELLOW), true);
+
+		textComponentParser.registerResettingPlaceholder("brown", Tag.styling(TextColor.color(137, 81, 41)), true);
 
 		textComponentParser.registerPlaceholder("magic", Tag.styling(TextDecoration.OBFUSCATED), true);
 

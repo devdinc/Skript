@@ -128,7 +128,7 @@ public class ExprName extends SimplePropertyExpression<Object, Object> {
 				if (mark != 1) {
 					return null;
 				}
-				return isComponent ? TextComponentUtils.plain(offlinePlayer.getName()) : offlinePlayer.getName();
+				return isComponent ? TextComponentUtils.from(offlinePlayer.getName()) : offlinePlayer.getName();
 			}
 		}
 
