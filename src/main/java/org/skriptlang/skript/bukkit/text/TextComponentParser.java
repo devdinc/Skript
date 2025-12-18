@@ -13,9 +13,9 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.Context;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.ParsingException;
+import net.kyori.adventure.text.minimessage.tag.Inserting;
 import net.kyori.adventure.text.minimessage.tag.ParserDirective;
 import net.kyori.adventure.text.minimessage.tag.Tag;
-import net.kyori.adventure.text.minimessage.tag.TagPattern;
 import net.kyori.adventure.text.minimessage.tag.resolver.ArgumentQueue;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags;
@@ -97,6 +97,33 @@ public final class TextComponentParser {
 	 */
 	public static TextComponentParser instance() {
 		return INSTANCE;
+	}
+
+	/**
+	 * Disables unset styling on a tag.
+	 * This method currently only supports {@link Inserting} tags.
+	 * @param tag The tag to change.
+	 * @return A new tag representing {@code tag} with all unset styling disabled.
+	 */
+	private static Tag disableUnsetStyling(Tag tag) {
+		if (!(tag instanceof Inserting insertingTag)) {
+			return tag;
+		}
+
+		Component content = insertingTag.value();
+
+		// disable unspecified styling
+		var decorations = new HashMap<>(content.decorations());
+		decorations.replaceAll((decoration, state) ->
+			state == TextDecoration.State.NOT_SET ? TextDecoration.State.FALSE : state);
+		content = content.decorations(decorations);
+
+		// preserve child setting
+		if (insertingTag.allowsChildren()) {
+			return Tag.inserting(content);
+		} else {
+			return Tag.selfClosingInserting(content);
+		}
 	}
 
 	private TextComponentParser() {}
@@ -190,50 +217,33 @@ public final class TextComponentParser {
 		resolvers.remove(new SkriptTagResolver(resolver, true));
 	}
 
-	private final ThreadLocal<Boolean> wasLastReset = new ThreadLocal<>();
-
-	private TagResolver createSkriptTagResolver(boolean safe, TagResolver builtInResolver) {
+	private TagResolver createSkriptTagResolver(boolean isSafeMode, TagResolver builtInResolver) {
 		return new TagResolver() {
 
 			@Override
 			public @Nullable Tag resolve(@NotNull String name, @NotNull ArgumentQueue arguments, @NotNull Context ctx) throws ParsingException {
-				Tag tag = resolve_i(name, arguments, ctx);
-				if (colorsCauseReset) {
-					wasLastReset.set(tag == ParserDirective.RESET);
-				}
-				return tag;
-			}
-
-			public @Nullable Tag resolve_i(@TagPattern @NotNull String name, @NotNull ArgumentQueue arguments, @NotNull Context ctx) throws ParsingException {
-				// for colors to cause a reset, we want to prepend a reset tag behind all color tags
-				// we track whether the last tag was a reset tag to determine if prepending is necessary
-				if (colorsCauseReset && !wasLastReset.get()) {
-					SkriptTag simple = simplePlaceholders.get(name);
-					if ((simple != null && simple.reset && (!safe || simple.safe)) || StandardTags.color().has(name)) {
-						StringBuilder tagBuilder = new StringBuilder();
-						tagBuilder.append("<reset><")
-							.append(name);
-						while (arguments.hasNext()) {
-							tagBuilder.append(":")
-								.append(arguments.pop().value());
-						}
-						tagBuilder.append(">");
-						return Tag.preProcessParsed(tagBuilder.toString());
-					}
-				}
-
-				// attempt our simple placeholders
 				SkriptTag simple = simplePlaceholders.get(name);
-				if (simple != null) {
-					return !safe || simple.safe ? simple.tag : null;
+				if (simple != null && (!isSafeMode || simple.safe)) {
+					if (colorsCauseReset && simple.reset()) {
+						return disableUnsetStyling(simple.tag);
+					}
+					return simple.tag;
 				}
 
 				// attempt our custom resolvers
 				for (SkriptTagResolver skriptResolver : resolvers) {
-					if ((safe && !skriptResolver.safe) || !skriptResolver.resolver.has(name)) {
+					if ((isSafeMode && !skriptResolver.safe) || !skriptResolver.resolver.has(name)) {
 						continue;
 					}
 					return skriptResolver.resolver.resolve(name, arguments, ctx);
+				}
+
+				// only process resets for standard color tags
+				if (colorsCauseReset && StandardTags.color().has(name)) {
+					Tag colorTag = StandardTags.color().resolve(name, arguments, ctx);
+					if (colorTag != null) {
+						return disableUnsetStyling(colorTag);
+					}
 				}
 
 				// attempt built in resolver
@@ -255,12 +265,12 @@ public final class TextComponentParser {
 				// check our simple placeholders
 				SkriptTag simple = simplePlaceholders.get(name);
 				if (simple != null) {
-					return !safe || simple.safe;
+					return !isSafeMode || simple.safe;
 				}
 
 				// check our custom resolvers
 				for (SkriptTagResolver skriptResolver : resolvers) {
-					if ((!safe || skriptResolver.safe) && skriptResolver.resolver.has(name)) {
+					if ((!isSafeMode || skriptResolver.safe) && skriptResolver.resolver.has(name)) {
 						return true;
 					}
 				}
@@ -273,12 +283,6 @@ public final class TextComponentParser {
 	// The normal parser will process any proper tags
 	private final MiniMessage parser = MiniMessage.builder()
 		.strict(false)
-		.preProcessor(string -> {
-			if (colorsCauseReset) {
-				wasLastReset.set(false);
-			}
-			return string;
-		})
 		.tags(TagResolver.builder()
 			.resolver(createSkriptTagResolver(false, StandardTags.defaults()))
 			.build())
@@ -287,12 +291,6 @@ public final class TextComponentParser {
 	// The safe parser only parses color/decoration/formatting related tags
 	private final MiniMessage safeParser = MiniMessage.builder()
 		.strict(false)
-		.preProcessor(string -> {
-			if (colorsCauseReset) {
-				wasLastReset.set(false);
-			}
-			return string;
-		})
 		.tags(TagResolver.builder()
 			.resolver(createSkriptTagResolver(true, TagResolver.builder()
 				.resolvers(
