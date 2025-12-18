@@ -28,7 +28,7 @@ public interface AnyNamed extends AnyProvider {
 	 */
 	default @UnknownNullability Component nameComponent() {
 		String name = name();
-		return name == null ? null : TextComponentParser.instance().parse(name);
+		return name == null ? null : Component.text(name);
 	}
 
 	/**
@@ -62,7 +62,7 @@ public interface AnyNamed extends AnyProvider {
 	 * @throws UnsupportedOperationException If this is impossible
 	 */
 	default void setName(Component name) throws UnsupportedOperationException {
-		setName(TextComponentParser.instance().toLegacyString(name));
+		setName(TextComponentParser.instance().toString(name));
 	}
 
 }

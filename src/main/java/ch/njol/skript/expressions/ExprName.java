@@ -31,7 +31,6 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.bukkit.text.TextComponentUtils;
 import org.skriptlang.skript.common.properties.expressions.PropExprName;
 import org.skriptlang.skript.lang.script.Script;
 
@@ -109,7 +108,7 @@ public class ExprName extends SimplePropertyExpression<Object, Object> {
 	private int mark;
 	private boolean scriptResolvedName;
 
-	private boolean isComponent;
+	private boolean isComponent = true;
 
 	@Override
 	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
@@ -128,12 +127,20 @@ public class ExprName extends SimplePropertyExpression<Object, Object> {
 				if (mark != 1) {
 					return null;
 				}
-				return isComponent ? TextComponentUtils.from(offlinePlayer.getName()) : offlinePlayer.getName();
+				String name = offlinePlayer.getName();
+				if (name == null) {
+					return null;
+				}
+				return isComponent ? Component.text(name) : name;
 			}
 		}
 
 		if (!scriptResolvedName && object instanceof Script script) {
-			return script.nameAndPath();
+			String nameAndPath = script.nameAndPath();
+			if (nameAndPath == null) {
+				return null;
+			}
+			return isComponent ? Component.text(nameAndPath) : nameAndPath;
 		}
 
 		if (object instanceof Player player) {
@@ -247,12 +254,12 @@ public class ExprName extends SimplePropertyExpression<Object, Object> {
 	@SafeVarargs
 	public final @Nullable <R> Expression<? extends R> getConvertedExpression(Class<R>... to) {
 		for (Class<R> clazz : to) {
-			if (Component.class.isAssignableFrom(clazz)) {
+			if (String.class.isAssignableFrom(clazz)) {
 				ExprName converted = new ExprName();
 				converted.setExpr(this.getExpr());
 				converted.mark = this.mark;
 				converted.scriptResolvedName = this.scriptResolvedName;
-				converted.isComponent = true;
+				converted.isComponent = false;
 				//noinspection unchecked
 				return (Expression<? extends R>) converted;
 			}
