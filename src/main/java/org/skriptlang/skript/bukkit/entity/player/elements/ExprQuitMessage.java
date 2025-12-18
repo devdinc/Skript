@@ -49,7 +49,10 @@ public class ExprQuitMessage extends SimpleExpression<Component> implements Even
 	@Override
 	protected Component @Nullable [] get(Event event) {
 		if (event instanceof PlayerQuitEvent quitEvent) {
-			return new Component[]{quitEvent.quitMessage()};
+			Component message = quitEvent.quitMessage();
+			if (message != null) {
+				return new Component[]{message};
+			}
 		}
 		return new Component[0];
 	}
@@ -68,9 +71,8 @@ public class ExprQuitMessage extends SimpleExpression<Component> implements Even
 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
-		Component message = delta == null ? null : (Component) delta[0];
 		if (event instanceof PlayerQuitEvent quitEvent) {
-			quitEvent.quitMessage(message);
+			quitEvent.quitMessage(delta == null ? Component.empty() : (Component) delta[0]);
 		}
 	}
 

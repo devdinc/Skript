@@ -57,14 +57,16 @@ public class ExprOnScreenKickMessage extends SimpleExpression<Component> impleme
 			Skript.error("'" + toString(null, false) + "' can't be changed after the event has passed");
 			return null;
 		}
-		return mode == ChangeMode.SET ? CollectionUtils.array(Component.class) : null;
+		return switch (mode) {
+			case SET, DELETE -> CollectionUtils.array(Component.class);
+			default -> null;
+		};
 	}
 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
-		assert delta != null;
 		if (event instanceof PlayerKickEvent kickEvent) {
-			kickEvent.reason((Component) delta[0]);
+			kickEvent.reason(delta == null ? Component.empty() : (Component) delta[0]);
 		}
 	}
 

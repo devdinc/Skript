@@ -51,7 +51,10 @@ public class ExprJoinMessage extends SimpleExpression<Component> implements Even
 	@Override
 	protected Component @Nullable [] get(Event event) {
 		if (event instanceof PlayerJoinEvent joinEvent) {
-			return new Component[]{joinEvent.joinMessage()};
+			Component message = joinEvent.joinMessage();
+			if (message != null) {
+				return new Component[]{message};
+			}
 		}
 		return new Component[0];
 	}
@@ -70,9 +73,8 @@ public class ExprJoinMessage extends SimpleExpression<Component> implements Even
 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
-		Component message = delta == null ? null : (Component) delta[0];
 		if (event instanceof PlayerJoinEvent joinEvent) {
-			joinEvent.joinMessage(message);
+			joinEvent.joinMessage(delta == null ? Component.empty() : (Component) delta[0]);
 		}
 	}
 

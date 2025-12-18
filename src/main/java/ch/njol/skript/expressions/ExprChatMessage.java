@@ -53,21 +53,15 @@ public class ExprChatMessage extends SimpleExpression<String> implements EventRe
 			return null;
 		}
 		return switch (mode) {
-			case SET -> CollectionUtils.array(String.class);
-			case DELETE -> {
-				Skript.error("'" + toString(null, false) + "' can't be deleted." +
-					" However, the event can be cancelled, which would prevent the message from being sent.");
-				yield null;
-			}
+			case SET, DELETE -> CollectionUtils.array(String.class);
 			default -> null;
 		};
 	}
 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
-		assert delta != null;
 		if (event instanceof AsyncPlayerChatEvent chatEvent) {
-			chatEvent.setMessage((String) delta[0]);
+			chatEvent.setMessage(delta == null ? "" : (String) delta[0]);
 		}
 	}
 

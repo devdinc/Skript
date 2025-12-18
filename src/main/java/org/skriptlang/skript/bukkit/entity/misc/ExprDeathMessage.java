@@ -47,7 +47,10 @@ public class ExprDeathMessage extends SimpleExpression<Component> implements Eve
 	@Override
 	protected Component @Nullable [] get(Event event) {
 		if (event instanceof PlayerDeathEvent deathEvent) {
-			return new Component[]{deathEvent.deathMessage()};
+			Component message = deathEvent.deathMessage();
+			if (message != null) {
+				return new Component[]{message};
+			}
 		}
 		return new Component[0];
 	}
@@ -66,9 +69,8 @@ public class ExprDeathMessage extends SimpleExpression<Component> implements Eve
 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
-		Component message = delta == null ? null : (Component) delta[0];
 		if (event instanceof PlayerDeathEvent deathEvent) {
-			deathEvent.deathMessage(message);
+			deathEvent.deathMessage(delta == null ? Component.empty() : (Component) delta[0]);
 		}
 	}
 

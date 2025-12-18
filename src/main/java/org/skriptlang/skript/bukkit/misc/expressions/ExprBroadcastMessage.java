@@ -57,14 +57,16 @@ public class ExprBroadcastMessage extends SimpleExpression<Component> implements
 			Skript.error("'" + toString(null, false) + "' can't be changed after the event has passed");
 			return null;
 		}
-		return mode == ChangeMode.SET ? CollectionUtils.array(Component.class) : null;
+		return switch (mode) {
+			case SET, DELETE -> CollectionUtils.array(Component.class);
+			default -> null;
+		};
 	}
 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
-		assert delta != null;
 		if (event instanceof BroadcastMessageEvent broadcastEvent) {
-			broadcastEvent.message((Component) delta[0]);
+			broadcastEvent.message(delta == null ? Component.empty() : (Component) delta[0]);
 		}
 	}
 
