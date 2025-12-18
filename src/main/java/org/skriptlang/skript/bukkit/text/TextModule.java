@@ -54,6 +54,7 @@ public class TextModule implements AddonModule {
 		Converters.registerConverter(Component.class, String.class,
 			component -> TextComponentParser.instance().toString(component));
 
+		// TODO always compacting might not be ideal
 		TextReplacementConfig componentToLowercase = TextReplacementConfig.builder()
 			.match(Pattern.compile(".+", Pattern.DOTALL))
 			.replacement(text -> text.content(text.content().toLowerCase(Locale.ENGLISH)))
@@ -63,7 +64,14 @@ public class TextModule implements AddonModule {
 				component = component.replaceText(componentToLowercase);
 				string = string.toLowerCase(Locale.ENGLISH);
 			}
-			return Relation.get(component.equals(TextComponentParser.instance().parse(string)));
+			return Relation.get(component.compact().equals(TextComponentParser.instance().parse(string)));
+		});
+		Comparators.registerComparator(Component.class, Component.class, (component1, component2) -> {
+			if (!SkriptConfig.caseSensitive.value()) {
+				component1 = component1.replaceText(componentToLowercase);
+				component2 = component2.replaceText(componentToLowercase);
+			}
+			return Relation.get(component1.compact().equals(component2.compact()));
 		});
 
 		Arithmetics.registerOperation(Operator.ADDITION, Component.class, Component.class, Component::append);

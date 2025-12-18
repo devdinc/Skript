@@ -105,9 +105,11 @@ public class ExprHoverList extends SimpleExpression<String> {
 			return;
 
 		// convert components to legacy strings
-		delta = Arrays.stream(delta)
-			.map(obj -> obj instanceof Component component ? TextComponentParser.instance().toLegacyString(component) : obj)
-			.toArray();
+		if (delta != null) {
+			delta = Arrays.stream(delta)
+				.map(obj -> obj instanceof Component component ? TextComponentParser.instance().toLegacyString(component) : obj)
+				.toArray();
+		}
 
 		if (HAS_NEW_LISTED_PLAYER_INFO) {
 			List<PaperServerListPingEvent.ListedPlayerInfo> values = new ArrayList<>();
