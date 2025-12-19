@@ -1,0 +1,306 @@
+package org.skriptlang.skript.lang.eventvalue;
+
+import ch.njol.skript.Skript;
+import ch.njol.skript.classes.Changer.ChangeMode;
+import ch.njol.skript.classes.ClassInfo;
+import ch.njol.skript.registrations.Classes;
+import ch.njol.skript.util.Utils;
+import org.bukkit.event.Event;
+import org.intellij.lang.annotations.RegExp;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.lang.converter.Converter;
+
+import java.util.EnumMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+
+/**
+ * Default implementation of {@link EventValue}.
+ */
+final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
+
+	private final Class<E> eventClass;
+	private final Class<V> valueClass;
+	private final Pattern[] identifierPatterns;
+	private final @Nullable Predicate<String> inputValidator;
+	private final @Nullable Predicate<Class<?>> eventValidator;
+	private final Converter<E, V> converter;
+	private final Map<ChangeMode, Changer<E, V>> changers;
+	private final int time;
+	private final Class<? extends E> @Nullable [] excludedEvents;
+	private final @Nullable String excludedErrorMessage;
+
+	EventValueImpl(
+		Class<E> eventClass,
+		Class<V> valueClass,
+		Pattern[] identifierPatterns,
+		@Nullable Predicate<String> inputValidator,
+		@Nullable Predicate<Class<?>> eventValidator,
+		Converter<E, V> converter,
+		Map<ChangeMode, Changer<E, V>> changers,
+		int time,
+		Class<? extends E> @Nullable [] excludedEvents,
+		@Nullable String excludedErrorMessage
+	) {
+		this.eventClass = eventClass;
+		this.valueClass = valueClass;
+		this.identifierPatterns = identifierPatterns;
+		this.inputValidator = inputValidator;
+		this.eventValidator = eventValidator;
+		this.converter = converter;
+		this.changers = changers;
+		this.time = time;
+		this.excludedEvents = excludedEvents;
+		this.excludedErrorMessage = excludedErrorMessage;
+	}
+
+	@Override
+	public Class<E> eventClass() {
+		return eventClass;
+	}
+
+	@Override
+	public Class<V> valueClass() {
+		return valueClass;
+	}
+
+	@Override
+	public Pattern[] identifierPatterns() {
+		return identifierPatterns;
+	}
+
+	@Override
+	public boolean validate(Class<?> event) {
+		if (excludedEvents != null) {
+			for (Class<? extends E> excludedEvent : excludedEvents) {
+				if (!excludedEvent.isAssignableFrom(event))
+					continue;
+				if (excludedErrorMessage != null)
+					Skript.error(excludedErrorMessage);
+				return false;
+			}
+		}
+		return eventValidator == null || eventValidator.test(event);
+	}
+
+	@Override
+	public boolean matchesInput(String input) {
+		for (Pattern pattern : identifierPatterns) {
+			if (pattern.matcher(input).matches())
+				return inputValidator == null || inputValidator.test(input);
+		}
+		return false;
+	}
+
+	@Override
+	public V get(E event) {
+		return converter.convert(event);
+	}
+
+	@Override
+	public Converter<E, V> converter() {
+		return converter;
+	}
+
+	@Override
+	public boolean hasChanger(ChangeMode mode) {
+		return changers.containsKey(mode);
+	}
+
+	@Override
+	public Optional<Changer<E, V>> changer(ChangeMode mode) {
+		return Optional.ofNullable(changers.get(mode));
+	}
+
+	@Override
+	public int time() {
+		return time;
+	}
+
+	@Override
+	public Class<? extends E> @Nullable [] excludedEvents() {
+		return excludedEvents;
+	}
+
+	@Override
+	public @Nullable String excludedErrorMessage() {
+		return excludedErrorMessage;
+	}
+
+	@Override
+	public <U extends Event> EventValue<U, V> forEventClass(Class<U> newEventClass) {
+		return ConvertedEventValue.newInstance(newEventClass, valueClass, this);
+	}
+
+	@Override
+	public <U> EventValue<E, U> convertedTo(Class<U> newValueClass) {
+		return ConvertedEventValue.newInstance(eventClass, newValueClass, this);
+	}
+
+	static class BuilderImpl<E extends Event, V> implements Builder<E, V> {
+
+		private final Class<E> eventClass;
+		private final Class<V> valueClass;
+		private final Map<ChangeMode, Changer<E, V>> changers = new EnumMap<>(ChangeMode.class);
+		private String @Nullable [] identifierPatterns;
+		private @Nullable Predicate<String> inputValidator;
+		private @Nullable Predicate<Class<?>> eventValidator;
+		private Converter<E, V> converter;
+		private int time = EventValue.TIME_NOW;
+		private Class<? extends E> @Nullable [] excludedEvents;
+		private @Nullable String excludedErrorMessage;
+
+		BuilderImpl(Class<E> eventClass, Class<V> valueClass) {
+			this.eventClass = eventClass;
+			this.valueClass = valueClass;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E,V> identifierPattern(@RegExp String... identifierPattern) {
+			this.identifierPatterns = identifierPattern;
+			return this;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E,V> inputValidator(Predicate<String> inputValidator) {
+			this.inputValidator = inputValidator;
+			return this;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E,V> eventValidator(Predicate<Class<?>> eventValidator) {
+			this.eventValidator = eventValidator;
+			return this;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E,V> getter(Converter<E, V> converter) {
+			this.converter = converter;
+			return this;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E,V> setChanger(Changer<E, V> changer) {
+			changers.put(ChangeMode.SET, changer);
+			return this;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E,V> addChanger(Changer<E, V> changer) {
+			changers.put(ChangeMode.ADD, changer);
+			return this;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E,V> removeChanger(Changer<E, V> changer) {
+			changers.put(ChangeMode.REMOVE, changer);
+			return this;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E,V> removeAllChanger(Changer<E, V> changer) {
+			changers.put(ChangeMode.REMOVE_ALL, changer);
+			return this;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E,V> deleteChanger(NoValueChanger<E, V> changer) {
+			changers.put(ChangeMode.DELETE, changer);
+			return this;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E,V> resetChanger(NoValueChanger<E, V> changer) {
+			changers.put(ChangeMode.RESET, changer);
+			return this;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E,V> time(int time) {
+			this.time = time;
+			return this;
+		}
+
+		@SafeVarargs
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public final Builder<E, V> excludes(Class<? extends E>... events) {
+			this.excludedEvents = events;
+			return this;
+		}
+
+		@Override
+		@Contract(value = "_ -> this", mutates = "this")
+		public Builder<E, V> excludedErrorMessage(String excludedErrorMessage) {
+			this.excludedErrorMessage = excludedErrorMessage;
+			return this;
+		}
+
+		@Override
+		public EventValue<E, V> build() {
+			Pattern[] identifierPatterns;
+			if (this.identifierPatterns == null) {
+				boolean plural = valueClass.isArray();
+				//noinspection unchecked
+				ClassInfo<?> type = Classes.getExactClassInfo(plural ? (Class<V>) valueClass.getComponentType() : valueClass);
+				if (type != null) {
+					identifierPatterns = type.getUserInputPatterns();
+					inputValidator = combinePredicates(
+						input -> plural == Utils.getEnglishPlural(input).getSecond(),
+						inputValidator
+					);
+				} else {
+					String className = plural
+						? Utils.toEnglishPlural(valueClass.getComponentType().getSimpleName())
+						: valueClass.getSimpleName();
+					identifierPatterns = new Pattern[] {Pattern.compile(className.toLowerCase(Locale.ENGLISH))};
+				}
+			} else {
+				identifierPatterns = new Pattern[this.identifierPatterns.length];
+				for (int i = 0; i < this.identifierPatterns.length; i++)
+					identifierPatterns[i] = Pattern.compile(this.identifierPatterns[i]);
+			}
+
+			return new EventValueImpl<>(
+				eventClass,
+				valueClass,
+				identifierPatterns,
+				inputValidator,
+				eventValidator,
+				converter,
+				changers,
+				time,
+				excludedEvents,
+				excludedErrorMessage
+			);
+		}
+
+		private static <V> Predicate<V> combinePredicates(
+			@Nullable Predicate<V> first,
+			@Nullable Predicate<V> second
+		) {
+			if (first == null)
+				return second;
+			if (second == null)
+				return first;
+			return first.and(second);
+		}
+
+	}
+
+}

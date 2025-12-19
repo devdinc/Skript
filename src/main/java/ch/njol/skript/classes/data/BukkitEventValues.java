@@ -10,8 +10,8 @@ import ch.njol.skript.events.bukkit.SkriptStartEvent;
 import ch.njol.skript.events.bukkit.SkriptStopEvent;
 import ch.njol.skript.registrations.EventConverter;
 import ch.njol.skript.registrations.EventValues;
-import ch.njol.skript.util.Color;
 import ch.njol.skript.util.*;
+import ch.njol.skript.util.Color;
 import ch.njol.skript.util.slot.InventorySlot;
 import ch.njol.skript.util.slot.Slot;
 import com.destroystokyo.paper.event.block.BeaconEffectEvent;
@@ -55,7 +55,10 @@ import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.vehicle.*;
 import org.bukkit.event.weather.LightningStrikeEvent;
 import org.bukkit.event.weather.WeatherEvent;
-import org.bukkit.event.world.*;
+import org.bukkit.event.world.ChunkEvent;
+import org.bukkit.event.world.PortalCreateEvent;
+import org.bukkit.event.world.StructureGrowEvent;
+import org.bukkit.event.world.WorldEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -618,12 +621,6 @@ public final class BukkitEventValues {
 				event -> new Timespan(Timespan.TimePeriod.TICK, event.getTicksHeldFor()));
 			EventValues.registerEventValue(PlayerStopUsingItemEvent.class, ItemType.class,
 				event -> new ItemType(event.getItem()));
-		}
-
-		// LootGenerateEvent
-		if (Skript.classExists("org.bukkit.event.world.LootGenerateEvent")) {
-			EventValues.registerEventValue(LootGenerateEvent.class, Entity.class, LootGenerateEvent::getEntity);
-			EventValues.registerEventValue(LootGenerateEvent.class, Location.class, event -> event.getLootContext().getLocation());
 		}
 
 		// EntityResurrectEvent
