@@ -274,8 +274,8 @@ public final class TextComponentParser {
 	private final MiniMessage parser = MiniMessage.builder()
 		.strict(false)
 		.tags(TagResolver.builder()
-			.resolver(createSkriptTagResolver(false))
 			.resolvers(StandardTags.defaults())
+			.resolver(createSkriptTagResolver(false))
 			.build())
 		.build();
 
@@ -284,12 +284,12 @@ public final class TextComponentParser {
 		.strict(false)
 		.emitVirtuals(false)
 		.tags(TagResolver.builder()
-			.resolver(createSkriptTagResolver(true))
 			.resolvers(StandardTags.color(), StandardTags.decorations(), StandardTags.font(),
 				StandardTags.gradient(), StandardTags.rainbow(), StandardTags.newline(),
 				StandardTags.reset(), StandardTags.transition())
 			.resolvers(Skript.methodExists(StandardTags.class, "pride") ?
 				new TagResolver[]{StandardTags.pride(), StandardTags.shadowColor()} : new TagResolver[0])
+			.resolver(createSkriptTagResolver(true))
 			.build())
 		.build();
 

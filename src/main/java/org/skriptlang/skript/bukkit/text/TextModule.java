@@ -1,24 +1,18 @@
 package org.skriptlang.skript.bukkit.text;
 
-import ch.njol.skript.SkriptConfig;
 import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.classes.Parser;
 import ch.njol.skript.lang.ParseContext;
 import ch.njol.skript.registrations.Classes;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
 import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.addon.SkriptAddon;
 import org.skriptlang.skript.bukkit.text.elements.*;
 import org.skriptlang.skript.lang.arithmetic.Arithmetics;
 import org.skriptlang.skript.lang.arithmetic.Operator;
 import org.skriptlang.skript.lang.comparator.Comparators;
-import org.skriptlang.skript.lang.comparator.Relation;
 import org.skriptlang.skript.lang.converter.Converters;
 import org.skriptlang.skript.registration.SyntaxRegistry;
-
-import java.util.Locale;
-import java.util.regex.Pattern;
 
 public class TextModule implements AddonModule {
 
@@ -54,24 +48,20 @@ public class TextModule implements AddonModule {
 		Converters.registerConverter(Component.class, String.class,
 			component -> TextComponentParser.instance().toString(component));
 
-		// TODO always compacting might not be ideal
-		TextReplacementConfig componentToLowercase = TextReplacementConfig.builder()
-			.match(Pattern.compile(".+", Pattern.DOTALL))
-			.replacement(text -> text.content(text.content().toLowerCase(Locale.ENGLISH)))
-			.build();
+		// due to VirtualComponents, we cannot compare components directly
+		// we instead check against the serialized version...
+		// this is *really* not ideal, but neither is comparing components it turns out 
 		Comparators.registerComparator(Component.class, String.class, (component, string) -> {
-			if (!SkriptConfig.caseSensitive.value()) {
-				component = component.replaceText(componentToLowercase);
-				string = string.toLowerCase(Locale.ENGLISH);
-			}
-			return Relation.get(component.compact().equals(TextComponentParser.instance().parse(string)));
+			TextComponentParser parser = TextComponentParser.instance();
+			String string1 = parser.toString(component);
+			String string2 = parser.toString(parser.parse(string));
+			return Comparators.compare(string1, string2);
 		});
 		Comparators.registerComparator(Component.class, Component.class, (component1, component2) -> {
-			if (!SkriptConfig.caseSensitive.value()) {
-				component1 = component1.replaceText(componentToLowercase);
-				component2 = component2.replaceText(componentToLowercase);
-			}
-			return Relation.get(component1.compact().equals(component2.compact()));
+			TextComponentParser parser = TextComponentParser.instance();
+			String string1 = parser.toString(component1);
+			String string2 = parser.toString(component2);
+			return Comparators.compare(string1, string2);
 		});
 
 		Arithmetics.registerOperation(Operator.ADDITION, Component.class, Component.class, TextComponentUtils::appendToEnd);
