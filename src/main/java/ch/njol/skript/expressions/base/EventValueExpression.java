@@ -345,7 +345,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 		for (Class<? extends Event> event : events) {
 			assert event != null;
 			if (getEventValuesForTime(event, EventValue.TIME_PAST).successful()
-				|| getEventValuesForTime(event, EventValue.TIME_NOW).successful()) {
+				|| getEventValuesForTime(event, EventValue.TIME_FUTURE).successful()) {
 				super.setTime(time);
 				return true;
 			}
