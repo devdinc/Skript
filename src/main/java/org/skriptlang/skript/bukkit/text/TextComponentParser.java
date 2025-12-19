@@ -217,7 +217,7 @@ public final class TextComponentParser {
 		resolvers.remove(new SkriptTagResolver(resolver, true));
 	}
 
-	private TagResolver createSkriptTagResolver(boolean isSafeMode, TagResolver builtInResolver) {
+	private TagResolver createSkriptTagResolver(boolean isSafeMode) {
 		return new TagResolver() {
 
 			@Override
@@ -246,22 +246,11 @@ public final class TextComponentParser {
 					}
 				}
 
-				// attempt built in resolver
-				// we do this last to allow overriding default tags
-				if (builtInResolver.has(name)) {
-					return builtInResolver.resolve(name, arguments, ctx);
-				}
-
 				return null;
 			}
 
 			@Override
 			public boolean has(@NotNull String name) {
-				// check built-in resolver
-				if (builtInResolver.has(name)) {
-					return true;
-				}
-
 				// check our simple placeholders
 				SkriptTag simple = simplePlaceholders.get(name);
 				if (simple != null) {
@@ -275,7 +264,8 @@ public final class TextComponentParser {
 					}
 				}
 
-				return false;
+				// otherwise, only process standard colors here if config applies
+				return colorsCauseReset && StandardTags.color().has(name);
 			}
 		};
 	}
@@ -284,22 +274,22 @@ public final class TextComponentParser {
 	private final MiniMessage parser = MiniMessage.builder()
 		.strict(false)
 		.tags(TagResolver.builder()
-			.resolver(createSkriptTagResolver(false, StandardTags.defaults()))
+			.resolver(createSkriptTagResolver(false))
+			.resolvers(StandardTags.defaults())
 			.build())
 		.build();
 
 	// The safe parser only parses color/decoration/formatting related tags
 	private final MiniMessage safeParser = MiniMessage.builder()
 		.strict(false)
+		.emitVirtuals(false)
 		.tags(TagResolver.builder()
-			.resolver(createSkriptTagResolver(true, TagResolver.builder()
-				.resolvers(
-					StandardTags.color(), StandardTags.decorations(), StandardTags.font(),
-					StandardTags.gradient(), StandardTags.rainbow(), StandardTags.newline(),
-					StandardTags.reset(), StandardTags.transition())
-				.resolvers(Skript.methodExists(StandardTags.class, "pride") ?
-					new TagResolver[]{StandardTags.pride(), StandardTags.shadowColor()} : new TagResolver[0])
-				.build()))
+			.resolver(createSkriptTagResolver(true))
+			.resolvers(StandardTags.color(), StandardTags.decorations(), StandardTags.font(),
+				StandardTags.gradient(), StandardTags.rainbow(), StandardTags.newline(),
+				StandardTags.reset(), StandardTags.transition())
+			.resolvers(Skript.methodExists(StandardTags.class, "pride") ?
+				new TagResolver[]{StandardTags.pride(), StandardTags.shadowColor()} : new TagResolver[0])
 			.build())
 		.build();
 
@@ -444,9 +434,7 @@ public final class TextComponentParser {
 	 * @return A formatted string.
 	 */
 	public String toString(Component component) {
-		// We use the default parser rather than our own as creating a custom TagResolver
-		//  that implements serialization is not possible
-		return MiniMessage.miniMessage().serialize(component);
+		return parser.serialize(component);
 	}
 
 	/**
