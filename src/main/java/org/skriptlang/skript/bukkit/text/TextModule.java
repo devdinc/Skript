@@ -74,10 +74,12 @@ public class TextModule implements AddonModule {
 			return Relation.get(component1.compact().equals(component2.compact()));
 		});
 
-		Arithmetics.registerOperation(Operator.ADDITION, Component.class, Component.class, Component::append);
+		Arithmetics.registerOperation(Operator.ADDITION, Component.class, Component.class, TextComponentUtils::appendToEnd);
 		Arithmetics.registerOperation(Operator.ADDITION, Component.class, String.class,
-			(component, string) -> component.append(TextComponentParser.instance().parse(string)),
-			(string, component) -> TextComponentParser.instance().parse(string).append(component));
+			(component, string) ->
+				TextComponentUtils.appendToEnd(component, TextComponentParser.instance().parse(string)),
+			(string, component) ->
+				TextComponentUtils.appendToEnd(TextComponentParser.instance().parse(string), component));
 	}
 
 	@Override

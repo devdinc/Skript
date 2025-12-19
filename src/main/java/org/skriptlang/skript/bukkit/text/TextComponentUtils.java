@@ -11,7 +11,9 @@ import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.lang.converter.ConverterInfo;
 import org.skriptlang.skript.lang.converter.Converters;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Utilities for working with {@link Component}s.
@@ -21,11 +23,14 @@ public final class TextComponentUtils {
 	private static final ConverterInfo<Object, Component> OBJECT_COMPONENT_CONVERTER =
 		new ConverterInfo<>(Object.class, Component.class, TextComponentUtils::from, 0);
 
-	private static final JoinConfiguration NEW_LINE_CONFIGURATION = JoinConfiguration.separator(Component.newline());
-
 	/**
 	 * Creates a component from an object.
-	 * If {@code message} is a component, {@code message} is simply returned.
+	 * <br>
+	 * If {@code message} is a {@link Component}, {@code message} is simply returned.
+	 * <br>
+	 * If {@code message} is a {@link String}, a safely-formatted Component
+	 *  (see {@link TextComponentParser#parse(Object)}) is returned.
+	 * <br>
 	 * Otherwise, a plain text component is returned.
 	 * @param message The message to create a component from.
 	 * @return A component from the given message.
@@ -33,7 +38,7 @@ public final class TextComponentUtils {
 	public static Component from(Object message) {
 		return switch (message) {
 			case Component component -> component;
-			case String string -> Component.text(string);
+			case String string -> TextComponentParser.instance().parse(string);
 			default -> Component.text(Classes.toString(message));
 		};
 	}
@@ -51,6 +56,20 @@ public final class TextComponentUtils {
 			combined = combined.appendNewline().append(components[i]);
 		}
 		return combined.compact();
+	}
+
+	public static Component appendToEnd(Component base, Component appendee) {
+		return appendToLastChild(base, appendee).compact();
+	}
+
+	private static Component appendToLastChild(Component base, Component appendee) {
+		List<Component> baseChildren = base.children();
+		if (baseChildren.isEmpty()) { // we made it to the end
+			return base.append(appendee);
+		}
+		baseChildren = new ArrayList<>(baseChildren);
+		baseChildren.addLast(appendToLastChild(baseChildren.removeLast(), appendee));
+		return base.children(baseChildren);
 	}
 
 	/**

@@ -77,7 +77,7 @@ public class ExprColored extends SimplePropertyExpression<String, Object> {
 	/**
 	 * @deprecated This method is only available for compatibility purposes.
 	 */
-	@Deprecated(since = "", forRemoval = true)
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public boolean isUnsafeFormat() {
 		return isColor && isFormat;
 	}

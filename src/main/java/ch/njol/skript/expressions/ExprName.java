@@ -257,6 +257,7 @@ public class ExprName extends SimplePropertyExpression<Object, Object> {
 			if (String.class.isAssignableFrom(clazz)) {
 				ExprName converted = new ExprName();
 				converted.setExpr(this.getExpr());
+				converted.rawExpr = this.rawExpr;
 				converted.mark = this.mark;
 				converted.scriptResolvedName = this.scriptResolvedName;
 				converted.isComponent = false;

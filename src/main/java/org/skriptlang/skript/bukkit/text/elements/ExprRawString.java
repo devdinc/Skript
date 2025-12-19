@@ -6,10 +6,8 @@ import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.util.ConvertedExpression;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.lang.converter.ConverterInfo;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
@@ -20,21 +18,25 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 })
 @Example("send raw \"&aThis text is unformatted!\" to all players")
 @Since("2.7")
-public class ExprRawString extends SimplePropertyExpression<String, String> {
-
-	private static final ConverterInfo<String, Component> RAW_STRING_CONVERTER =
-		new ConverterInfo<>(String.class, Component.class, Component::text, 0);
+public class ExprRawString extends SimplePropertyExpression<String, Object> {
 
 	public static void register(SyntaxRegistry syntaxRegistry) {
-		syntaxRegistry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRawString.class, String.class)
+		syntaxRegistry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprRawString.class, Object.class)
 			.supplier(ExprRawString::new)
 			.addPatterns("raw %strings%")
 			.build());
 	}
 
+	private boolean isComponent = true;
+
 	@Override
-	public String convert(String from) {
-		return from;
+	public Object convert(String from) {
+		return isComponent ? Component.text(from) : from;
+	}
+
+	@Override
+	public Class<?> getReturnType() {
+		return isComponent ? Component.class : String.class;
 	}
 
 	@Override
@@ -43,18 +45,16 @@ public class ExprRawString extends SimplePropertyExpression<String, String> {
 	}
 
 	@Override
-	public Class<? extends String> getReturnType() {
-		return String.class;
-	}
-
-	@Override
 	@SafeVarargs
 	public final @Nullable <R> Expression<? extends R> getConvertedExpression(Class<R>... to) {
 		for (Class<R> clazz : to) {
-			if (Component.class.isAssignableFrom(clazz)) {
+			if (String.class.isAssignableFrom(clazz)) {
+				ExprRawString converted = new ExprRawString();
+				converted.setExpr(this.getExpr());
+				converted.rawExpr = this.rawExpr;
+				converted.isComponent = false;
 				//noinspection unchecked
-				return (Expression<? extends R>) new ConvertedExpression<>(this, Component.class,
-					RAW_STRING_CONVERTER);
+				return (Expression<? extends R>) converted;
 			}
 		}
 		return super.getConvertedExpression(to);
