@@ -231,14 +231,14 @@ public class EventValueRegistry implements Registry<EventValue<?, ?>> {
 
 		var input = Input.of(eventClass, valueClass, time, flags);
 		//noinspection unchecked
-//		var resolution = (Resolution<E, ? extends V>) eventValuesCache.get(input);
-//		if (resolution != null)
-//			return resolution;
+		var resolution = (Resolution<E, ? extends V>) eventValuesCache.get(input);
+		if (resolution != null)
+			return resolution;
 
-		Resolution<E, ? extends V> resolution = resolveExact(eventClass, valueClass, time)
-//			.anyOptional()
-//			.map(eventValue -> Resolution.of(Collections.singletonList(eventValue)))
-//			.orElse(Resolution.empty())
+		resolution = resolveExact(eventClass, valueClass, time)
+			.anyOptional()
+			.map(eventValue -> Resolution.of(Collections.singletonList(eventValue)))
+			.orElse(Resolution.empty())
 			;
 		if (resolution.successful() || resolution.errored()) {
 			eventValuesCache.put(input, resolution);
