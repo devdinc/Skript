@@ -132,13 +132,21 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 	}
 
 	@Override
-	public <U extends Event> EventValue<U, V> forEventClass(Class<U> newEventClass) {
-		return ConvertedEventValue.newInstance(newEventClass, valueClass, this);
+	public @Nullable <ConvertedEvent extends Event, ConvertedValue> EventValue<ConvertedEvent, ConvertedValue> getConverted(
+		Class<ConvertedEvent> newEventClass,
+		Class<ConvertedValue> newValueClass
+	) {
+		return ConvertedEventValue.newInstance(newEventClass, newValueClass, this);
 	}
 
 	@Override
-	public <U> EventValue<E, U> convertedTo(Class<U> newValueClass) {
-		return ConvertedEventValue.newInstance(eventClass, newValueClass, this);
+	public <ConvertedEvent extends Event, ConvertedValue> EventValue<ConvertedEvent, ConvertedValue> getConverted(
+		Class<ConvertedEvent> newEventClass,
+		Class<ConvertedValue> newValueClass,
+		Converter<V, ConvertedValue> converter,
+		@Nullable Converter<ConvertedValue, V> reverseConverter
+	) {
+		return new ConvertedEventValue<>(newEventClass, newValueClass, this, converter, reverseConverter);
 	}
 
 	static class BuilderImpl<E extends Event, V> implements Builder<E, V> {

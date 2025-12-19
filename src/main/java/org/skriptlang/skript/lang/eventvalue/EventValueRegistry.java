@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Range;
 import org.jetbrains.annotations.Unmodifiable;
+import org.skriptlang.skript.lang.converter.Converter;
 import org.skriptlang.skript.lang.converter.Converters;
 import org.skriptlang.skript.util.ClassUtils;
 import org.skriptlang.skript.util.Registry;
@@ -169,11 +170,11 @@ public class EventValueRegistry implements Registry<EventValue<?, ?>> {
 			if (distEvent < bestDist) {
 				best.clear();
 				//noinspection unchecked
-				best.add((EventValue<E, V>) eventValue.forEventClass(eventClass));
+				best.add((EventValue<E, V>) eventValue.getConverted(eventClass, eventValue.valueClass()));
 				bestDist = distEvent;
 			} else if (distEvent == bestDist) {
 				//noinspection unchecked
-				best.add((EventValue<E, V>) eventValue.forEventClass(eventClass));
+				best.add((EventValue<E, V>) eventValue.getConverted(eventClass, eventValue.valueClass()));
 			}
 		}
 		if (!best.isEmpty()) {
@@ -244,6 +245,12 @@ public class EventValueRegistry implements Registry<EventValue<?, ?>> {
 		}
 
 		if ((flags & ALLOW_CONVERSION) != 0) {
+			resolution = resolveWithDowncastConversion(eventClass, valueClass, time);
+			if (resolution.successful() || resolution.errored()) {
+				eventValuesCache.put(input, resolution);
+				return resolution;
+			}
+
 			resolution = resolveWithConversion(eventClass, valueClass, time);
 			if (resolution.successful() || resolution.errored()) {
 				eventValuesCache.put(input, resolution);
@@ -314,11 +321,49 @@ public class EventValueRegistry implements Registry<EventValue<?, ?>> {
 			int distValue = ClassUtils.hierarchyDistance(valueClass, eventValue.valueClass());
 			if (distEvent < bestDistEvent || (distEvent == bestDistEvent && distValue < bestDistValue)) {
 				best.clear();
-				best.add(eventValue.forEventClass(eventClass).convertedTo(valueClass));
+				best.add(eventValue.getConverted(eventClass, valueClass));
 				bestDistEvent = distEvent;
 				bestDistValue = distValue;
 			} else if (distEvent == bestDistEvent && distValue == bestDistValue) {
-				best.add(eventValue.forEventClass(eventClass).convertedTo(valueClass));
+				best.add(eventValue.getConverted(eventClass, valueClass));
+			}
+		}
+		return Resolution.of(filterEventValues(valueClass, best));
+	}
+
+	/**
+	 * Resolves using downcast conversion when the desired value class is a supertype
+	 * of the registered value class.
+	 */
+	private <E extends Event, V> Resolution<E, V> resolveWithDowncastConversion(
+		Class<E> eventClass,
+		Class<V> valueClass,
+		int time
+	) {
+		List<EventValue<E, V>> best = new ArrayList<>();
+		int bestDistEvent = Integer.MAX_VALUE, bestDistValue = Integer.MAX_VALUE;
+		for (EventValue<?, ?> eventValue : eventValues(time)) {
+			if (!ClassUtils.isRelatedTo(eventValue.eventClass(), eventClass)
+				|| !eventValue.valueClass().isAssignableFrom(valueClass))
+				continue;
+
+			if (!eventValue.validate(eventClass))
+				return Resolution.error();
+
+			int distEvent = eventValue.eventClass().isAssignableFrom(eventClass)
+				? ClassUtils.hierarchyDistance(eventValue.eventClass(), eventClass)
+				: 1000 + ClassUtils.hierarchyDistance(eventClass, eventValue.eventClass()); // favor super events to sub events
+			int distValue = ClassUtils.hierarchyDistance(valueClass, eventValue.valueClass());
+			Converter<?, V> converter = source -> valueClass.isInstance(source) ? valueClass.cast(source) : null;
+			if (distEvent < bestDistEvent || (distEvent == bestDistEvent && distValue < bestDistValue)) {
+				best.clear();
+				//noinspection unchecked,rawtypes
+				best.add(eventValue.getConverted(eventClass, valueClass, (Converter) converter));
+				bestDistEvent = distEvent;
+				bestDistValue = distValue;
+			} else if (distEvent == bestDistEvent && distValue == bestDistValue) {
+				//noinspection unchecked,rawtypes
+				best.add(eventValue.getConverted(eventClass, valueClass, (Converter) converter));
 			}
 		}
 		return Resolution.of(filterEventValues(valueClass, best));
@@ -346,19 +391,19 @@ public class EventValueRegistry implements Registry<EventValue<?, ?>> {
 				: 1000 + ClassUtils.hierarchyDistance(eventClass, eventValue.eventClass()); // favor super events to sub events
 			if (distEvent < bestDistEvent && Converters.converterExists(eventValue.valueClass(), valueClass)) {
 				best.clear();
-				EventValue<E, V> converted = eventValue.forEventClass(eventClass).convertedTo(valueClass);
+				EventValue<E, V> converted = eventValue.getConverted(eventClass, valueClass);
 				if (converted == null)
 					continue;
 				best.add(converted);
 				bestDistEvent = distEvent;
 			} else if (distEvent == bestDistEvent) {
-				EventValue<E, V> converted = eventValue.forEventClass(eventClass).convertedTo(valueClass);
+				EventValue<E, V> converted = eventValue.getConverted(eventClass, valueClass);
 				if (converted == null)
 					continue;
 				best.add(converted);
 			}
 		}
-		return Resolution.of(filterEventValues(valueClass, best));
+		return Resolution.of(best);
 	}
 
 	/**

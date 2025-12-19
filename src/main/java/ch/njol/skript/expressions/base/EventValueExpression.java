@@ -243,7 +243,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 							"You must define which " + typeName + " to use.");
 					return false;
 				}
-				if (resolution.successful())
+				if (getEventValues(event).successful())
 					hasValue = true;
 			}
 			if (!hasValue) {

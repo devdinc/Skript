@@ -143,24 +143,25 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 	 */
 	@Nullable String excludedErrorMessage();
 
-	/**
-	 * Creates a view of this event value for a different (related) event class.
-	 *
-	 * @param newEventClass the target event type
-	 * @param <U> the new event type parameter
-	 * @return an event value usable with the given event class
-	 */
-	<U extends Event> EventValue<U, V> forEventClass(Class<U> newEventClass);
+	@Nullable <ConvertedEvent extends Event, ConvertedValue> EventValue<ConvertedEvent, ConvertedValue> getConverted(
+		Class<ConvertedEvent> newEventClass,
+		Class<ConvertedValue> newValueClass
+	);
 
-	/**
-	 * Creates a converted view of this event value that yields a different value type.
-	 * Conversion is performed using {@link org.skriptlang.skript.lang.converter.Converters} at access time.
-	 *
-	 * @param newValueClass the desired value class
-	 * @param <U> the new value type parameter
-	 * @return an event value that converts results to the requested type, or null if conversion is not possible
-	 */
-	<U> EventValue<E, U> convertedTo(Class<U> newValueClass);
+	default @Nullable <NewEvent extends Event, NewValue> EventValue<NewEvent, NewValue> getConverted(
+		Class<NewEvent> newEventClass,
+		Class<NewValue> newValueClass,
+		Converter<V, NewValue> converter
+	) {
+		return getConverted(newEventClass, newValueClass, converter, null);
+	}
+
+	<NewEvent extends Event, NewValue> EventValue<NewEvent, NewValue> getConverted(
+		Class<NewEvent> newEventClass,
+		Class<NewValue> newValueClass,
+		Converter<V, NewValue> converter,
+		@Nullable Converter<NewValue, V> reverseConverter
+	);
 
 	@FunctionalInterface
 	interface Changer<E, V> {

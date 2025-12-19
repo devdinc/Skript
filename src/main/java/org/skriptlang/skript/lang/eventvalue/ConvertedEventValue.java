@@ -2,7 +2,7 @@ package org.skriptlang.skript.lang.eventvalue;
 
 import ch.njol.skript.classes.Changer.ChangeMode;
 import org.bukkit.event.Event;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.lang.converter.Converter;
 import org.skriptlang.skript.lang.converter.Converters;
 
@@ -16,6 +16,8 @@ final class ConvertedEventValue<SourceEvent extends Event, ConvertedEvent extend
 	private final Class<ConvertedEvent> eventClass;
 	private final Class<ConvertedValue> valueClass;
 	private final EventValue<SourceEvent, SourceValue> source;
+	private final Converter<SourceValue, ConvertedValue> converter;
+	private final @Nullable Converter<ConvertedValue, SourceValue> reverseConverter;
 
     public static <SourceEvent extends Event, ConvertedEvent extends Event, SourceValue, ConvertedValue> EventValue<ConvertedEvent, ConvertedValue> newInstance(
 		Class<ConvertedEvent> eventClass,
@@ -25,19 +27,37 @@ final class ConvertedEventValue<SourceEvent extends Event, ConvertedEvent extend
 		if (source.eventClass().isAssignableFrom(eventClass) && valueClass.isAssignableFrom(source.valueClass()))
 			//noinspection unchecked
 			return (EventValue<ConvertedEvent, ConvertedValue>) source;
-		if (!Converters.converterExists(source.valueClass(), valueClass))
+		Converter<SourceValue, ConvertedValue> converter = getConverter(source.valueClass(), valueClass);
+		if (converter == null)
 			return null;
-		return new ConvertedEventValue<>(eventClass, valueClass, source);
+		return new ConvertedEventValue<>(
+			eventClass,
+			valueClass,
+			source,
+			converter,
+			getConverter(valueClass, source.valueClass())
+		);
 	}
 
-	private ConvertedEventValue(
+	private static <F, T> Converter<F, T> getConverter(Class<F> from, Class<T> to) {
+		//noinspection unchecked
+		return to.isAssignableFrom(from) ? value -> (T) value : Converters.getConverter(from, to);
+	}
+
+	public ConvertedEventValue(
 		Class<ConvertedEvent> eventClass,
 		Class<ConvertedValue> valueClass,
-		EventValue<SourceEvent, SourceValue> source
+		EventValue<SourceEvent, SourceValue> source,
+		Converter<SourceValue, ConvertedValue> converter,
+		@Nullable Converter<ConvertedValue, SourceValue> reverseConverter
 	) {
 		this.eventClass = eventClass;
 		this.valueClass = valueClass;
 		this.source = source;
+		this.converter = converter;
+		this.reverseConverter = reverseConverter == null
+			? getConverter(valueClass, source.valueClass())
+			: reverseConverter;
 	}
 
 	@Override
@@ -72,14 +92,11 @@ final class ConvertedEventValue<SourceEvent extends Event, ConvertedEvent extend
 
 	@Override
 	public Converter<ConvertedEvent, ConvertedValue> converter() {
-		return new Converter<>() {
-			@Override
-			public @Nullable ConvertedValue convert(ConvertedEvent event) {
-				if (!source.eventClass().isAssignableFrom(event.getClass()))
-					return null;
-				SourceValue sourceValue = source.get(source.eventClass().cast(event));
-				return Converters.convert(sourceValue, valueClass);
-			}
+		return event -> {
+			if (!source.eventClass().isAssignableFrom(event.getClass()))
+				return null;
+			SourceValue sourceValue = source.get(source.eventClass().cast(event));
+			return converter.convert(sourceValue);
 		};
 	}
 
@@ -97,9 +114,11 @@ final class ConvertedEventValue<SourceEvent extends Event, ConvertedEvent extend
 				changer.change(source.eventClass().cast(event), null);
 				return;
 			}
-			SourceValue convert = Converters.convert(value, source.valueClass());
-			if (convert != null)
-				changer.change(source.eventClass().cast(event), convert);
+			if (reverseConverter == null)
+				return;
+			SourceValue sourceValue = reverseConverter.convert(value);
+			if (sourceValue != null)
+				changer.change(source.eventClass().cast(event), sourceValue);
 		});
 	}
 
@@ -125,13 +144,21 @@ final class ConvertedEventValue<SourceEvent extends Event, ConvertedEvent extend
 	}
 
 	@Override
-	public <U extends Event> EventValue<U, ConvertedValue> forEventClass(Class<U> newEventClass) {
-		return newInstance(newEventClass, valueClass, source);
+	public @Nullable <NewEvent extends Event, NewValue> EventValue<NewEvent, NewValue> getConverted(
+		Class<NewEvent> newEventClass,
+		Class<NewValue> newValueClass
+	) {
+		return ConvertedEventValue.newInstance(newEventClass, newValueClass, source);
 	}
 
 	@Override
-	public <U> EventValue<ConvertedEvent, U> convertedTo(Class<U> newValueClass) {
-		return newInstance(eventClass, newValueClass, source);
+	public <NewEvent extends Event, NewValue> EventValue<NewEvent, NewValue> getConverted(
+		Class<NewEvent> newEventClass,
+		Class<NewValue> newValueClass,
+		Converter<ConvertedValue, NewValue> converter,
+		@Nullable Converter<NewValue, ConvertedValue> reverseConverter
+	) {
+		return new ConvertedEventValue<>(newEventClass, newValueClass, this, converter, reverseConverter);
 	}
 
 }
