@@ -14,11 +14,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.skriptlang.skript.bukkit.lang.eventvalue.EventValue;
+import org.skriptlang.skript.bukkit.lang.eventvalue.EventValueRegistry;
+import org.skriptlang.skript.bukkit.lang.eventvalue.EventValueRegistry.Resolution;
 import org.skriptlang.skript.lang.converter.Converter;
 import org.skriptlang.skript.lang.converter.Converters;
-import org.skriptlang.skript.lang.eventvalue.EventValue;
-import org.skriptlang.skript.lang.eventvalue.EventValueRegistry;
-import org.skriptlang.skript.lang.eventvalue.EventValueRegistry.Resolution;
 
 import java.util.ArrayList;
 import java.util.Collection;

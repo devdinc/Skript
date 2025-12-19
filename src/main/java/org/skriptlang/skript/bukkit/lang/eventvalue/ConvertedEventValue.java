@@ -1,4 +1,4 @@
-package org.skriptlang.skript.lang.eventvalue;
+package org.skriptlang.skript.bukkit.lang.eventvalue;
 
 import ch.njol.skript.classes.Changer.ChangeMode;
 import org.bukkit.event.Event;
