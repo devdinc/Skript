@@ -50,7 +50,7 @@ public class TextModule implements AddonModule {
 
 		// due to VirtualComponents, we cannot compare components directly
 		// we instead check against the serialized version...
-		// this is *really* not ideal, but neither is comparing components it turns out 
+		// this is *really* not ideal, but neither is comparing components it turns out
 		Comparators.registerComparator(Component.class, String.class, (component, string) -> {
 			TextComponentParser parser = TextComponentParser.instance();
 			String string1 = parser.toString(component);

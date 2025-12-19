@@ -18,8 +18,6 @@ import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.format.TextDecoration.State;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
@@ -111,15 +109,6 @@ public class ExprLore extends SimpleExpression<Component> {
 			lore = new ArrayList<>();
 		}
 		assert lore != null; // NotNull by hasLore check
-
-		// italic is true by default, change for compatibility
-		if (delta != null && TextComponentParser.instance().colorsCauseReset()) {
-			for (int i = 0; i < delta.length; i++) {
-				if (delta[i] instanceof Component component) {
-					delta[i] = component.decorationIfAbsent(TextDecoration.ITALIC, State.FALSE);
-				}
-			}
-		}
 
 		if (line == null) {
 			switch (mode) {

@@ -282,7 +282,6 @@ public final class TextComponentParser {
 	// The safe parser only parses color/decoration/formatting related tags
 	private final MiniMessage safeParser = MiniMessage.builder()
 		.strict(false)
-		.emitVirtuals(false)
 		.tags(TagResolver.builder()
 			.resolvers(StandardTags.color(), StandardTags.decorations(), StandardTags.font(),
 				StandardTags.gradient(), StandardTags.rainbow(), StandardTags.newline(),
