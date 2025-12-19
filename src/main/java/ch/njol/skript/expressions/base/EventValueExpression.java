@@ -165,8 +165,8 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	private final Class<?> componentType;
 	private final Class<? extends T> type;
 
-	@Nullable
-	private Changer<? super T> changer;
+	private Class<? extends Event>[] events;
+	private @Nullable Changer<? super T> changer;
 	private final boolean single;
 	private final boolean exact;
 	private boolean isDelayed;
@@ -230,7 +230,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 		ParseLogHandler log = SkriptLogger.startParseLogHandler();
 		try {
 			boolean hasValue = false;
-			Class<? extends Event>[] events = parser.getCurrentEvents();
+			events = parser.getCurrentEvents();
 			if (events == null) {
 				assert false;
 				return false;
@@ -276,23 +276,29 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	}
 
 	@Nullable
-	@SuppressWarnings("unchecked")
 	private <E extends Event> T getValue(E event) {
-		Class<E> eventClass = (Class<E>) event.getClass();
+		Class<E> eventClass = getParseTimeEventClass(event);
+		if (eventClass == null)
+			return null;
 		Resolution<E, ? extends T> resolution = getEventValues(eventClass);
 		return resolution.anyOptional()
 			.map(eventValue -> eventValue.get(event))
 			.orElse(null);
 	}
 
+	private <E extends Event> Class<E> getParseTimeEventClass(E event) {
+		for (Class<? extends Event> eventClass : events) {
+			if (eventClass.isInstance(event)) {
+				//noinspection unchecked
+				return (Class<E>) eventClass;
+			}
+		}
+		return null;
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public Class<?> @Nullable [] acceptChange(ChangeMode mode) {
-		Class<? extends Event>[] events = getParser().getCurrentEvents();
-		if (events == null) {
-			assert false;
-			return null;
-		}
 		for (Class<? extends Event> event : events) {
 			Resolution<?, ? extends T> resolution = getEventValues(event);
 			if (!resolution.successful())
@@ -314,7 +320,10 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 
 	@Override
 	public void change(Event event, @Nullable Object[] delta, ChangeMode mode) {
-		Resolution<?, ? extends T> resolution = getEventValues(event.getClass());
+		Class<Event> eventClass = getParseTimeEventClass(event);
+		if (eventClass == null)
+			return;
+		Resolution<?, ? extends T> resolution = getEventValues(eventClass);
 		for (EventValue<?, ? extends T> eventValue : resolution.all()) {
 			if (!eventValue.hasChanger(mode))
 				continue;
@@ -337,11 +346,6 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 
 	@Override
 	public boolean setTime(int time) {
-		Class<? extends Event>[] events = getParser().getCurrentEvents();
-		if (events == null) {
-			assert false;
-			return false;
-		}
 		for (Class<? extends Event> event : events) {
 			assert event != null;
 			if (getEventValuesForTime(event, EventValue.TIME_PAST).successful()

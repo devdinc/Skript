@@ -11,10 +11,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.lang.converter.Converter;
 
-import java.util.EnumMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -147,6 +144,16 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 		@Nullable Converter<ConvertedValue, V> reverseConverter
 	) {
 		return new ConvertedEventValue<>(newEventClass, newValueClass, this, converter, reverseConverter);
+	}
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", EventValueImpl.class.getSimpleName() + "[", "]")
+			.add("eventClass=" + eventClass)
+			.add("valueClass=" + valueClass)
+			.add("identifierPatterns=" + Arrays.toString(identifierPatterns))
+			.add("time=" + time)
+			.toString();
 	}
 
 	static class BuilderImpl<E extends Event, V> implements Builder<E, V> {

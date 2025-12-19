@@ -4,6 +4,7 @@ import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAPIException;
 import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.registrations.Classes;
+import com.google.common.base.Preconditions;
 import io.papermc.paper.event.player.PlayerTradeEvent;
 import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Player;
@@ -146,6 +147,9 @@ public class EventValueRegistry implements Registry<EventValue<?, ?>> {
 	 * @return a {@link Resolution} describing candidates or empty/error state
 	 */
 	public <E extends Event, V> Resolution<E, V> resolve(Class<E> eventClass, String identifier, int time, int flags) {
+		Preconditions.checkNotNull(eventClass, "eventClass");
+		Preconditions.checkNotNull(identifier, "identifier");
+
 		if (time == EventValue.TIME_NOW)
 			flags &= ~FALLBACK_TO_DEFAULT_TIME_STATE; // only 'past' and 'future' may use the fallback flag
 
@@ -219,6 +223,9 @@ public class EventValueRegistry implements Registry<EventValue<?, ?>> {
 		int time,
 		int flags
 	) {
+		Preconditions.checkNotNull(eventClass, "eventClass");
+		Preconditions.checkNotNull(valueClass, "valueClass");
+
 		if (time == EventValue.TIME_NOW)
 			flags &= ~FALLBACK_TO_DEFAULT_TIME_STATE; // only 'past' and 'future' may use the fallback flag
 
@@ -277,13 +284,16 @@ public class EventValueRegistry implements Registry<EventValue<?, ?>> {
 		List<EventValue<E, V>> best = new ArrayList<>();
 		int bestDist = Integer.MAX_VALUE;
 		for (EventValue<?, ?> eventValue : eventValues(time)) {
-			if (!eventValue.eventClass().isAssignableFrom(eventClass) || !eventValue.valueClass().equals(valueClass))
+			if (!eventValue.valueClass().equals(valueClass))
 				continue;
 
 			if (!eventValue.validate(eventClass))
 				return Resolution.error();
 
 			int dist = ClassUtils.hierarchyDistance(eventValue.eventClass(), eventClass);
+			if (dist < 0)
+				continue;
+
 			if (dist < bestDist) {
 				best.clear();
 				//noinspection unchecked
