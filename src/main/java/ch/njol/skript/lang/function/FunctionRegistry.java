@@ -731,7 +731,7 @@ public final class FunctionRegistry implements Registry<Function<?>> {
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(name, local, Arrays.hashCode(args));
+			return Objects.hash(name, Arrays.hashCode(args));
 		}
 
 		@Override
