@@ -135,7 +135,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 
 		// first, sort into types
 		for (Signature<?> option : options) {
-			if (option.parameters().size() == 1 && !option.parameters().firstEntry().getValue().single()) {
+			if (option.parameters().size() == 1 && !option.parameters().getFirst().single()) {
 				lists.add(option);
 			} else {
 				exacts.add(option);
@@ -202,7 +202,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 
 			// all remaining arguments to parse
 			// if a passed argument is named it bypasses the regular argument order of unnamed arguments
-			SequencedMap<String, Parameter<?>> parameters = signature.parameters();
+			SequencedMap<String, Parameter<?>> parameters = signature.parameters().sequencedMap();
 			LinkedHashSet<String> remaining = new LinkedHashSet<>(parameters.keySet());
 
 			// if a parameter is not passed, we need to create a dummy argument to allow parsing in parseFunctionArguments
@@ -302,7 +302,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 
 		signatures:
 		for (Signature<?> signature : signatures) {
-			Parameter<?> parameter = signature.parameters().firstEntry().getValue();
+			Parameter<?> parameter = signature.parameters().getFirst();
 
 			Class<?> targetType = parameter.type().componentType();
 			Expression<?> fallback;
@@ -373,7 +373,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 		for (FunctionReference<T> reference : references) {
 			String builder = reference.name() +
 					"(" +
-					reference.signature().parameters().values().stream()
+					Arrays.stream(reference.signature().parameters().all())
 							.map(it -> {
 								if (it.type().isArray()) {
 									return Classes.getSuperClassInfo(it.type().componentType()).getName().getPlural();

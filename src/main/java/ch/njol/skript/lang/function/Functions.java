@@ -115,7 +115,7 @@ public abstract class Functions {
 				return null; // Probably duplicate signature; reported before
 		}
 
-		Parameter<?>[] params = signature.parameters().values().toArray(new Parameter<?>[0]);
+		Parameter<?>[] params = signature.parameters().all();
 
 		if (Skript.debug() || node.debug()) {
 			Class<?> returnType = signature.returnType();
@@ -171,7 +171,7 @@ public abstract class Functions {
 	 */
 	public static @Nullable Signature<?> registerSignature(Signature<?> signature) {
 		Retrieval<Signature<?>> existing;
-		Parameter<?>[] parameters = signature.parameters().values().toArray(new Parameter<?>[0]);
+		Parameter<?>[] parameters = signature.parameters().all();
 
 		if (parameters.length == 1 && !parameters[0].single()) {
 			existing = FunctionRegistry.getRegistry().getExactSignature(signature.namespace(), signature.getName(), parameters[0].type().arrayType());

@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.common.function.DefaultFunction;
 import org.skriptlang.skript.common.function.FunctionArguments;
 import org.skriptlang.skript.common.function.Parameter.Modifier;
+import org.skriptlang.skript.common.function.Parameters;
 import org.skriptlang.skript.common.function.ScriptParameter;
 
 import java.util.Arrays;
@@ -112,8 +113,7 @@ public abstract class Function<T> implements org.skriptlang.skript.common.functi
 			Bukkit.getPluginManager().callEvent(event);
 
 		// Parameters taken by the function.
-		SequencedMap<String, org.skriptlang.skript.common.function.Parameter<?>> parameters = sign.parameters();
-
+		Parameters parameters = sign.parameters();
 		if (params.length > parameters.size()) {
 			// Too many parameters, should have failed to parse
 			assert false : params.length;
@@ -125,7 +125,7 @@ public abstract class Function<T> implements org.skriptlang.skript.common.functi
 
 		int i = 0;
 		// Execute parameters or default value expressions
-		for (org.skriptlang.skript.common.function.Parameter<?> parameter : parameters.values()) {
+		for (org.skriptlang.skript.common.function.Parameter<?> parameter : parameters.all()) {
 			Object[] parameterValue = parameter.hasModifier(Modifier.KEYED) ? convertToKeyed(parameterValues[i]) : parameterValues[i];
 
 			Expression<?> def;

@@ -387,7 +387,7 @@ public class Documentation {
 		}
 
 		StringBuilder params = new StringBuilder();
-		for (Parameter<?> p : func.getSignature().parameters().values()) {
+		for (Parameter<?> p : func.getSignature().parameters().all()) {
 			if (!params.isEmpty())
 				params.append(", ");
 			params.append(p.toString());

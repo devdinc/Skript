@@ -11,10 +11,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.common.function.FunctionArguments;
 import org.skriptlang.skript.common.function.Parameter;
+import org.skriptlang.skript.common.function.Parameters;
 
 import java.util.Arrays;
-import java.util.Map.Entry;
-import java.util.SequencedMap;
 
 public class ScriptFunction<T> extends Function<T> implements ReturnHandler<T> {
 
@@ -31,7 +30,7 @@ public class ScriptFunction<T> extends Function<T> implements ReturnHandler<T> {
 		HintManager hintManager = ParserInstance.get().getHintManager();
 		try {
 			hintManager.enterScope(false);
-			for (Parameter<?> parameter : sign.parameters().values()) {
+			for (Parameter<?> parameter : sign.parameters().all()) {
 				String hintName = parameter.name();
 				if (!parameter.single()) {
 					hintName += Variable.SEPARATOR + "*";
@@ -54,12 +53,8 @@ public class ScriptFunction<T> extends Function<T> implements ReturnHandler<T> {
 	// REM: use patterns, e.g. {_a%b%} is like "a.*", and thus subsequent {_axyz} may be set and of that type.
 	@Override
 	public T @Nullable [] execute(FunctionEvent<?> event, Object[][] params) {
-		SequencedMap<String, Parameter<?>> parameters = getSignature().parameters();
-
 		int i = 0;
-		for (Entry<String, Parameter<?>> entry : parameters.entrySet()) {
-			Parameter<?> parameter = entry.getValue();
-
+		for (Parameter<?> parameter :  getSignature().parameters().all()) {
 			Object[] val = params[i];
 			if (parameter.single() && val.length > 0) {
 				Variables.setVariable(parameter.name(), val[0], event, true);
@@ -91,7 +86,7 @@ public class ScriptFunction<T> extends Function<T> implements ReturnHandler<T> {
 
 	@Override
 	public T execute(@NotNull FunctionEvent<?> event, @NotNull FunctionArguments arguments) {
-		SequencedMap<String, Parameter<?>> parameters = getSignature().parameters();
+		Parameters parameters = getSignature().parameters();
 		FunctionEvent<?> newEvent = new FunctionEvent<>(this);
 
 		for (String name : arguments.names()) {

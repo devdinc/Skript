@@ -163,7 +163,7 @@ public class DynamicFunctionReference<Result>
 		this.checkedInputs.put(input, null); // failure case
 		if (signature == null)
 			return null;
-		boolean varArgs = signature.getMaxParameters() == 1 && !signature.parameters().firstEntry().getValue().single();
+		boolean varArgs = signature.getMaxParameters() == 1 && !signature.parameters().getFirst().single();
 		Expression<?>[] parameters = input.parameters();
 		// Too many parameters
 		if (parameters.length > signature.getMaxParameters() && !varArgs)
@@ -175,7 +175,7 @@ public class DynamicFunctionReference<Result>
 
 		// Check parameter types
 		for (int i = 0; i < parameters.length; i++) {
-			Parameter<?> parameter = signature.parameters().values().toArray(new Parameter<?>[0])[varArgs ? 0 : i];
+			Parameter<?> parameter = signature.parameters().all()[varArgs ? 0 : i];
 
 			Class<?> target = Function.getComponent(parameter.type());
 			//noinspection unchecked
