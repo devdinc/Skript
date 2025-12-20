@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.skriptlang.skript.common.function.DefaultFunction;
 import org.skriptlang.skript.common.function.FunctionArguments;
+import org.skriptlang.skript.common.function.Parameters;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,16 +50,19 @@ public abstract class JavaFunction<T> extends Function<T> implements Documentabl
 
 	@Override
 	public final T execute(@NotNull FunctionEvent<?> event, @NotNull FunctionArguments arguments) {
-		List<org.skriptlang.skript.common.function.Parameter<?>> parameters = getSignature().parameters().values().stream().toList();
+		Parameters parameters = getSignature().parameters();
 
+		// old params
 		Object[][] params = new Object[parameters.size()][];
 		for (int i = 0; i < parameters.size(); i++) {
 			Parameter<?> parameter = (Parameter<?>) parameters.get(i);
 			Object object = arguments.get(parameter.name());
 
 			if (object != null && object.getClass().isArray()) {
+				// if arg is array, just set the param
 				params[i] = (Object[]) object;
 			} else if (object == null) {
+				// use default if object is null
 				Expression<?> defaultExpression = parameter.getDefaultExpression();
 
 				if (defaultExpression == null) {
@@ -71,6 +75,7 @@ public abstract class JavaFunction<T> extends Function<T> implements Documentabl
 					params[i] = defaultExpression.getArray(event);
 				}
 			} else {
+				// if arg is not array, wrap object with array
 				params[i] = new Object[] { object };
 			}
 		}

@@ -156,9 +156,9 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	 */
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
 	public Parameter<?>[] getParameters() {
-		return (Parameter<?>[]) Arrays.stream(parameters.all())
+		return Arrays.stream(parameters.all())
 				.map(Signature::toOldParameter)
-				.toArray();
+				.toArray(Parameter[]::new);
 	}
 
 	@Override
