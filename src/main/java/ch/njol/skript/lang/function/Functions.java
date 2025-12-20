@@ -115,8 +115,6 @@ public abstract class Functions {
 				return null; // Probably duplicate signature; reported before
 		}
 
-		Parameter<?>[] params = signature.parameters().all();
-
 		if (Skript.debug() || node.debug()) {
 			Class<?> returnType = signature.returnType();
 			ClassInfo<?> c;
@@ -126,8 +124,7 @@ public abstract class Functions {
 				c = Classes.getExactClassInfo(returnType);
 			}
 
-			Skript.debug((signature.isLocal() ? "local " : "") + "function " + name + "(" + StringUtils.join(params, ", ") + ")"
-				+ (c != null ? " :: " + (signature.isSingle() ? c.getName().getSingular() : c.getName().getPlural()) : "") + ":");
+			Skript.debug(signature.toString());
 		}
 
 		Function<?> function;

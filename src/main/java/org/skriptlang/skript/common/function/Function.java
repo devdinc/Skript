@@ -32,9 +32,15 @@ public interface Function<T> {
 	 */
 	@NotNull Signature<T> signature();
 
+	/**
+	 * Resets the return value.
+	 */
 	@Experimental
 	boolean resetReturnValue();
 
+	/**
+	 * @return The returned keys.
+	 */
 	@Experimental
 	@NotNull String @Nullable [] returnedKeys();
 
