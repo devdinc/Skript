@@ -28,11 +28,18 @@ public interface Signature<T> {
 	/**
 	 * @return An unmodifiable view of all the parameters that this signature has.
 	 */
-	@UnmodifiableView @NotNull SequencedMap<String, Parameter<?>> parameters();
+	@UnmodifiableView @NotNull Parameters parameters();
 
+	/**
+	 * @return The contract of this signature.
+	 */
 	@Experimental
 	Contract contract();
 
+	/**
+	 * Adds a reference to the clearing list.
+	 * @param reference The reference.
+	 */
 	@Experimental
 	void addCall(FunctionReference<?> reference);
 

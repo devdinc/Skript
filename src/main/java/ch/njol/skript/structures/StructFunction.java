@@ -24,6 +24,7 @@ import ch.njol.util.StringUtils;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.common.function.Parameter;
+import org.skriptlang.skript.common.function.Parameters;
 import org.skriptlang.skript.common.function.ScriptParameter;
 import org.skriptlang.skript.lang.entry.EntryContainer;
 import org.skriptlang.skript.lang.structure.Structure;
@@ -182,7 +183,7 @@ public class StructFunction extends Structure {
 		 * @see Functions#registerSignature(Signature)
 		 */
 		public static @Nullable Signature<?> parse(String script, String name, String args, @Nullable String returns, boolean local) {
-			SequencedMap<String, Parameter<?>> parameters = parseParameters(args);
+			Parameters parameters = parseParameters(args);
 			if (parameters == null)
 				return null;
 
@@ -231,13 +232,13 @@ public class StructFunction extends Structure {
 		private final static Pattern SCRIPT_PARAMETER_PATTERN =
 			Pattern.compile("^\\s*(?<name>[^:(){}\",]+?)\\s*:\\s*(?<type>[a-zA-Z ]+?)\\s*(?:\\s*=\\s*(?<def>.+))?\\s*$");
 
-		private static SequencedMap<String, Parameter<?>> parseParameters(String args) {
+		private static Parameters parseParameters(String args) {
 			SequencedMap<String, Parameter<?>> params = new LinkedHashMap<>();
 
 			boolean caseInsensitive = SkriptConfig.caseInsensitiveVariables.value();
 
 			if (args.isEmpty()) // Zero-argument function
-				return params;
+				return new Parameters(params);
 
 			int j = 0;
 			for (int i = 0; i <= args.length(); i = SkriptParser.next(args, i, ParseContext.DEFAULT)) {
@@ -303,7 +304,7 @@ public class StructFunction extends Structure {
                 if (i == args.length())
 					break;
 			}
-			return params;
+			return new Parameters(params);
 		}
 
 	}

@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.common.function.FunctionReference;
 import org.skriptlang.skript.common.function.Parameter.Modifier;
+import org.skriptlang.skript.common.function.Parameters;
 
 import java.util.*;
 
@@ -33,7 +34,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	/**
 	 * Parameters taken by this function, in order.
 	 */
-	private final SequencedMap<String, org.skriptlang.skript.common.function.Parameter<?>> parameters;
+	private final Parameters parameters;
 
 	/**
 	 * Whether this function is only accessible in the script it was declared in
@@ -98,7 +99,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 		this.originClassPath = stacktrace;
 	}
 
-	public Signature(@Nullable String script, String name, SequencedMap<String, org.skriptlang.skript.common.function.Parameter<?>> parameters, Class<T> returnType, boolean local) {
+	public Signature(@Nullable String script, String name, Parameters parameters, Class<T> returnType, boolean local) {
 		this.script = script;
 		this.name = name;
 		this.parameters = parameters;
@@ -119,12 +120,12 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 		this(namespace, name, initParameters(parameters), returnType, false);
 	}
 
-	private static SequencedMap<String, org.skriptlang.skript.common.function.Parameter<?>> initParameters(org.skriptlang.skript.common.function.Parameter<?>[] params) {
+	private static Parameters initParameters(org.skriptlang.skript.common.function.Parameter<?>[] params) {
 		SequencedMap<String, org.skriptlang.skript.common.function.Parameter<?>> map = new LinkedHashMap<>();
 		for (org.skriptlang.skript.common.function.Parameter<?> parameter : params) {
 			map.put(parameter.name(), parameter);
 		}
-		return map;
+		return new Parameters(map);
 	}
 
 	/**
@@ -138,7 +139,8 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 		}
 
 		ClassInfo<?> classInfo = Classes.getExactClassInfo(Function.getComponent(parameter.type()));
-		return new Parameter<>(parameter.name(), classInfo, !parameter.type().isArray(), null, parameter.modifiers().toArray(new Modifier[0]));
+		return new Parameter<>(parameter.name(), classInfo, !parameter.type().isArray(), null,
+				parameter.modifiers().toArray(new Modifier[0]));
 	}
 
 	/**
@@ -146,9 +148,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	 */
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
 	public Parameter<?> getParameter(int index) {
-		return parameters.values()
-				.stream().map(Signature::toOldParameter)
-				.toList().get(index);
+		return getParameters()[index];
 	}
 
 	/**
@@ -156,9 +156,9 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	 */
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
 	public Parameter<?>[] getParameters() {
-		return parameters.values().stream().map(Signature::toOldParameter)
-				.toList()
-				.toArray(new Parameter[0]);
+		return (Parameter<?>[]) Arrays.stream(parameters.all())
+				.map(Signature::toOldParameter)
+				.toArray();
 	}
 
 	@Override
@@ -171,8 +171,8 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	 * @return A {@link SequencedMap} containing all parameters.
 	 */
 	@Override
-	public @NotNull SequencedMap<String, org.skriptlang.skript.common.function.Parameter<?>> parameters() {
-		return Collections.unmodifiableSequencedMap(parameters);
+	public @NotNull Parameters parameters() {
+		return parameters;
 	}
 
 	@Override
@@ -255,11 +255,11 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	 * @return Minimum number of parameters required.
 	 */
 	public int getMinParameters() {
-		List<org.skriptlang.skript.common.function.Parameter<?>> params = new LinkedList<>(parameters.values());
+		List<org.skriptlang.skript.common.function.Parameter<?>> params = new LinkedList<>(List.of(parameters.all()));
 
 		int i = parameters.size() - 1;
 		for (org.skriptlang.skript.common.function.Parameter<?> parameter : Lists.reverse(params)) {
-			if (!parameter.modifiers().contains(Modifier.OPTIONAL)) {
+			if (!parameter.hasModifier(Modifier.OPTIONAL)) {
 				return i + 1;
 			}
 			i--;
@@ -286,7 +286,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 		signatureBuilder.append(name);
 
 		signatureBuilder.append('(')
-				.append(StringUtils.join(parameters.values(), ", "))
+				.append(StringUtils.join(parameters.all(), ", "))
 				.append(')');
 
 		if (includeReturnType && returns != null) {

@@ -712,7 +712,7 @@ public final class FunctionRegistry implements Registry<Function<?>> {
 		static FunctionIdentifier of(@NotNull Signature<?> signature) {
 			Preconditions.checkNotNull(signature, "signature cannot be null");
 
-			Parameter<?>[] signatureParams = signature.parameters().values().toArray(new Parameter<?>[0]);
+			Parameter<?>[] signatureParams = signature.parameters().all();
 			Class<?>[] parameters = new Class[signatureParams.length];
 
 			int optionalArgs = 0;
@@ -731,7 +731,7 @@ public final class FunctionRegistry implements Registry<Function<?>> {
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(name, Arrays.hashCode(args));
+			return Objects.hash(name, local, Arrays.hashCode(args));
 		}
 
 		@Override

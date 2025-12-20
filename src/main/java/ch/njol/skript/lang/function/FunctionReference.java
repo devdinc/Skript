@@ -199,7 +199,7 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 		}
 
 		// Validate parameter count
-		singleListParam = sign.getMaxParameters() == 1 && !sign.parameters().firstEntry().getValue().single();
+		singleListParam = sign.getMaxParameters() == 1 && !sign.parameters().getFirst().single();
 		if (!singleListParam) { // Check that parameter count is within allowed range
 			// Too many parameters
 			if (parameters.length > sign.getMaxParameters()) {
@@ -236,7 +236,7 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 
 		// Check parameter types
 		for (int i = 0; i < parameters.length; i++) {
-			Parameter<?> parameter = sign.parameters().values().toArray(new Parameter<?>[0])[singleListParam ? 0 : i];
+			Parameter<?> parameter = sign.parameters().get(singleListParam ? 0 : i);
 			RetainingLogHandler log = SkriptLogger.startRetainingLog();
 			try {
 				Class<?> target = Function.getComponent(parameter.type());
@@ -402,14 +402,13 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 		// Prepare parameter values for calling
 		Object[][] params = new Object[singleListParam ? 1 : parameters.length][];
 		if (singleListParam && parameters.length > 1) { // All parameters to one list
-			params[0] = evaluateSingleListParameter(parameters, event, function.getSignature().parameters()
-				.entrySet().iterator().next().getValue().modifiers().contains(Modifier.KEYED));
+			params[0] = evaluateSingleListParameter(parameters, event,
+					function.getSignature().parameters().getFirst().hasModifier(Modifier.KEYED));
 		} else { // Use parameters in normal way
-			Parameter<?>[] values = function.getSignature().parameters()
-				.values().toArray(new Parameter<?>[0]);
+			Parameter<?>[] values = function.getSignature().parameters().all();
 
 			for (int i = 0; i < parameters.length; i++)
-				params[i] = evaluateParameter(parameters[i], event, values[i].modifiers().contains(Modifier.KEYED));
+				params[i] = evaluateParameter(parameters[i], event, values[i].hasModifier(Modifier.KEYED));
 		}
 
 		// Execute the function

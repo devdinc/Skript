@@ -70,11 +70,12 @@ public final class FunctionReference<T> implements Debuggable {
 
 			// mixing arguments is only allowed when the order of arguments matches param order
 			boolean mix = Arrays.stream(arguments)
-				.map(it -> it.type)
-				.collect(Collectors.toSet()).size() == ArgumentType.values().length;
+					.map(it -> it.type)
+					.collect(Collectors.toSet()).size() == ArgumentType.values().length;
 
 			// get the target params of the function
-			SequencedMap<String, Parameter<?>> targetParameters = new LinkedHashMap<>(signature.parameters());
+			SequencedMap<String, Parameter<?>> targetParameters =
+					new LinkedHashMap<>(signature.parameters().sequencedMap());
 
 			for (Argument<Expression<?>> argument : arguments) {
 				Parameter<?> target;
@@ -137,14 +138,15 @@ public final class FunctionReference<T> implements Debuggable {
 				Skript.error("Can't understand this expression: %s", original);
 			} else {
 				Skript.error("Expected type %s for argument '%s', but %s is of type %s.",
-					getName(target.type(), target.single()), target.name(), original, getName(original.getReturnType(), original.isSingle()));
+						getName(target.type(), target.single()), target.name(), original,
+						getName(original.getReturnType(), original.isSingle()));
 			}
 			return false;
 		}
 
 		if (target.single() && !converted.isSingle()) {
 			Skript.error("Expected type %s for argument '%s', but %s is of type %s.",
-				getName(target.type(), target.single()), target.name(), converted, getName(converted.getReturnType(), converted.isSingle()));
+					getName(target.type(), target.single()), target.name(), converted, getName(converted.getReturnType(), converted.isSingle()));
 			return false;
 		}
 
@@ -211,8 +213,8 @@ public final class FunctionReference<T> implements Debuggable {
 		for (Expression<?> parameter : parameters) {
 			Object[] valuesArray = parameter.getArray(event);
 			String[] keysArray = KeyProviderExpression.areKeysRecommended(parameter)
-				? ((KeyProviderExpression<?>) parameter).getArrayKeys(event)
-				: null;
+					? ((KeyProviderExpression<?>) parameter).getArrayKeys(event)
+					: null;
 
 			// Don't allow mutating across function boundary; same hack is applied to variables
 			for (Object value : valuesArray)
@@ -240,8 +242,8 @@ public final class FunctionReference<T> implements Debuggable {
 			values[i] = Classes.clone(values[i]);
 
 		String[] keys = KeyProviderExpression.areKeysRecommended(parameter)
-			? ((KeyProviderExpression<?>) parameter).getArrayKeys(event)
-			: null;
+				? ((KeyProviderExpression<?>) parameter).getArrayKeys(event)
+				: null;
 		return KeyedValue.zip(values, keys);
 	}
 
@@ -250,7 +252,9 @@ public final class FunctionReference<T> implements Debuggable {
 	 */
 	public Function<T> function() {
 		if (cachedFunction == null) {
-			Class<?>[] parameters = signature.parameters().values().stream().map(Parameter::type).toArray(Class[]::new);
+			Class<?>[] parameters = Arrays.stream(signature.parameters().all())
+					.map(Parameter::type)
+					.toArray(Class[]::new);
 
 			Retrieval<ch.njol.skript.lang.function.Function<?>> retrieval = FunctionRegistry.getRegistry().getFunction(namespace, name, parameters);
 
@@ -297,8 +301,8 @@ public final class FunctionReference<T> implements Debuggable {
 	public boolean single() {
 		if (signature.contract() != null) {
 			Expression<?>[] args = Arrays.stream(arguments)
-				.map(it -> it.value)
-				.toArray(Expression[]::new);
+					.map(it -> it.value)
+					.toArray(Expression[]::new);
 
 			return signature.contract().isSingle(args);
 		} else {
@@ -331,9 +335,9 @@ public final class FunctionReference<T> implements Debuggable {
 	 * @param value The value of the argument.
 	 */
 	public record Argument<T>(
-		ArgumentType type,
-		String name,
-		T value
+			ArgumentType type,
+			String name,
+			T value
 	) {
 
 	}
