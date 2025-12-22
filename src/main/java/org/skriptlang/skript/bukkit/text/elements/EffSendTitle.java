@@ -7,7 +7,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.Title.Times;
 import net.kyori.adventure.title.TitlePart;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,9 +26,9 @@ import java.time.Duration;
 
 @Name("Title - Send")
 @Description({
-	"Sends a title and/or subtitle to a player with an optional fade in, stay, and/or fade out time.",
-	"If sending only the subtitle, it will only be shown if the player currently has a title displayed. "
-		+ "Otherwise, it will be shown when the player is next shown a title.",
+	"Sends a title and/or subtitle to an audience with an optional fade in, stay, and/or fade out time.",
+	"If sending only the subtitle, it will only be shown if the audience currently has a title displayed. "
+		+ "Otherwise, it will be shown when the audience is next shown a title.",
 	"Additionally, if no input is given for the times, the previous times of the last sent title will be used (or default values). "
 		+ "Use the <a href='#EffResetTitle'>reset title</a> effect to restore the default values for the times."
 })
@@ -45,7 +44,7 @@ import java.time.Duration;
 public class EffSendTitle extends Effect {
 
 	public static void register(SyntaxRegistry syntaxRegistry) {
-		String suffix = "[to %players%] [for %-timespan%] [with fade[(-| )]in %-timespan%] [[and] [with] fade[(-| )]out %-timespan%]";
+		String suffix = "[to %audiences%] [for %-timespan%] [with fade[(-| )]in %-timespan%] [[and] [with] fade[(-| )]out %-timespan%]";
 		syntaxRegistry.register(SyntaxRegistry.EFFECT, SyntaxInfo.builder(EffSendTitle.class)
 			.supplier(EffSendTitle::new)
 			.addPatterns("send title %object% [with subtitle %-object%] " + suffix,
@@ -55,7 +54,7 @@ public class EffSendTitle extends Effect {
 
 	private @Nullable Expression<? extends Component> title;
 	private @Nullable Expression<? extends Component> subtitle;
-	private Expression<Player> recipients;
+	private Expression<Audience> audiences;
 	private @Nullable Expression<Timespan> fadeIn;
 	private @Nullable Expression<Timespan> stay;
 	private @Nullable Expression<Timespan> fadeOut;
@@ -76,7 +75,7 @@ public class EffSendTitle extends Effect {
 				return false;
 			}
 		}
-		recipients = (Expression<Player>) exprs[2 - matchedPattern];
+		audiences = (Expression<Audience>) exprs[2 - matchedPattern];
 		stay = (Expression<Timespan>) exprs[3 - matchedPattern];
 		fadeIn = (Expression<Timespan>) exprs[4 - matchedPattern];
 		fadeOut = (Expression<Timespan>) exprs[5 - matchedPattern];
@@ -135,7 +134,7 @@ public class EffSendTitle extends Effect {
 			specifiesTimes = true;
 		}
 
-		Audience audience = Audience.audience(recipients.getArray(event));
+		Audience audience = Audience.audience(audiences.getArray(event));
 		if (specifiesTimes) {
 			audience.sendTitlePart(TitlePart.TIMES, Times.times(fadeIn, stay, fadeOut));
 		}
@@ -160,7 +159,7 @@ public class EffSendTitle extends Effect {
 			}
 			builder.append("subtitle", subtitle);
 		}
-		builder.append("to", recipients);
+		builder.append("to", audiences);
 		if (stay != null) {
 			builder.append("for", stay);
 		}

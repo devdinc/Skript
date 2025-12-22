@@ -3131,6 +3131,7 @@ types:
 	damagesource: damage source¦s @a
 	damagetype: damage type¦s @a
 	textcomponent: text component¦s @a
+	audience: audience¦s @an
 	frogvariant: frog variant¦s @a
 	itemcomponent: item component¦s @an
 	equippablecomponent: equippable component¦s @an

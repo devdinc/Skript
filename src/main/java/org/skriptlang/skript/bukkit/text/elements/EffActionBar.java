@@ -11,7 +11,6 @@ import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.util.Kleenean;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.text.TextComponentUtils;
@@ -19,7 +18,7 @@ import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Action Bar")
-@Description("Sends an action bar message to a player.")
+@Description("Sends an action bar message to an audience.")
 @Examples("send action bar \"Hello player!\" to player")
 @Since({
 	"2.3",
@@ -30,12 +29,12 @@ public class EffActionBar extends Effect {
 	public static void register(SyntaxRegistry syntaxRegistry) {
 		syntaxRegistry.register(SyntaxRegistry.EFFECT, SyntaxInfo.builder(EffActionBar.class)
 			.supplier(EffActionBar::new)
-			.addPattern("send [the] action[ ]bar [with text] %object% [to %commandsenders%]")
+			.addPattern("send [the] action[ ]bar [with text] %object% [to %audiences%]")
 			.build());
 	}
 
 	private Expression<? extends Component> message;
-	private Expression<CommandSender> recipients;
+	private Expression<Audience> recipients;
 
 	@Override
 	public boolean init(Expression<?>[] expressions, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
@@ -44,7 +43,7 @@ public class EffActionBar extends Effect {
 			return false;
 		}
 		//noinspection unchecked
-		recipients = (Expression<CommandSender>) expressions[1];
+		recipients = (Expression<Audience>) expressions[1];
 		return true;
 	}
 

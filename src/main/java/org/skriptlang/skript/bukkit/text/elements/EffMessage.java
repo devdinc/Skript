@@ -11,7 +11,6 @@ import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.util.Kleenean;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.text.TextComponentUtils;
@@ -20,7 +19,7 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Message")
 @Description({
-	"Sends a message to a player (or other thing capable of receiving a message, such as the console)",
+	"Sends a message to an audience, such as a player or the console.",
 	"Only styles written in given string or in <a href=#ExprColored>formatted expressions</a> will be parsed.",
 })
 @Example("message \"A wild %player% appeared!\"")
@@ -40,12 +39,12 @@ public class EffMessage extends Effect {
 	public static void register(SyntaxRegistry syntaxRegistry) {
 		syntaxRegistry.register(SyntaxRegistry.EFFECT, SyntaxInfo.builder(EffMessage.class)
 			.supplier(EffMessage::new)
-			.addPattern("(message|send [message[s]]) %objects% [to %commandsenders%]")
+			.addPattern("(message|send [message[s]]) %objects% [to %audiences%]")
 			.build());
 	}
 
 	private Expression<? extends Component> messages;
-	private Expression<CommandSender> recipients;
+	private Expression<Audience> recipients;
 
 	@Override
 	public boolean init(Expression<?>[] expressions, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
@@ -54,7 +53,7 @@ public class EffMessage extends Effect {
 			return false;
 		}
 		//noinspection unchecked
-		recipients = (Expression<CommandSender>) expressions[1];
+		recipients = (Expression<Audience>) expressions[1];
 		return true;
 	}
 
