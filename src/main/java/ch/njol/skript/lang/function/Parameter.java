@@ -239,6 +239,7 @@ public final class Parameter<T> implements org.skriptlang.skript.common.function
 	/**
 	 * Evaluates this parameter's default expression.
 	 *
+	 * @param event the event in which to evaluate the expression 
 	 * @return an object array containing either value-only elements or {@code KeyedValue[]} when keyed
 	 * @throws IllegalStateException if this parameter does not have a default value
 	 * @see #evaluate(Expression, Event)
@@ -257,7 +258,10 @@ public final class Parameter<T> implements org.skriptlang.skript.common.function
 	 * If the argument expression does not provide keys, numerical indices (1, 2, 3, ...) will be used as keys;
 	 * otherwise, the returned array will contain only the values.</p>
 	 *
+	 * @param argument the argument passed to this parameter; or {@code null} to use the default value if present
+	 * @param event the event in which to evaluate the expression 
 	 * @return an object array containing either value-only elements or {@code KeyedValue[]} when keyed
+	 * @throws IllegalStateException if the argument is {@code null} and this parameter does not have a default value
 	 */
 	public Object[] evaluate(@Nullable Expression<? extends T> argument, Event event) {
 		if (argument == null) {

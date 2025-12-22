@@ -59,21 +59,21 @@ public class ExprRecursive extends WrapperExpression<Object> implements KeyProvi
 	@Override
 	public @NotNull String @NotNull [] getArrayKeys(Event event) throws IllegalStateException {
 		if (!returnsKeys)
-			throw new IllegalStateException();
+			throw new UnsupportedOperationException();
 		return ((KeyProviderExpression<?>) getExpr()).getArrayKeys(event);
 	}
 
 	@Override
 	public @NotNull String @NotNull [] getAllKeys(Event event) {
 		if (!returnsKeys)
-			throw new IllegalStateException();
+			throw new UnsupportedOperationException();
 		return ((KeyProviderExpression<?>) getExpr()).getAllKeys(event);
 	}
 
 	@Override
 	public Iterator<KeyedValue<Object>> keyedIterator(Event event) {
 		if (!returnsKeys)
-			throw new IllegalStateException();
+			throw new UnsupportedOperationException();
 		//noinspection unchecked
 		return ((KeyProviderExpression<Object>) getExpr()).keyedIterator(event);
 	}
