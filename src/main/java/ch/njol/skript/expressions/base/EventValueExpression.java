@@ -165,7 +165,8 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	private final Class<?> componentType;
 	private final Class<? extends T> type;
 
-	private Class<? extends Event>[] events;
+	@SuppressWarnings("unchecked")
+	private Class<? extends Event>[] events = new Class[0];
 	private @Nullable Changer<? super T> changer;
 	private final boolean single;
 	private final boolean exact;
@@ -258,9 +259,8 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	}
 
 	@Override
-	@Nullable
 	@SuppressWarnings("unchecked")
-	protected T[] get(Event event) {
+	protected T @Nullable [] get(Event event) {
 		T value = getValue(event);
 		if (value == null)
 			return (T[]) Array.newInstance(componentType, 0);
@@ -346,6 +346,11 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 
 	@Override
 	public boolean setTime(int time) {
+		events = getParser().getCurrentEvents();
+		if (events == null) {
+			assert false;
+			return false;
+		}
 		for (Class<? extends Event> event : events) {
 			assert event != null;
 			if (getEventValuesForTime(event, EventValue.TIME_PAST).successful()
