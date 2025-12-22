@@ -32,6 +32,9 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skript.util.Priority;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A useful class for creating default expressions. It simply returns the event value of the given type.
@@ -161,12 +164,11 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	}
 
 	private final EventValueRegistry registry = Skript.instance().registry(EventValueRegistry.class);
+	public final Set<Class<? extends Event>> events = new HashSet<>();
 
 	private final Class<?> componentType;
 	private final Class<? extends T> type;
 
-	@SuppressWarnings("unchecked")
-	private Class<? extends Event>[] events = new Class[0];
 	private @Nullable Changer<? super T> changer;
 	private final boolean single;
 	private final boolean exact;
@@ -231,7 +233,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 		ParseLogHandler log = SkriptLogger.startParseLogHandler();
 		try {
 			boolean hasValue = false;
-			events = parser.getCurrentEvents();
+			Class<? extends Event>[] events = parser.getCurrentEvents();
 			if (events == null) {
 				assert false;
 				return false;
@@ -252,6 +254,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 				return false;
 			}
 			log.printLog();
+			this.events.addAll(Arrays.asList(events));
 			return true;
 		} finally {
 			log.stop();
@@ -346,7 +349,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 
 	@Override
 	public boolean setTime(int time) {
-		events = getParser().getCurrentEvents();
+		Class<? extends Event>[] events = getParser().getCurrentEvents();
 		if (events == null) {
 			assert false;
 			return false;
@@ -356,6 +359,10 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 			if (getEventValuesForTime(event, EventValue.TIME_PAST).successful()
 				|| getEventValuesForTime(event, EventValue.TIME_FUTURE).successful()) {
 				super.setTime(time);
+				// Since the time was changed, we now need to re-initialize the parse time events we already got. START
+				this.events.clear();
+				init();
+				// END
 				return true;
 			}
 		}
