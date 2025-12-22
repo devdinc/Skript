@@ -75,8 +75,9 @@ public class TextModule implements AddonModule {
 
 		Converters.registerConverter(String.class, Component.class,
 			string -> TextComponentParser.instance().parse(string));
+		// if this is a conversion, legacy formatting is probably desired?
 		Converters.registerConverter(Component.class, String.class,
-			component -> TextComponentParser.instance().toString(component));
+			component -> TextComponentParser.instance().toLegacyString(component));
 
 		// due to VirtualComponents, we cannot compare components directly
 		// we instead check against the serialized version...
