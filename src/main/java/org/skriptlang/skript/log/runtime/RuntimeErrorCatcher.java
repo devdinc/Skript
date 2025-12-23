@@ -55,18 +55,17 @@ public class RuntimeErrorCatcher implements RuntimeErrorConsumer, AutoCloseable 
 
 	/**
 	 * Stops this {@link RuntimeErrorCatcher}, removing from {@link RuntimeErrorManager} and restoring the previous
-	 * {@link RuntimeErrorConsumer}s from {@link #storedConsumers}.
-	 * Prints all cached {@link RuntimeError}s, {@link #cachedErrors}.
+	 * {@link RuntimeErrorConsumer}s from {@link #storedConsumers}. Does not clear cached errors. May be restarted.
 	 */
 	public void stop() {
+		if (stopped)
+			return;
 		stopped = true;
 		if (!getManager().removeConsumer(this)) {
 			SkriptLogger.LOGGER.severe("[Skript] A 'RuntimeErrorCatcher' was stopped incorrectly.");
 			return;
 		}
 		getManager().addConsumers(storedConsumers.toArray(RuntimeErrorConsumer[]::new));
-		for (RuntimeError runtimeError : cachedErrors)
-			storedConsumers.forEach(consumer -> consumer.printError(runtimeError));
 	}
 
 	/**
@@ -100,8 +99,7 @@ public class RuntimeErrorCatcher implements RuntimeErrorConsumer, AutoCloseable 
 	 */
 	@Override
 	public void close() {
-		if (!stopped)
-			this.clearCachedErrors().stop();
+		this.clearCachedErrors().stop();
 	}
 
 }

@@ -46,7 +46,6 @@ public class ExprColorFromHexCode extends SimplePropertyExpression<String, Color
 
 	@Override
 	protected String getPropertyName() {
-		assert false;
 		return "ExprColorFromHexCode - UNUSED";
 	}
 

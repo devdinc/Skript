@@ -123,41 +123,45 @@ public interface Parameter<T> {
 			/**
 			 * @return Min value of the range (inclusive)
 			 */
-			public T getMin() { return min; }
+			public T getMin() {
+				return min;
+			}
 
 			/**
 			 * @return Max value of the range (inclusive)
 			 */
-			public T getMax() { return max; }
+			public T getMax() {
+				return max;
+			}
 
 			/**
 			 * @param input The value to test.
 			 * @return Whether input is between min and max.
 			 */
+			@SuppressWarnings("unchecked")
 			public boolean inRange(Object input) {
-				return inRange(new Object[]{ input });
+				// convert to right type
+				if (!min.getClass().isInstance(input)) {
+					Converter<Object, ?> converter = (Converter<Object, ?>) Converters.getConverter(input.getClass(), min.getClass());
+					if (converter == null)
+						return false;
+					input = converter.convert(input);
+					if (input == null)
+						return false;
+				}
+				// compare
+				return ((T) input).compareTo(min) > -1 && ((T) input).compareTo(max) < 1;
 			}
 
 			/**
 			 * @param inputs The values to test.
 			 * @return Whether all the inputs are between min and max.
 			 */
-			@SuppressWarnings("unchecked")
 			public boolean inRange(Object @NotNull [] inputs) {
 				if (inputs.length == 0)
 					return false;
 				for (Object input : inputs) {
-					// convert to right type
-					if (!min.getClass().isInstance(input)) {
-						Converter<Object, ?> converter = (Converter<Object, ?>) Converters.getConverter(input.getClass(), min.getClass());
-						if (converter == null)
-							return false;
-						input = converter.convert(input);
-						if (input == null)
-							return false;
-					}
-					// compare
-					if (!(((T) input).compareTo(min) > -1 && ((T) input).compareTo(max) < 1))
+					if (!inRange(input))
 						return false;
 				}
 				return true;
