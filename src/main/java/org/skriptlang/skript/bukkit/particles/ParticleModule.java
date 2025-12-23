@@ -330,7 +330,10 @@ public class ParticleModule implements AddonModule {
 				protected Particle.Trail deserialize(Fields fields) throws StreamCorruptedException, NotSerializableException {
 					Location target = fields.getAndRemoveObject("target", Location.class);
 					Color color = fields.getAndRemoveObject("color", Color.class);
-					int duration = fields.getAndRemovePrimitive("duration", Integer.class);
+					int duration = 20;
+					// allow deserializing old versions without duration
+					if (fields.hasField("duration"))
+						duration = fields.getAndRemovePrimitive("duration", Integer.class);
 					if (target == null)
 						throw new NotSerializableException("Target cannot be null for Trail");
 					if (color == null)
