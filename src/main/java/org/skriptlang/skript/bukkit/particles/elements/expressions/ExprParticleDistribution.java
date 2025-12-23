@@ -56,25 +56,12 @@ public class ExprParticleDistribution extends SimplePropertyExpression<ParticleE
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
 		ParticleEffect[] particleEffect = getExpr().getArray(event);
-		if (particleEffect == null) return;
+		if (particleEffect.length == 0)
+			return;
 
-		Vector3d newVector = null;
-		if (mode != ChangeMode.RESET) {
-			assert delta != null;
-			if (delta[0] == null) return;
-			newVector = ((Vector) delta[0]).toVector3d();
-		}
-
-		switch (mode) {
-			case SET:
-				for (ParticleEffect effect : particleEffect)
-					effect.distribution(newVector);
-				break;
-			case RESET:
-				for (ParticleEffect effect : particleEffect)
-					effect.distribution(new Vector3d(0,0,0));
-				break;
-		}
+		Vector3d newVector = delta == null ? new Vector3d(0,0,0) : ((Vector) delta[0]).toVector3d();
+		for (ParticleEffect effect : particleEffect)
+			effect.distribution(newVector);
 	}
 
 	@Override

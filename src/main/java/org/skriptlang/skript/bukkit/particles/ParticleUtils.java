@@ -91,7 +91,7 @@ public class ParticleUtils {
 				//</editor-fold>
 			));
 	private static final RegistryKeySet<@NotNull Particle> SCALABLE_PARTICLES = RegistrySet.keySetFromValues(PARTICLE_REGISTRY_KEY,
-			List.of(
+			List.of( // sourced from https://docs.papermc.io/paper/dev/particles/#scalable-particles
 				//<editor-fold desc="Scalable Particles" defaultstate="collapsed">
 				Particle.SWEEP_ATTACK,
 				Particle.EXPLOSION

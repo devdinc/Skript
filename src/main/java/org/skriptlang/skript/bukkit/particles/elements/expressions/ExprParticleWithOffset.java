@@ -53,7 +53,7 @@ public class ExprParticleWithOffset extends PropertyExpression<ParticleEffect, P
 		}
 	}
 
-	static Patterns<Mode> patterns = new Patterns<>(new Object[][]{
+	private static final Patterns<Mode> patterns = new Patterns<>(new Object[][]{
 		{"%particles% with [an] offset [of] %vector%", Mode.OFFSET},
 		{"%particles% with [a] distribution [of] %vector%", Mode.DISTRIBUTION},
 		{"%directionalparticles% with [a] velocity [of] %vector%", Mode.VELOCITY}

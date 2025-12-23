@@ -21,8 +21,8 @@ import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ScalableEffect;
 import org.skriptlang.skript.bukkit.particles.registration.DataGameEffects;
 import org.skriptlang.skript.bukkit.particles.registration.DataParticles;
+import org.skriptlang.skript.registration.SyntaxOrigin;
 
-import java.io.IOException;
 import java.io.NotSerializableException;
 import java.io.StreamCorruptedException;
 import java.lang.reflect.InvocationTargetException;
@@ -33,6 +33,8 @@ import java.util.Arrays;
  */
 public class ParticleModule implements AddonModule {
 
+	static SyntaxOrigin ORIGIN = SyntaxOrigin.
+
 	@Override
 	public void load(SkriptAddon addon) {
 		registerClasses();
@@ -41,18 +43,14 @@ public class ParticleModule implements AddonModule {
 		DataParticles.getParticleInfos();
 
 		// load elements!
-		try {
-			Skript.getAddonInstance().loadClasses("org.skriptlang.skript.bukkit.particles", "elements");
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+
 	}
 
 	/**
 	 * Registers particle and game effect related classes.
 	 */
 	private static void registerClasses() {
-		// gane effects
+		// game effects
 		Classes.registerClass(new ClassInfo<>(GameEffect.class, "gameeffect")
 			.user("game ?effects?")
 			.since("INSERT VERSION")

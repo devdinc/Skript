@@ -44,13 +44,9 @@ public class ExprParticleSpeed extends SimplePropertyExpression<ParticleEffect, 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
 		ParticleEffect[] particleEffect = getExpr().getArray(event);
-		if (particleEffect == null) return;
-		double extraDelta = 0;
-		if (mode != ChangeMode.RESET) {
-			assert delta != null;
-			if (delta[0] == null) return;
-			extraDelta = ((Number) delta[0]).doubleValue();
-		}
+		if (particleEffect.length == 0)
+			return;
+		double extraDelta = delta == null ? 0 : ((Number) delta[0]).doubleValue();
 
 		switch (mode) {
 			case REMOVE:

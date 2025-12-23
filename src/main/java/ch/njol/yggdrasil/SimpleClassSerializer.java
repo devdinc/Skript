@@ -30,6 +30,17 @@ public abstract class SimpleClassSerializer<T> extends YggdrasilSerializer<T> {
 		return this.type.equals(clazz) ? this.id : null;
 	}
 
+	/**
+	 * A simple serializer for classes that cannot be instantiated (e.g. abstract classes or interfaces).
+	 * The same as {@link SimpleClassSerializer}, but overrides instantiation methods to prevent instantiation.
+	 * Only deserialization via {@link #deserialize(Fields)} is supported. {@link #deserialize(Class, Fields)} will
+	 * call that method internally. {@link #deserialize(Object, Fields)} will throw an exception.
+	 * <br>
+	 * {@link #newInstance(Class)} will always return null, and {@link #canBeInstantiated(Class)} will always
+	 * return false.
+	 *
+	 * @param <T> the type of the class to serialize
+	 */
 	public static abstract class NonInstantiableClassSerializer<T> extends SimpleClassSerializer<T> {
 
 		public NonInstantiableClassSerializer(Class<T> type, String id) {
@@ -42,12 +53,12 @@ public abstract class SimpleClassSerializer<T> extends YggdrasilSerializer<T> {
 		}
 
 		@Override
-		public <E extends T> @Nullable E newInstance(Class<E> c) {
+		public final <E extends T> @Nullable E newInstance(Class<E> c) {
 			return null;
 		}
 
 		@Override
-		public void deserialize(T object, Fields fields) throws StreamCorruptedException, NotSerializableException {
+		public final void deserialize(T object, Fields fields) throws StreamCorruptedException, NotSerializableException {
 			throw new UnsupportedOperationException("This class cannot be instantiated");
 		}
 
@@ -64,7 +75,7 @@ public abstract class SimpleClassSerializer<T> extends YggdrasilSerializer<T> {
 		 * @param fields The Fields object that holds the information about the serialised object
 		 * @return The deserialized object. Must not be null (throw an exception instead).
 		 */
-		abstract protected T deserialize(final Fields fields) throws StreamCorruptedException, NotSerializableException;
+		abstract protected T deserialize(Fields fields) throws StreamCorruptedException, NotSerializableException;
 
 	}
 

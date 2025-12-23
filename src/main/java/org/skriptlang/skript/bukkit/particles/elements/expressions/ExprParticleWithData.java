@@ -10,6 +10,7 @@ import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.skript.lang.util.SimpleExpression;
+import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.Patterns;
 import ch.njol.util.Kleenean;
 import org.bukkit.Particle;
@@ -60,7 +61,7 @@ public class ExprParticleWithData extends SimpleExpression<ParticleEffect> {
 	public boolean init(Expression<?>[] expressions, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
 		this.parseResult = parseResult;
 		// exclude count expr
-		this.expressions = Arrays.copyOfRange(expressions, 1,  expressions.length);
+		this.expressions = Arrays.copyOfRange(expressions, 1, expressions.length);
 		this.count = (Expression<Number>) expressions[0];
 		effectInfo = PATTERNS.getInfo(matchedPattern);
 		return effectInfo != null;
@@ -79,6 +80,8 @@ public class ExprParticleWithData extends SimpleExpression<ParticleEffect> {
 			Number count = this.count.getSingle(event);
 			if (count != null) {
 				effect.count(Math.clamp(count.intValue(), 0, 16_384)); // drawing more than the maximum display count of 16,384 is likely unintended and can crash users.
+			} else {
+				warning("The 'count' value for the '" + Classes.toString(effect) + "' particle was either not set or not a number (" + this.count.toString(event, false) + "); defaulting to 1.");
 			}
 		}
 		return new ParticleEffect[] {effect};

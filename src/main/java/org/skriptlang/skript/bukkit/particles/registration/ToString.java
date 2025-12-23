@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
  */
 @FunctionalInterface
 public interface ToString {
+
 	/**
 	 * Converts the particle and provided data to a string representation.
 	 *
@@ -21,4 +22,5 @@ public interface ToString {
 	 * @return The {@link SyntaxStringBuilder} with the string representation appended
 	 */
 	SyntaxStringBuilder toString(Expression<?> @NotNull [] exprs, ParseResult parseResult, SyntaxStringBuilder builder);
+
 }

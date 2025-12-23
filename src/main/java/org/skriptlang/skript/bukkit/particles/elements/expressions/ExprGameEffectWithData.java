@@ -1,12 +1,10 @@
 package org.skriptlang.skript.bukkit.particles.elements.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.skript.lang.util.SimpleExpression;
@@ -14,10 +12,15 @@ import ch.njol.skript.util.Patterns;
 import ch.njol.util.Kleenean;
 import org.bukkit.Effect;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.particles.GameEffect;
 import org.skriptlang.skript.bukkit.particles.registration.DataGameEffects;
 import org.skriptlang.skript.bukkit.particles.registration.EffectInfo;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxRegistry;
+
+import static org.skriptlang.skript.registration.DefaultSyntaxInfos.Expression.builder;
 
 @Name("Game Effects with Data")
 @Description("""
@@ -32,9 +35,9 @@ import org.skriptlang.skript.bukkit.particles.registration.EffectInfo;
 @Since("INSERT VERSION")
 public class ExprGameEffectWithData extends SimpleExpression<GameEffect> {
 
-	private static final Patterns<EffectInfo<Effect, Object>> PATTERNS;
+	private static Patterns<EffectInfo<Effect, Object>> PATTERNS;
 
-	static {
+	static void register(@NotNull SyntaxRegistry registry) {
 		// create Patterns object
 		Object[][] patterns = new Object[DataGameEffects.getGameEffectInfos().size()][2];
 		int i = 0;
@@ -45,7 +48,11 @@ public class ExprGameEffectWithData extends SimpleExpression<GameEffect> {
 		}
 		PATTERNS = new Patterns<>(patterns);
 
-		Skript.registerExpression(ExprGameEffectWithData.class, GameEffect.class, ExpressionType.COMBINED, PATTERNS.getPatterns());
+		registry.register(SyntaxRegistry.EXPRESSION, builder(ExprGameEffectWithData.class, GameEffect.class)
+				.addPatterns(PATTERNS.getPatterns())
+				.supplier(ExprGameEffectWithData::new)
+				.priority(SyntaxInfo.COMBINED)
+				.build());
 	}
 
 	private EffectInfo<Effect, Object> gameEffectInfo;

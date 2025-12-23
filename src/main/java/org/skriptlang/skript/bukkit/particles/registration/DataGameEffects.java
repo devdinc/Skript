@@ -20,6 +20,7 @@ import java.util.List;
  * Registry and utility class for game effects that require data.
  */
 public class DataGameEffects {
+
 	private static final List<EffectInfo<Effect, ?>> GAME_EFFECT_INFOS = new ArrayList<>();
 
 	/**
@@ -129,8 +130,15 @@ public class DataGameEffects {
 			(exprs, parseResult, builder) -> builder.append("electric spark effect")
 													.appendIf(parseResult.mark != 0, "along the", Axis.values()[parseResult.mark - 1], "axis"));
 
+		// 'data' is explicitly vague because the data value is extremely complex and not easily represented in Skript
+		// The upper 26 bits represent the charge level, while the lower 6 bits represent a map of which block faces the
+		// particles will appear on, but if no charge level is used, the particles appear to just be a standard sound
+		// with some particles with offsets depending on the block's size. The upper 26 bits is intended to be a maximum
+		// of 7, based on wiki max charge of 1000 and the formula `floor(ln(1 + charge of the block) ) + 1`.
+		// there's more to it with how the particles roll and how often the sound plays, but I can't be bothered to
+		// figure it out to a tee.
 		registerEffect(Effect.PARTICLES_SCULK_CHARGE, "sculk (charge|spread) effect [(with|using) data %integer%]",
-			(exprs, parseResult, builder) -> builder.append("sculk charge effect with data", exprs[0])); // data explanation here https://discord.com/channels/135877399391764480/836220422223036467/1211040434852208660
+			(exprs, parseResult, builder) -> builder.append("sculk charge effect with data", exprs[0]));
 
 		registerEffect(Effect.PARTICLES_AND_SOUND_BRUSH_BLOCK_COMPLETE, "[finish] brush[ing] %itemtype/blockdata% effect",
 			DataSupplier::getBlockData,

@@ -47,12 +47,9 @@ public class ExprParticleScale extends SimplePropertyExpression<ScalableEffect, 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, Changer.ChangeMode mode) {
 		ScalableEffect[] scalableEffect = getExpr().getArray(event);
-		if (scalableEffect == null) return;
-		double scaleDelta = 1;
-		if (mode != Changer.ChangeMode.RESET) {
-			assert delta != null;
-			scaleDelta = ((Number) delta[0]).doubleValue();
-		}
+		if (scalableEffect.length == 0)
+			return;
+		double scaleDelta = delta == null ? 1 : ((Number) delta[0]).doubleValue();
 
 		switch (mode) {
 			case REMOVE:
@@ -73,7 +70,7 @@ public class ExprParticleScale extends SimplePropertyExpression<ScalableEffect, 
 				for (ScalableEffect effect : scalableEffect) {
 					if (!effect.hasScale()) // don't reset scale if it doesn't have one
 						continue;
-					effect.scale(1.0);
+					effect.scale(scaleDelta);
 				}
 				break;
 		}

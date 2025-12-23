@@ -46,14 +46,9 @@ public class ExprParticleOffset extends SimplePropertyExpression<ParticleEffect,
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
 		ParticleEffect[] particleEffect = getExpr().getArray(event);
-		if (particleEffect == null) return;
-		Vector3d vectorDelta = null;
-		if (mode != ChangeMode.RESET) {
-			assert delta != null;
-			if (delta[0] == null) return;
-			vectorDelta = ((Vector) delta[0]).toVector3d();
-		}
-
+		if (particleEffect.length == 0)
+			return;
+		Vector3d vectorDelta = delta == null ? new Vector3d() : ((Vector) delta[0]).toVector3d();
 		switch (mode) {
 			case REMOVE:
 				vectorDelta.mul(-1);
@@ -62,13 +57,9 @@ public class ExprParticleOffset extends SimplePropertyExpression<ParticleEffect,
 				for (ParticleEffect effect : particleEffect)
 					effect.offset(vectorDelta.add(effect.offset()));
 				break;
-			case SET:
+			case SET, RESET:
 				for (ParticleEffect effect : particleEffect)
 					effect.offset(vectorDelta);
-				break;
-			case RESET:
-				for (ParticleEffect effect : particleEffect)
-					effect.offset(0, 0, 0);
 				break;
 		}
 	}

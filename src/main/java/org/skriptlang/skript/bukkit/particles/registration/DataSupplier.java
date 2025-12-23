@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
  */
 @FunctionalInterface
 public interface DataSupplier<D> {
+
 	/**
 	 * Supplies data from the parsed expressions from a pattern.
 	 *

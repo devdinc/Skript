@@ -7,8 +7,10 @@ import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Particle Count")
 @Description("""
@@ -26,7 +28,13 @@ import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 @Since("INSERT VERSION")
 public class ExprParticleCount extends SimplePropertyExpression<ParticleEffect, Number> {
 
-	static {
+	static void register(@NotNull SyntaxRegistry registry) {
+
+		registry.register(SyntaxRegistry.EXPRESSION,
+			infoBuilder(ExprParticleCount.class, Number.class, "particle count", "particles", false)
+				.supplier(ExprParticleCount::new)
+				.build());
+
 		register(ExprParticleCount.class, Number.class, "particle count", "particles");
 	}
 
@@ -46,13 +54,9 @@ public class ExprParticleCount extends SimplePropertyExpression<ParticleEffect, 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
 		ParticleEffect[] particleEffect = getExpr().getArray(event);
-		if (particleEffect == null) return;
-		int countDelta = 0;
-		if (mode != ChangeMode.RESET) {
-			assert delta != null;
-			if (delta[0] == null) return;
-			countDelta = ((Number) delta[0]).intValue();
-		}
+		if (particleEffect == null)
+			return;
+		int countDelta = delta == null ? 0 : ((Number) delta[0]).intValue();
 
 		switch (mode) {
 			case REMOVE:
@@ -62,13 +66,10 @@ public class ExprParticleCount extends SimplePropertyExpression<ParticleEffect, 
 				for (ParticleEffect effect : particleEffect)
 					effect.count(Math.clamp(effect.count() + countDelta, 0, 1000));
 				break;
-			case SET:
+			case SET, RESET:
+				countDelta = Math.clamp(countDelta, 0, 1000);
 				for (ParticleEffect effect : particleEffect)
-					effect.count(Math.clamp(countDelta, 0, 1000)); // Limit count to 1000 to prevent unintended crashing
-				break;
-			case RESET:
-				for (ParticleEffect effect : particleEffect)
-					effect.count(0);
+					effect.count(countDelta); // Limit count to 1000 to prevent unintended crashing
 				break;
 		}
 	}

@@ -1,6 +1,5 @@
 package org.skriptlang.skript.bukkit.particles.elements.effects;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.config.Node;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
@@ -22,6 +21,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.particles.GameEffect;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Play or Draw an Effect")
 @Description("""
@@ -42,12 +43,17 @@ import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 @Example("play blue instant splash potion break effect with a view radius of 10")
 @Example("play ravager attack animation on player's target")
 public class EffPlayEffect extends Effect {
-	static {
-		Skript.registerEffect(EffPlayEffect.class,
-		"[:force] (play|show|draw) %gameeffects/particles% [%-directions% %locations%] [as %-player%]",
-			"[:force] (play|draw) %gameeffects/particles% [%-directions% %locations%] (for|to) %-players% [as %-player%]", // show is omitted to avoid conflicts with EffOpenInv
-			"(play|show|draw) %gameeffects% [%-directions% %locations%] (in|with) [a] [view] (radius|range) [of] %number%",
-			"(play|show|draw) %entityeffects% on %entities%");
+
+	static void register(@NotNull SyntaxRegistry registry) {
+		registry.register(SyntaxRegistry.EFFECT, SyntaxInfo.builder(EffPlayEffect.class)
+				.addPatterns(
+					"[:force] (play|show|draw) %gameeffects/particles% [%-directions% %locations%] [as %-player%]",
+					"[:force] (play|draw) %gameeffects/particles% [%-directions% %locations%] (for|to) %-players% [as %-player%]", // show is omitted to avoid conflicts with EffOpenInv
+					"(play|show|draw) %gameeffects% [%-directions% %locations%] (in|with) [a] [view] (radius|range) [of] %number%",
+					"(play|show|draw) %entityeffects% on %entities%"
+				)
+				.supplier(EffPlayEffect::new)
+				.build());
 	}
 
 	private Expression<?> toDraw;
@@ -99,7 +105,7 @@ public class EffPlayEffect extends Effect {
 
 		// game effects / particles
 		assert this.locations != null;
-		Number radius = this.radius != null ? this.radius.getSingle(event) : null;
+		Number radius = this.radius != null ? this.radius.getSingle(event) : null; // a null radius means no radius limit
 		Location[] locations = this.locations.getArray(event);
 		Object[] toDraw = this.toDraw.getArray(event);
 		Player[] players = toPlayers != null ? toPlayers.getArray(event) : null;
@@ -161,7 +167,6 @@ public class EffPlayEffect extends Effect {
 
 	@Override
 	public String toString(@Nullable Event event, boolean debug) {
-		//noinspection DataFlowIssue
 		return new SyntaxStringBuilder(event, debug)
 			.append("play", toDraw)
 			.appendIf(locations != null, locations)
@@ -173,4 +178,5 @@ public class EffPlayEffect extends Effect {
 	public Node getNode() {
 		return node;
 	}
+
 }

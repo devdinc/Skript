@@ -1618,7 +1618,7 @@ entities:
 		pattern: animal[plural:s]
 	tameable:
 		name: tameable creature¦s
-		pattern: tameable creature[1¦s]
+		pattern: tameable creature[plural:s]
 	fish:
 		name: fish¦es
 		pattern: fish[plural:es]
@@ -2837,7 +2837,7 @@ types:
 	equippablecomponent: equippable component¦s @an
 	nameable: nameable thing¦s @a
 	gameeffect: game effect¦s @a
-	entityeffect: entity effect¦s @a
+	entityeffect: entity effect¦s @an
 	particle: particle effect¦s @a
 	convergingparticle: converging particle¦s @a
 	directionalparticle: directional particle¦s @a
