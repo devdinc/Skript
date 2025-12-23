@@ -28,7 +28,10 @@ import java.util.Map;
 
 /**
  * Use {@link EventValueRegistry} instead.
- * Obtain one using {@code Skript.instance().registry(EventValueRegistry.class)}.
+ * <p>
+ * Obtain an instance using {@code SkriptAddon#registry(EventValueRegistry.class)}.
+ * <br>
+ * Or an unmodifiable view using {@code Skript.instance().registry(EventValueRegistry.class)}.
  */
 @Deprecated(since = "INSERT VERSION", forRemoval = true)
 public class EventValues {

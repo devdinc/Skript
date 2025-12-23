@@ -20,7 +20,9 @@ import java.util.Optional;
  * desired value type. Resolution prefers the closest matching event type and, optionally,
  * can fall back to default time state and/or allow value-type conversion.
  * <p>
- * Obtain an instance via {@code Skript.instance().registry(EventValueRegistry.class)}.
+ * Obtain an instance using {@code SkriptAddon#registry(EventValueRegistry.class)}.
+ * <br>
+ * Or an unmodifiable view using {@code Skript.instance().registry(EventValueRegistry.class)}.
  */
 public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProvider<EventValueRegistry> {
 
