@@ -480,7 +480,10 @@ public final class Skript extends JavaPlugin implements Listener {
 		skript.storeRegistry(PropertyRegistry.class, new PropertyRegistry(this));
 		Property.registerDefaultProperties();
 
-		skript.storeRegistry(EventValueRegistry.class, new EventValueRegistry(this));
+		EventValueRegistry eventValueRegistry = EventValueRegistry.empty(this);
+		skript.storeRegistry(EventValueRegistry.class, eventValueRegistry);
+		//noinspection removal
+		EventValues.setEventValueRegistry(eventValueRegistry);
 
 		// Load classes which are always safe to use
 		new JavaClasses(); // These may be needed in configuration

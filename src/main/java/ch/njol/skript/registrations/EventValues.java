@@ -12,6 +12,7 @@ import org.bukkit.entity.AbstractVillager;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValue;
@@ -52,7 +53,14 @@ public class EventValues {
 	 */
 	public static final int TIME_FUTURE = EventValue.TIME_FUTURE;
 
-	private static final EventValueRegistry registry = Skript.instance().registry(EventValueRegistry.class);
+	private static EventValueRegistry registry;
+
+	@ApiStatus.Internal
+	public static void setEventValueRegistry(EventValueRegistry registry) {
+		if (EventValues.registry != null)
+			throw new IllegalStateException("EventValueRegistry is already set and cannot be changed.");
+		EventValues.registry = registry;
+	}
 
 	/**
 	 * Get Event Values list for the specified time
