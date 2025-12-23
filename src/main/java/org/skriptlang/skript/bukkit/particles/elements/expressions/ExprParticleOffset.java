@@ -8,9 +8,12 @@ import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import org.bukkit.event.Event;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
+import org.skriptlang.skript.addon.AddonModule.ModuleOrigin;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Particle Offset")
 @Description("""
@@ -26,8 +29,12 @@ import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 @Since("INSERT VERSION")
 public class ExprParticleOffset extends SimplePropertyExpression<ParticleEffect, Vector> {
 
-	static {
-		register(ExprParticleOffset.class, Vector.class, "particle offset", "particles");
+	public static void register(@NotNull SyntaxRegistry registry, @NotNull ModuleOrigin origin) {
+		registry.register(SyntaxRegistry.EXPRESSION,
+			infoBuilder(ExprParticleOffset.class, Vector.class, "particle offset", "particles", false)
+				.supplier(ExprParticleOffset::new)
+				.origin(origin)
+				.build());
 	}
 
 	@Override

@@ -1,12 +1,10 @@
 package org.skriptlang.skript.bukkit.particles.elements.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.skript.lang.util.SimpleExpression;
@@ -15,12 +13,18 @@ import ch.njol.skript.util.Patterns;
 import ch.njol.util.Kleenean;
 import org.bukkit.Particle;
 import org.bukkit.event.Event;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 import org.skriptlang.skript.bukkit.particles.registration.DataParticles;
 import org.skriptlang.skript.bukkit.particles.registration.EffectInfo;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.util.Arrays;
+
+import static org.skriptlang.skript.registration.DefaultSyntaxInfos.Expression.builder;
 
 @Name("Particles with Data")
 @Description("""
@@ -35,9 +39,9 @@ import java.util.Arrays;
 @Since("INSERT VERSION")
 public class ExprParticleWithData extends SimpleExpression<ParticleEffect> {
 
-	private static final Patterns<EffectInfo<Particle, Object>> PATTERNS;
+	private static Patterns<EffectInfo<Particle, Object>> PATTERNS;
 
-	static {
+	public static void register(@NotNull SyntaxRegistry registry, @NotNull AddonModule.ModuleOrigin origin) {
 		// create Patterns object
 		Object[][] patterns = new Object[DataParticles.getParticleInfos().size()][2];
 		int i = 0;
@@ -48,7 +52,12 @@ public class ExprParticleWithData extends SimpleExpression<ParticleEffect> {
 		}
 		PATTERNS = new Patterns<>(patterns);
 
-		Skript.registerExpression(ExprParticleWithData.class, ParticleEffect.class, ExpressionType.COMBINED, PATTERNS.getPatterns());
+		registry.register(SyntaxRegistry.EXPRESSION, builder(ExprParticleWithData.class, ParticleEffect.class)
+			.addPatterns(PATTERNS.getPatterns())
+			.supplier(ExprParticleWithData::new)
+			.priority(SyntaxInfo.COMBINED)
+			.origin(origin)
+			.build());
 	}
 
 	private ParseResult parseResult;

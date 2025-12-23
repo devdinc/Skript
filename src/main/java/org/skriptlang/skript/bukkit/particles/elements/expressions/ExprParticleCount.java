@@ -9,6 +9,7 @@ import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.addon.AddonModule.ModuleOrigin;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
@@ -28,14 +29,12 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 @Since("INSERT VERSION")
 public class ExprParticleCount extends SimplePropertyExpression<ParticleEffect, Number> {
 
-	static void register(@NotNull SyntaxRegistry registry) {
-
+	public static void register(@NotNull SyntaxRegistry registry, @NotNull ModuleOrigin origin) {
 		registry.register(SyntaxRegistry.EXPRESSION,
 			infoBuilder(ExprParticleCount.class, Number.class, "particle count", "particles", false)
 				.supplier(ExprParticleCount::new)
+				.origin(origin)
 				.build());
-
-		register(ExprParticleCount.class, Number.class, "particle count", "particles");
 	}
 
 	@Override

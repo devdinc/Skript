@@ -19,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.skriptlang.skript.addon.AddonModule.ModuleOrigin;
 import org.skriptlang.skript.bukkit.particles.GameEffect;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 import org.skriptlang.skript.registration.SyntaxInfo;
@@ -44,7 +45,7 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 @Example("play ravager attack animation on player's target")
 public class EffPlayEffect extends Effect {
 
-	static void register(@NotNull SyntaxRegistry registry) {
+	public static void register(@NotNull SyntaxRegistry registry, @NotNull ModuleOrigin origin) {
 		registry.register(SyntaxRegistry.EFFECT, SyntaxInfo.builder(EffPlayEffect.class)
 				.addPatterns(
 					"[:force] (play|show|draw) %gameeffects/particles% [%-directions% %locations%] [as %-player%]",
@@ -53,6 +54,7 @@ public class EffPlayEffect extends Effect {
 					"(play|show|draw) %entityeffects% on %entities%"
 				)
 				.supplier(EffPlayEffect::new)
+				.origin(origin)
 				.build());
 	}
 

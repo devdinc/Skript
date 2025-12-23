@@ -1,26 +1,30 @@
 package org.skriptlang.skript.bukkit.particles.elements.expressions;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
 import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
 import ch.njol.skript.expressions.base.PropertyExpression;
 import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.SyntaxStringBuilder;
 import ch.njol.skript.util.Patterns;
 import ch.njol.util.Kleenean;
 import org.bukkit.event.Event;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
+import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.bukkit.particles.particleeffects.DirectionalEffect;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
+import org.skriptlang.skript.registration.SyntaxInfo;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.lang.reflect.Array;
 import java.util.function.BiFunction;
+
+import static org.skriptlang.skript.registration.DefaultSyntaxInfos.Expression.builder;
 
 @Name("Particle with Offset/Distribution/Velocity")
 @Description("""
@@ -59,8 +63,13 @@ public class ExprParticleWithOffset extends PropertyExpression<ParticleEffect, P
 		{"%directionalparticles% with [a] velocity [of] %vector%", Mode.VELOCITY}
 	});
 
-	static {
-		Skript.registerExpression(ExprParticleWithOffset.class, ParticleEffect.class, ExpressionType.COMBINED, patterns.getPatterns());
+	public static void register(@NotNull SyntaxRegistry registry, @NotNull AddonModule.ModuleOrigin origin) {
+		registry.register(SyntaxRegistry.EXPRESSION, builder(ExprParticleWithOffset.class, ParticleEffect.class)
+			.addPatterns(patterns.getPatterns())
+			.supplier(ExprParticleWithOffset::new)
+			.priority(SyntaxInfo.COMBINED)
+			.origin(origin)
+			.build());
 	}
 
 	private Mode mode;

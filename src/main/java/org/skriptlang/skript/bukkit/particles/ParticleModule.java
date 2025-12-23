@@ -15,13 +15,15 @@ import ch.njol.yggdrasil.SimpleClassSerializer.NonInstantiableClassSerializer;
 import org.bukkit.*;
 import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.addon.SkriptAddon;
+import org.skriptlang.skript.bukkit.particles.elements.effects.EffPlayEffect;
+import org.skriptlang.skript.bukkit.particles.elements.expressions.*;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ConvergingEffect;
 import org.skriptlang.skript.bukkit.particles.particleeffects.DirectionalEffect;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ScalableEffect;
 import org.skriptlang.skript.bukkit.particles.registration.DataGameEffects;
 import org.skriptlang.skript.bukkit.particles.registration.DataParticles;
-import org.skriptlang.skript.registration.SyntaxOrigin;
+import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.io.NotSerializableException;
 import java.io.StreamCorruptedException;
@@ -33,8 +35,6 @@ import java.util.Arrays;
  */
 public class ParticleModule implements AddonModule {
 
-	static SyntaxOrigin ORIGIN = SyntaxOrigin.
-
 	@Override
 	public void load(SkriptAddon addon) {
 		registerClasses();
@@ -43,7 +43,18 @@ public class ParticleModule implements AddonModule {
 		DataParticles.getParticleInfos();
 
 		// load elements!
-
+		SyntaxRegistry registry = addon.syntaxRegistry();
+		ModuleOrigin origin = AddonModule.origin(addon, "particles");
+		EffPlayEffect.register(registry, origin);
+		ExprGameEffectWithData.register(registry, origin);
+		ExprParticleCount.register(registry, origin);
+		ExprParticleDistribution.register(registry, origin);
+		ExprParticleOffset.register(registry, origin);
+		ExprParticleScale.register(registry, origin);
+		ExprParticleSpeed.register(registry, origin);
+		ExprParticleWithData.register(registry, origin);
+		ExprParticleWithOffset.register(registry, origin);
+		ExprParticleWithSpeed.register(registry, origin);
 	}
 
 	/**
