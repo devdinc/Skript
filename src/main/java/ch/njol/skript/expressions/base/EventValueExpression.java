@@ -12,7 +12,6 @@ import ch.njol.skript.lang.ExpressionType;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.parser.ParserInstance;
 import ch.njol.skript.lang.util.SimpleExpression;
-import ch.njol.skript.localization.Noun;
 import ch.njol.skript.log.ParseLogHandler;
 import ch.njol.skript.log.SkriptLogger;
 import ch.njol.skript.registrations.Classes;
@@ -20,8 +19,10 @@ import ch.njol.skript.util.Utils;
 import ch.njol.util.Kleenean;
 import ch.njol.util.StringUtils;
 import ch.njol.util.coll.CollectionUtils;
+import com.google.common.base.Preconditions;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValue;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValueRegistry;
@@ -34,6 +35,7 @@ import org.skriptlang.skript.util.Priority;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -166,11 +168,12 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	private final EventValueRegistry registry = Skript.instance().registry(EventValueRegistry.class);
 	public final Set<Class<? extends Event>> events = new HashSet<>();
 
-	private final Class<?> componentType;
-	private final Class<? extends T> type;
+	private final @Nullable Class<?> componentType;
+	private final @Nullable Class<? extends T> type;
+	private final @Nullable String identifier;
 
 	private @Nullable Changer<? super T> changer;
-	private final boolean single;
+	private final Kleenean single;
 	private final boolean exact;
 	private boolean isDelayed;
 
@@ -193,12 +196,27 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	}
 
 	public EventValueExpression(Class<? extends T> type, @Nullable Changer<? super T> changer, boolean exact) {
-		assert type != null;
+		this(Preconditions.checkNotNull(type, "type"), null, changer, exact);
+	}
+
+	public EventValueExpression(String identifier) {
+		this(identifier, null);
+	}
+
+	public EventValueExpression(String identifier, @Nullable Changer<? super T> changer) {
+		this(null, Preconditions.checkNotNull(identifier, "identifier"), changer, false);
+	}
+
+	@Contract("null, null, _, _ -> fail")
+	public EventValueExpression(@Nullable Class<? extends T> type, @Nullable String identifier, @Nullable Changer<? super T> changer, boolean exact) {
+		if (type == null && identifier == null)
+			throw new IllegalArgumentException("Either type or identifier must be non-null");
 		this.type = type;
+		this.identifier = identifier;
 		this.exact = exact;
 		this.changer = changer;
-		single = !type.isArray();
-		componentType = single ? type : type.getComponentType();
+		single = type != null ? Kleenean.get(!type.isArray()) : Kleenean.UNKNOWN;
+		componentType = single.isTrue() || single.isUnknown() ? type : type.getComponentType();
 	}
 
 	@Override
@@ -208,22 +226,42 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 		return init();
 	}
 
-	private <E extends Event> Resolution<E, ? extends T> getEventValues(Class<E> eventClass) {
-		return exact
-			? registry.resolveExact(eventClass, type, getTime())
-			: registry.resolve(eventClass, type, getTime());
+	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass) {
+		return resolve(eventClass, EventValueRegistry.DEFAULT_RESOLVE_FLAGS);
 	}
 
-	private <E extends Event> Resolution<E, ? extends T> getEventValues(Class<E> eventClass, int flags) {
-		return exact
-			? registry.resolveExact(eventClass, type, getTime())
-			: registry.resolve(eventClass, type, getTime(), flags);
+	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass, int flags) {
+		return resolve(eventClass, getTime(), flags);
 	}
 
-	private <E extends Event> Resolution<E, ? extends T> getEventValuesForTime(Class<E> eventClass, int time) {
+	private <E extends Event> Resolution<E, ? extends T> resolveForTime(Class<E> eventClass, int time) {
+		return resolve(
+			eventClass,
+			time,
+			EventValueRegistry.DEFAULT_RESOLVE_FLAGS & ~EventValueRegistry.FALLBACK_TO_DEFAULT_TIME_STATE
+		);
+	}
+
+	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass, int time, int flags) {
+		if (identifier != null) {
+			Resolution<E, ? extends T> resolution = registry.resolve(eventClass, identifier, time, flags);
+			if (type == null)
+				return resolution;
+			return Resolution.of(resolution.all().stream()
+				.map(eventValue -> eventValue.getConverted(eventClass, type))
+				.filter(Objects::nonNull)
+				.toList());
+		}
 		return exact
 			? registry.resolveExact(eventClass, type, time)
-			: registry.resolve(eventClass, type, time, EventValueRegistry.DEFAULT_RESOLVE_FLAGS & ~EventValueRegistry.FALLBACK_TO_DEFAULT_TIME_STATE);
+			: registry.resolve(eventClass, type, time, flags);
+	}
+
+	private String input(boolean plural) {
+		if (identifier != null)
+			return identifier;
+		assert componentType != null;
+		return Classes.getSuperClassInfo(componentType).getName().toString(plural);
 	}
 
 	@Override
@@ -239,18 +277,18 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 				return false;
 			}
 			for (Class<? extends Event> event : events) {
-				Resolution<?, ? extends T> resolution = getEventValues(event, EventValueRegistry.DEFAULT_RESOLVE_FLAGS & ~EventValueRegistry.ALLOW_CONVERSION);
+				Resolution<?, ? extends T> resolution = resolve(event, EventValueRegistry.DEFAULT_RESOLVE_FLAGS & ~EventValueRegistry.ALLOW_CONVERSION);
 				if (resolution.multiple()) {
-					Noun typeName = Classes.getExactClassInfo(componentType).getName();
-					log.printError("There are multiple " + typeName.toString(true) + " in " + Utils.a(parser.getCurrentEventName()) + " event. " +
-							"You must define which " + typeName + " to use.");
+					log.printError("There are multiple " + input(true) + " in " + Utils.a(parser.getCurrentEventName()) + " event. " +
+							"You must define which " + input(false) + " to use.");
 					return false;
 				}
-				if (getEventValues(event).successful())
+				resolution = resolve(event);
+				if (resolution.successful())
 					hasValue = true;
 			}
 			if (!hasValue) {
-				log.printError("There's no " + Classes.getSuperClassInfo(componentType).getName().toString(!single) + " in " + Utils.a(parser.getCurrentEventName()) + " event");
+				log.printError("There's no " + input(!isSingle()) + " in " + Utils.a(parser.getCurrentEventName()) + " event");
 				return false;
 			}
 			log.printLog();
@@ -266,14 +304,14 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	protected T @Nullable [] get(Event event) {
 		T value = getValue(event);
 		if (value == null)
-			return (T[]) Array.newInstance(componentType, 0);
-		if (single) {
-			T[] one = (T[]) Array.newInstance(type, 1);
+			return (T[]) Array.newInstance(getReturnType(), 0);
+		if (isSingle()) {
+			T[] one = (T[]) Array.newInstance(getReturnType(), 1);
 			one[0] = value;
 			return one;
 		}
 		T[] dataArray = (T[]) value;
-		T[] array = (T[]) Array.newInstance(componentType, dataArray.length);
+		T[] array = (T[]) Array.newInstance(getReturnType(), dataArray.length);
 		System.arraycopy(dataArray, 0, array, 0, array.length);
 		return array;
 	}
@@ -283,7 +321,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 		Class<E> eventClass = getParseTimeEventClass(event);
 		if (eventClass == null)
 			return null;
-		Resolution<E, ? extends T> resolution = getEventValues(eventClass);
+		Resolution<E, ? extends T> resolution = resolve(eventClass);
 		return resolution.anyOptional()
 			.map(eventValue -> eventValue.get(event))
 			.orElse(null);
@@ -303,21 +341,23 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	@SuppressWarnings("unchecked")
 	public Class<?> @Nullable [] acceptChange(ChangeMode mode) {
 		for (Class<? extends Event> event : events) {
-			Resolution<?, ? extends T> resolution = getEventValues(event);
+			Resolution<?, ? extends T> resolution = resolve(event);
 			if (!resolution.successful())
 				continue;
-			boolean supportsChanger = resolution.all().stream().anyMatch(eventValue -> eventValue.hasChanger(mode));
-			if (!supportsChanger)
+			EventValue<?, ? extends T> found = resolution.all().stream()
+				.filter(eventValue -> eventValue.hasChanger(mode))
+				.findFirst().orElse(null);
+			if (found == null)
 				continue;
 			if (isDelayed) {
 				Skript.error("Event values cannot be changed after the event has already passed.");
 				return null;
 			}
-			return CollectionUtils.array(type);
+			return CollectionUtils.array(found.valueClass());
 		}
 
 		if (changer == null)
-			changer = (Changer<? super T>) Classes.getSuperClassInfo(componentType).getChanger();
+			changer = (Changer<? super T>) Classes.getSuperClassInfo(getReturnType()).getChanger();
 		return changer == null ? null : changer.acceptChange(mode);
 	}
 
@@ -326,12 +366,12 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 		Class<Event> eventClass = getParseTimeEventClass(event);
 		if (eventClass == null)
 			return;
-		Resolution<?, ? extends T> resolution = getEventValues(eventClass);
+		Resolution<?, ? extends T> resolution = resolve(eventClass);
 		for (EventValue<?, ? extends T> eventValue : resolution.all()) {
 			if (!eventValue.hasChanger(mode))
 				continue;
 			eventValue.changer(mode).ifPresent(changer -> {
-				if (single && delta != null) {
+				if (!eventValue.valueClass().isArray() && delta != null) {
 					//noinspection unchecked,rawtypes
 					((EventValue.Changer) changer).change(event, delta[0]);
 				} else {
@@ -356,8 +396,8 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 		}
 		for (Class<? extends Event> event : events) {
 			assert event != null;
-			if (getEventValuesForTime(event, EventValue.TIME_PAST).successful()
-				|| getEventValuesForTime(event, EventValue.TIME_FUTURE).successful()) {
+			if (resolveForTime(event, EventValue.TIME_PAST).successful()
+				|| resolveForTime(event, EventValue.TIME_FUTURE).successful()) {
 				super.setTime(time);
 				// Since the time was changed, we now need to re-initialize the parse time events we already got. START
 				this.events.clear();
@@ -379,19 +419,52 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 
 	@Override
 	public boolean isSingle() {
-		return single;
+		if (!single.isUnknown())
+			return single.isTrue();
+		for (Class<? extends Event> event : events) {
+			Resolution<?, ? extends T> resolution = resolve(event);
+			if (!resolution.successful())
+				continue;
+			Class<? extends T> valueClass = resolution.any().valueClass();
+			if (valueClass.isArray())
+				return false;
+		}
+		return true;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	public Class<? extends T>[] possibleReturnTypes() {
+		if (componentType != null)
+			//noinspection unchecked
+			return new Class[] {componentType};
+		Set<Class<? extends T>> types = new HashSet<>();
+		for (Class<? extends Event> eventClass : events) {
+			Resolution<?, ? extends T> resolution = resolve(eventClass);
+			if (!resolution.successful())
+				continue;
+			resolution.anyOptional().ifPresent(eventValue -> {
+				Class<? extends T> type = eventValue.valueClass();
+				//noinspection unchecked
+				type = type.isArray() ? (Class<? extends T>) type.componentType() : type;
+				types.add(type);
+			});
+		}
+		//noinspection unchecked
+		return types.toArray(new Class[0]);
+	}
+
+	@Override
 	public Class<? extends T> getReturnType() {
-		return (Class<? extends T>) componentType;
+		Class<? extends T>[] classes = possibleReturnTypes();
+		if (classes.length == 1)
+			return classes[0];
+		return Utils.highestDenominator(Object.class, classes);
 	}
 
 	@Override
 	public String toString(@Nullable Event event, boolean debug) {
 		if (!debug || event == null)
-			return "event-" + Classes.getSuperClassInfo(componentType).getName().toString(!single);
+			return "event-" + input(!isSingle());
 		return Classes.getDebugMessage(getValue(event));
 	}
 

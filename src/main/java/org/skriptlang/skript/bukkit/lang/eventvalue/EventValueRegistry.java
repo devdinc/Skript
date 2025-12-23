@@ -540,9 +540,19 @@ public class EventValueRegistry implements Registry<EventValue<?, ?>> {
 		}
 
 		/**
-		 *  @return any candidate or {@code null} if none
+		 *  @return any candidate, throws if none
+		 *  @throws IllegalStateException if the resolution is empty
 		 */
 		public EventValue<E, V> any() {
+			if (all.isEmpty())
+				throw new IllegalStateException("Resolution is empty");
+			return all.getFirst();
+		}
+
+		/**
+		 *  @return any candidate or {@code null} if none
+		 */
+		public EventValue<E, V> anyOrNull() {
 			if (all.isEmpty())
 				return null;
 			return all.getFirst();
