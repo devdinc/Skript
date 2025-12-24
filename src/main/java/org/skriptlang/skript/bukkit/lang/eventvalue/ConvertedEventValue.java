@@ -10,6 +10,25 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+/**
+ * An {@link EventValue} that is a converted version of another event value.
+ * <p>
+ * This class facilitates event value resolution when the requested event or value types differ from
+ * those of the source {@link EventValue}. The following rules apply:
+ * <ul>
+ *     <li>The {@code ConvertedEvent} must be hierarchically related to the {@code SourceEvent}
+ *     (one must be assignable from the other).</li>
+ *     <li>The {@code ConvertedValue} does not need to be related to the {@code SourceValue},
+ *     provided a {@link Converter} exists to perform the transformation.</li>
+ *     <li>{@link Changer}s are supported for the converted value if a reverse converter is available
+ *     to map the {@code ConvertedValue} back to the {@code SourceValue}.</li>
+ * </ul>
+ *
+ * @param <SourceEvent> The source event type.
+ * @param <ConvertedEvent> The converted event type.
+ * @param <SourceValue> The source value type.
+ * @param <ConvertedValue> The converted value type.
+ */
 final class ConvertedEventValue<SourceEvent extends Event, ConvertedEvent extends Event, SourceValue, ConvertedValue>
 	implements EventValue<ConvertedEvent, ConvertedValue> {
 
@@ -19,6 +38,24 @@ final class ConvertedEventValue<SourceEvent extends Event, ConvertedEvent extend
 	private final Converter<SourceValue, ConvertedValue> converter;
 	private final @Nullable Converter<ConvertedValue, SourceValue> reverseConverter;
 
+	/**
+	 * Creates a new converted event value.
+	 * <p>
+	 * If the requested {@code eventClass} and {@code valueClass} are already compatible with the source
+	 * {@link EventValue}, the source itself is returned. Otherwise, a new {@link ConvertedEventValue}
+	 * is created if a valid {@link Converter} exists between the source and target value classes.
+	 *
+	 * @param eventClass The target event class.
+	 * @param valueClass The target value class.
+	 * @param source The source event value to convert from.
+	 * @param <SourceEvent> The source event type.
+	 * @param <ConvertedEvent> The target event type.
+	 * @param <SourceValue> The source value type.
+	 * @param <ConvertedValue> The target value type.
+	 * @return The source event value if it is already assignable to the target classes;
+	 * otherwise a new {@link ConvertedEventValue} instance, or {@code null} if no suitable
+	 * converter exists between the source and target value classes.
+	 */
     public static <SourceEvent extends Event, ConvertedEvent extends Event, SourceValue, ConvertedValue> EventValue<ConvertedEvent, ConvertedValue> newInstance(
 		Class<ConvertedEvent> eventClass,
 		Class<ConvertedValue> valueClass,

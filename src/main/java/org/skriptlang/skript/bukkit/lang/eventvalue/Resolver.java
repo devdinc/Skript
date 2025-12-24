@@ -16,15 +16,33 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+/**
+ * A class used to resolve {@link EventValue}s.
+ *
+ * @param <E> The event type.
+ * @param <V> The value type.
+ */
 class Resolver<E extends Event, V> {
 
+	/**
+	 * A comparator factory that creates a comparator that compares {@link EventValue}s based on the distance
+	 * of their event class to the given event class.
+	 */
 	static final EventComparatorFactory EVENT_DISTANCE_COMPARATOR = eventClass ->
 		Comparator.comparingInt(ev -> ClassUtils.hierarchyDistance(ev.eventClass(), eventClass));
 
+	/**
+	 * A comparator factory that creates a comparator that compares {@link EventValue}s based on the distance
+	 * of their event class to the given event class, in both directions, with priority to superclasses.
+	 */
 	static final EventComparatorFactory BI_EVENT_DISTANCE_COMPARATOR = eventClass ->
 		EVENT_DISTANCE_COMPARATOR.create(eventClass)
-			.thenComparingInt(ev -> ClassUtils.hierarchyDistance(eventClass, ev.eventClass()));
+			.thenComparingInt(ev -> ClassUtils.hierarchyDistance(eventClass, ev.valueClass()));
 
+	/**
+	 * A comparator factory that creates a comparator that compares {@link EventValue}s based on the distance
+	 * of their event class to the given event class, and the distance of their value class to the given value class.
+	 */
 	static final EventValueComparatorFactory EVENT_VALUE_DISTANCE_COMPARATOR = (eventClass, valueClass) ->
 		BI_EVENT_DISTANCE_COMPARATOR.create(eventClass)
 			.thenComparingInt(ev -> ClassUtils.hierarchyDistance(valueClass, ev.valueClass()));
@@ -52,6 +70,12 @@ class Resolver<E extends Event, V> {
 		this.filterMatches = filterMatches;
 	}
 
+	/**
+	 * Resolves the given list of {@link EventValue}s.
+	 *
+	 * @param eventValues The event values to resolve.
+	 * @return The resolution.
+	 */
 	public EventValueRegistry.Resolution<E, V> resolve(List<EventValue<?, ?>> eventValues) {
 		List<EventValue<E, V>> best = new ArrayList<>();
 		EventValue<?, ?> bestMatch = null;
@@ -85,17 +109,23 @@ class Resolver<E extends Event, V> {
 	}
 
 	/**
+	 * Filters the given list of {@link EventValue}s to only include those that match the given value class.
 	 * <p>
-	 *  In this method we can strip converters that are able to be obtainable through their own 'event-classinfo'.
-	 *  For example, {@link PlayerTradeEvent} has a {@link Player} value (player who traded)
-	 *  	and an {@link AbstractVillager} value (villager traded from).
-	 *  Beforehand, since there is no {@link Entity} value, it was grabbing both values as they both can be cast as an {@link Entity},
-	 *  	resulting in a parse error of "multiple entities".
-	 * 	Now, we filter out the values that can be obtained using their own classinfo, such as 'event-player'
-	 * 		which leaves us only the {@link AbstractVillager} for 'event-entity'.
-	 * </p>
+	 * In this method we can strip converters that are able to be obtainable through their own 'event-classinfo'.
+	 * For example, {@link PlayerTradeEvent} has a {@link Player} value (player who traded)
+	 * 	and an {@link AbstractVillager} value (villager traded from).
+	 * Beforehand, since there is no {@link Entity} value, it was grabbing both values as they both can be cast as an {@link Entity},
+	 * 	resulting in a parse error of "multiple entities".
+	 * Now, we filter out the values that can be obtained using their own classinfo, such as 'event-player'
+	 * 	which leaves us only the {@link AbstractVillager} for 'event-entity'.
+	 *
+	 * @param valueClass The value class to filter by.
+	 * @param eventValues The event values to filter.
+	 * @param <E> The event type.
+	 * @param <V> The value type.
+	 * @return The filtered list of event values.
 	 */
-	private <E extends Event, V> List<EventValue<E, V>> filterEventValues(
+	private static <E extends Event, V> List<EventValue<E, V>> filterEventValues(
 		Class<V> valueClass,
 		List<EventValue<E, V>> eventValues
 	) {
@@ -112,14 +142,37 @@ class Resolver<E extends Event, V> {
 		return filtered.isEmpty() ? eventValues : filtered;
 	}
 
+	/**
+	 * Creates a new {@link Builder} for the given event class.
+	 *
+	 * @param eventClass The event class.
+	 * @param <E> The event type.
+	 * @param <V> The value type.
+	 * @return The builder.
+	 */
 	static <E extends Event, V> Builder<E, V> builder(Class<E> eventClass) {
 		return new Builder<>(eventClass, null);
 	}
 
+	/**
+	 * Creates a new {@link Builder} for the given event class and value class.
+	 *
+	 * @param eventClass The event class.
+	 * @param valueClass The value class.
+	 * @param <E> The event type.
+	 * @param <V> The value type.
+	 * @return The builder.
+	 */
 	static <E extends Event, V> Builder<E, V> builder(Class<E> eventClass, Class<V> valueClass) {
 		return new Builder<>(eventClass, valueClass);
 	}
 
+	/**
+	 * A builder for {@link Resolver}.
+	 *
+	 * @param <E> The event type.
+	 * @param <V> The value type.
+	 */
 	static class Builder<E extends Event, V> {
 
 		private final Class<E> eventClass;
@@ -134,36 +187,76 @@ class Resolver<E extends Event, V> {
 			this.valueClass = valueClass;
 		}
 
+		/**
+		 * Sets the filter.
+		 *
+		 * @param filter The filter.
+		 * @return This builder.
+		 */
 		public Builder<E, V> filter(Predicate<EventValue<?, ?>> filter) {
 			this.filter = filter;
 			return this;
 		}
 
+		/**
+		 * Sets the comparator.
+		 *
+		 * @param comparator The comparator.
+		 * @return This builder.
+		 */
 		public Builder<E, V> comparator(Comparator<EventValue<?, ?>> comparator) {
 			this.comparator = comparator;
 			return this;
 		}
 
+		/**
+		 * Sets the comparator using a factory.
+		 *
+		 * @param factory The factory.
+		 * @return This builder.
+		 */
 		public Builder<E, V> comparator(EventComparatorFactory factory) {
 			this.comparator = factory.create(eventClass);
 			return this;
 		}
 
+		/**
+		 * Sets the comparator using a factory.
+		 *
+		 * @param factory The factory.
+		 * @return This builder.
+		 */
 		public Builder<E, V> comparator(EventValueComparatorFactory factory) {
 			this.comparator = factory.create(eventClass, valueClass);
 			return this;
 		}
 
+		/**
+		 * Sets the mapper.
+		 *
+		 * @param mapper The mapper.
+		 * @return This builder.
+		 */
 		public Builder<E, V> mapper(Function<EventValue<?, ?>, @Nullable EventValue<E, V>> mapper) {
 			this.mapper = mapper;
 			return this;
 		}
 
+		/**
+		 * Sets the filter to match the value class.
+		 *
+		 * @return This builder.
+		 */
 		public Builder<E, V> filterMatches() {
 			this.filterMatches = true;
 			return this;
 		}
 
+		/**
+		 * Builds the resolver.
+		 *
+		 * @return The resolver.
+		 */
 		public Resolver<E, V> build() {
 			return new Resolver<>(
 				eventClass,
@@ -177,13 +270,32 @@ class Resolver<E extends Event, V> {
 
 	}
 
+	/**
+	 * A factory for creating comparators based on event classes.
+	 */
 	@FunctionalInterface
 	interface EventComparatorFactory {
+		/**
+		 * Creates a comparator for the given event class.
+		 *
+		 * @param eventClass The event class.
+		 * @return The comparator.
+		 */
 		Comparator<EventValue<?, ?>> create(Class<? extends Event> eventClass);
 	}
 
+	/**
+	 * A factory for creating comparators based on event classes and value classes.
+	 */
 	@FunctionalInterface
 	interface EventValueComparatorFactory {
+		/**
+		 * Creates a comparator for the given event class and value class.
+		 *
+		 * @param eventClass The event class.
+		 * @param valueClass The value class.
+		 * @return The comparator.
+		 */
 		Comparator<EventValue<?, ?>> create(Class<? extends Event> eventClass, Class<?> valueClass);
 	}
 

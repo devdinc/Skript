@@ -144,11 +144,35 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 	 */
 	@Nullable String excludedErrorMessage();
 
+	/**
+	 * Returns a new event value that converts this value to a different value class,
+	 * or uses a different event class.
+	 * <p>
+	 * This method attempts to find a suitable converter for the value classes automatically.
+	 *
+	 * @param newEventClass the new event class
+	 * @param newValueClass the new value class
+	 * @param <ConvertedEvent> the new event type
+	 * @param <ConvertedValue> the new value type
+	 * @return a new converted event value, or {@code null} if no converter was found
+	 */
 	@Nullable <ConvertedEvent extends Event, ConvertedValue> EventValue<ConvertedEvent, ConvertedValue> getConverted(
 		Class<ConvertedEvent> newEventClass,
 		Class<ConvertedValue> newValueClass
 	);
 
+	/**
+	 * Returns a new event value that converts this value to a different value class
+	 * using the provided converter.
+	 *
+	 * @param newEventClass the new event class
+	 * @param newValueClass the new value class
+	 * @param converter the converter to use
+	 * @param <NewEvent> the new event type
+	 * @param <NewValue> the new value type
+	 * @return a new converted event value
+	 * @see #getConverted(Class, Class, Converter, Converter)
+	 */
 	default @Nullable <NewEvent extends Event, NewValue> EventValue<NewEvent, NewValue> getConverted(
 		Class<NewEvent> newEventClass,
 		Class<NewValue> newValueClass,
@@ -157,6 +181,18 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		return getConverted(newEventClass, newValueClass, converter, null);
 	}
 
+	/**
+	 * Returns a new event value that converts this value to a different value class
+	 * using the provided converter and reverse converter.
+	 *
+	 * @param newEventClass the new event class
+	 * @param newValueClass the new value class
+	 * @param converter the converter to use to obtain the new value type
+	 * @param reverseConverter the reverse converter to use for changing the value, if available
+	 * @param <NewEvent> the new event type
+	 * @param <NewValue> the new value type
+	 * @return a new converted event value
+	 */
 	<NewEvent extends Event, NewValue> EventValue<NewEvent, NewValue> getConverted(
 		Class<NewEvent> newEventClass,
 		Class<NewValue> newValueClass,

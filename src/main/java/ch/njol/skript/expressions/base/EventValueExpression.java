@@ -21,15 +21,12 @@ import ch.njol.util.StringUtils;
 import ch.njol.util.coll.CollectionUtils;
 import com.google.common.base.Preconditions;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValue;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValueRegistry;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValueRegistry.Resolution;
-import org.skriptlang.skript.registration.DefaultSyntaxInfos;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxRegistry;
 import org.skriptlang.skript.util.Priority;
 
 import java.lang.reflect.Array;
@@ -181,14 +178,38 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 		return init();
 	}
 
+	/**
+	 * Resolves event values for a given event class with default flags and current time.
+	 *
+	 * @param eventClass The event class to resolve for.
+	 * @param <E> The event type.
+	 * @return The resolution result.
+	 */
 	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass) {
 		return resolve(eventClass, EventValueRegistry.DEFAULT_RESOLVE_FLAGS);
 	}
 
+	/**
+	 * Resolves event values for a given event class with specified flags and current time.
+	 *
+	 * @param eventClass The event class to resolve for.
+	 * @param flags The flags to use for resolution.
+	 * @param <E> The event type.
+	 * @return The resolution result.
+	 */
 	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass, int flags) {
 		return resolve(eventClass, getTime(), flags);
 	}
 
+	/**
+	 * Resolves event values for a given event class and a specific time.
+	 * This method disables fallback to the default time state.
+	 *
+	 * @param eventClass The event class to resolve for.
+	 * @param time The time to resolve at.
+	 * @param <E> The event type.
+	 * @return The resolution result.
+	 */
 	private <E extends Event> Resolution<E, ? extends T> resolveForTime(Class<E> eventClass, int time) {
 		return resolve(
 			eventClass,
@@ -197,6 +218,16 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 		);
 	}
 
+	/**
+	 * The core resolution logic for event values.
+	 * This method handles both identifier-based and type-based lookups.
+	 *
+	 * @param eventClass The event class to resolve for.
+	 * @param time The time to resolve at.
+	 * @param flags The flags to use for resolution.
+	 * @param <E> The event type.
+	 * @return The resolution result.
+	 */
 	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass, int time, int flags) {
 		if (identifier != null) {
 			Resolution<E, ? extends T> resolution = registry.resolve(eventClass, identifier, time, flags);
@@ -212,6 +243,12 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 			: registry.resolve(eventClass, type, time, flags);
 	}
 
+	/**
+	 * Gets a string representation of this expression's input for error messages and {@link #toString(Event, boolean)}.
+	 *
+	 * @param plural Whether the name should be plural.
+	 * @return The identifier if it exists, otherwise the name of the component type's super class info.
+	 */
 	private String input(boolean plural) {
 		if (identifier != null)
 			return identifier;
