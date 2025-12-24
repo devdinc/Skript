@@ -55,20 +55,17 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 	@Override
 	public boolean isRegistered(EventValue<?, ?> eventValue) {
 		for (EventValue<?, ?> eventValue2 : eventValues(eventValue.time())) {
-			if (!eventValue.eventClass().equals(eventValue2.eventClass())) continue;
-			if (!eventValue.valueClass().equals(eventValue2.valueClass())) continue;
-			if (!Arrays.equals(eventValue.identifierPatterns(), eventValue2.identifierPatterns())) continue;
-			return true;
+			if (eventValue.matches(eventValue2))
+				return true;
 		}
 		return false;
 	}
 
 	@Override
 	public boolean isRegistered(Class<? extends Event> eventClass, Class<?> valueClass, int time) {
-		for (EventValue<?, ?> eventValue2 : eventValues(time)) {
-			if (!eventClass.equals(eventValue2.eventClass())) continue;
-			if (!valueClass.equals(eventValue2.valueClass())) continue;
-			return true;
+		for (EventValue<?, ?> eventValue : eventValues(time)) {
+			if (eventValue.matches(eventClass, valueClass))
+				return true;
 		}
 		return false;
 	}
@@ -102,8 +99,7 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 			.filter(ev -> ClassUtils.isRelatedTo(ev.eventClass(), eventClass) && ev.matchesInput(identifier))
 			.comparator(Resolver.EVENT_DISTANCE_COMPARATOR)
 			.mapper(ev -> (EventValue<E, V>) ev.getConverted(eventClass, ev.valueClass()))
-			.build()
-			.resolve(eventValues(time));
+			.build().resolve(eventValues(time));
 
 		if (resolution.successful()) {
 			eventValuesCache.put(input, resolution);

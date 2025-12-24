@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.lang.converter.Converter;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
@@ -143,6 +144,41 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 	 * @return the exclusion error message or {@code null}
 	 */
 	@Nullable String excludedErrorMessage();
+
+	/**
+	 * Checks whether this event value matches the provided event value in terms of
+	 * event class, value class, and identifier patterns.
+	 *
+	 * @param eventValue the event value to compare against
+	 * @return {@code true} if they match
+	 */
+	default boolean matches(EventValue<?, ?> eventValue) {
+		return matches(eventValue.eventClass(), eventValue.valueClass(), eventValue.identifierPatterns());
+	}
+
+	/**
+	 * Checks whether this event value matches the provided event class, value class,
+	 * and identifier patterns.
+	 *
+	 * @param eventClass the event class to compare against
+	 * @param valueClass the value class to compare against
+	 * @param identifiersPatterns the identifier patterns to compare against
+	 * @return {@code true} if they match
+	 */
+	default boolean matches(Class<? extends Event> eventClass, Class<?> valueClass, Pattern[] identifiersPatterns) {
+		return matches(eventClass, valueClass) && Arrays.equals(identifierPatterns(), identifiersPatterns);
+	}
+
+	/**
+	 * Checks whether this event value matches the provided event class and value class.
+	 *
+	 * @param eventClass the event class to compare against
+	 * @param valueClass the value class to compare against
+	 * @return {@code true} if they match
+	 */
+	default boolean matches(Class<? extends Event> eventClass, Class<?> valueClass) {
+		return eventClass().equals(eventClass) && valueClass().equals(valueClass);
+	}
 
 	/**
 	 * Returns a new event value that converts this value to a different value class,
