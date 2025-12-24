@@ -2,11 +2,7 @@ package ch.njol.skript.patterns;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAPIException;
-import ch.njol.skript.conditions.CondCompare;
-import ch.njol.skript.conditions.CondContains;
-import ch.njol.skript.conditions.CondDate;
-import ch.njol.skript.conditions.CondIsLoaded;
-import ch.njol.skript.conditions.CondScriptLoaded;
+import ch.njol.skript.conditions.*;
 import ch.njol.skript.effects.EffScriptFile;
 import ch.njol.skript.effects.EffWorldLoad;
 import ch.njol.skript.expressions.*;
@@ -22,15 +18,8 @@ import org.skriptlang.skript.bukkit.potion.elements.conditions.CondHasPotion;
 import org.skriptlang.skript.lang.structure.Structure;
 import org.skriptlang.skript.registration.SyntaxInfo;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -434,6 +423,7 @@ public class PatternConflictsTest extends SkriptJUnitTest {
 		EXCLUSIONS.add(new Exclusion(ExprNewBannerPattern.class, ExprFireworkEffect.class));
 		EXCLUSIONS.add(new Exclusion(ExprInventoryAction.class, ExprClicked.class));
 		EXCLUSIONS.add(new Exclusion(ExprEntities.class, ExprValueWithin.class));
+		EXCLUSIONS.add(new Exclusion(ExprEventExpression.class, ExprEntity.class));
 
 		// 4 conflicts
 		EXCLUSIONS.add(new Exclusion(ExprEntitySound.class, ExprBlockSound.class));
