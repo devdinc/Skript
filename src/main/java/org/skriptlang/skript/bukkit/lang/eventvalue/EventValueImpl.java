@@ -251,8 +251,8 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 			return this;
 		}
 
-		@SafeVarargs
 		@Override
+		@SafeVarargs
 		@Contract(value = "_ -> this", mutates = "this")
 		public final Builder<E, V> excludes(Class<? extends E>... events) {
 			this.excludedEvents = events;
@@ -273,7 +273,7 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 				boolean plural = valueClass.isArray();
 				//noinspection unchecked
 				ClassInfo<?> type = Classes.getExactClassInfo(plural ? (Class<V>) valueClass.getComponentType() : valueClass);
-				if (type != null) {
+				if (type != null && type.getUserInputPatterns() != null) {
 					identifierPatterns = type.getUserInputPatterns();
 					inputValidator = combinePredicates(
 						input -> plural == Utils.getEnglishPlural(input).getSecond(),
