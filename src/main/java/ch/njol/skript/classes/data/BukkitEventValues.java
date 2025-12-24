@@ -880,9 +880,6 @@ public final class BukkitEventValues {
 		registry.register(EventValue.builder(CreatureSpawnEvent.class, SpawnReason.class)
 			.getter(CreatureSpawnEvent::getSpawnReason)
 			.build());
-		registry.register(EventValue.builder(CreatureSpawnEvent.class, SpawnReason.class)
-			.getter(CreatureSpawnEvent::getSpawnReason)
-			.build());
 		//PlayerRespawnEvent - 1.21.5+ added AbstractRespawnEvent as a base class, where prior to that, getRespawnReason was in PlayerRespawnEvent
 		if (Skript.classExists("org.bukkit.event.player.AbstractRespawnEvent")) {
 			registry.register(EventValue.builder(PlayerRespawnEvent.class, RespawnReason.class)
