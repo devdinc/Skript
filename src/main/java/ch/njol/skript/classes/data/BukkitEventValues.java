@@ -479,7 +479,7 @@ public final class BukkitEventValues {
 		// PlayerItemConsumeEvent
 		registry.register(EventValue.builder(PlayerItemConsumeEvent.class, ItemStack.class)
 			.getter(PlayerItemConsumeEvent::getItem)
-			.setChanger(PlayerItemConsumeEvent::setItem)
+			.registerSetChanger(PlayerItemConsumeEvent::setItem)
 			.build());
 		// PlayerItemBreakEvent
 		registry.register(EventValue.builder(PlayerItemBreakEvent.class, ItemStack.class)
@@ -1224,7 +1224,7 @@ public final class BukkitEventValues {
 		if (Skript.classExists("org.bukkit.event.block.VaultDisplayItemEvent")) {
 			registry.register(EventValue.builder(VaultDisplayItemEvent.class, ItemStack.class)
 				.getter(VaultDisplayItemEvent::getDisplayItem)
-				.setChanger(VaultDisplayItemEvent::setDisplayItem)
+				.registerSetChanger(VaultDisplayItemEvent::setDisplayItem)
 				.build());
 		}
 
@@ -1233,7 +1233,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(VillagerCareerChangeEvent.class, Villager.Profession.class)
 			.getter(VillagerCareerChangeEvent::getProfession)
-			.setChanger((event, profession) -> {
+			.registerSetChanger((event, profession) -> {
 				if (profession == null)
 					return;
 				event.setProfession(profession);

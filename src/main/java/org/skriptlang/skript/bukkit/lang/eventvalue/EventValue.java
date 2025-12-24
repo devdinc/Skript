@@ -275,7 +275,7 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		 * @return this builder
 		 */
 		@Contract(value = "_ -> this", mutates = "this")
-		Builder<E,V> setChanger(Changer<E, V> changer);
+		Builder<E,V> registerSetChanger(Changer<E, V> changer);
 
 		/**
 		 * Registers a changer for {@link ChangeMode#ADD}.
@@ -284,7 +284,7 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		 * @return this builder
 		 */
 		@Contract(value = "_ -> this", mutates = "this")
-		Builder<E,V> addChanger(Changer<E, V> changer);
+		Builder<E,V> registerAddChanger(Changer<E, V> changer);
 
 		/**
 		 * Registers a changer for {@link ChangeMode#REMOVE}.
@@ -293,7 +293,7 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		 * @return this builder
 		 */
 		@Contract(value = "_ -> this", mutates = "this")
-		Builder<E,V> removeChanger(Changer<E, V> changer);
+		Builder<E,V> registerRemoveChanger(Changer<E, V> changer);
 
 		/**
 		 * Registers a changer for {@link ChangeMode#REMOVE_ALL}.
@@ -302,7 +302,7 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		 * @return this builder
 		 */
 		@Contract(value = "_ -> this", mutates = "this")
-		Builder<E,V> removeAllChanger(Changer<E, V> changer);
+		Builder<E,V> registerRemoveAllChanger(Changer<E, V> changer);
 
 		/**
 		 * Registers a changer for {@link ChangeMode#DELETE} that does not require a value.
@@ -311,7 +311,7 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		 * @return this builder
 		 */
 		@Contract(value = "_ -> this", mutates = "this")
-		Builder<E,V> deleteChanger(NoValueChanger<E, V> changer);
+		Builder<E,V> registerDeleteChanger(NoValueChanger<E, V> changer);
 
 		/**
 		 * Registers a changer for {@link ChangeMode#RESET} that does not require a value.
@@ -320,7 +320,7 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		 * @return this builder
 		 */
 		@Contract(value = "_ -> this", mutates = "this")
-		Builder<E,V> resetChanger(NoValueChanger<E, V> changer);
+		Builder<E,V> registerResetChanger(NoValueChanger<E, V> changer);
 
 		/**
 		 * Sets the time state for which this event value is registered.

@@ -204,42 +204,42 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 
 		@Override
 		@Contract(value = "_ -> this", mutates = "this")
-		public Builder<E,V> setChanger(Changer<E, V> changer) {
+		public Builder<E,V> registerSetChanger(Changer<E, V> changer) {
 			changers.put(ChangeMode.SET, changer);
 			return this;
 		}
 
 		@Override
 		@Contract(value = "_ -> this", mutates = "this")
-		public Builder<E,V> addChanger(Changer<E, V> changer) {
+		public Builder<E,V> registerAddChanger(Changer<E, V> changer) {
 			changers.put(ChangeMode.ADD, changer);
 			return this;
 		}
 
 		@Override
 		@Contract(value = "_ -> this", mutates = "this")
-		public Builder<E,V> removeChanger(Changer<E, V> changer) {
+		public Builder<E,V> registerRemoveChanger(Changer<E, V> changer) {
 			changers.put(ChangeMode.REMOVE, changer);
 			return this;
 		}
 
 		@Override
 		@Contract(value = "_ -> this", mutates = "this")
-		public Builder<E,V> removeAllChanger(Changer<E, V> changer) {
+		public Builder<E,V> registerRemoveAllChanger(Changer<E, V> changer) {
 			changers.put(ChangeMode.REMOVE_ALL, changer);
 			return this;
 		}
 
 		@Override
 		@Contract(value = "_ -> this", mutates = "this")
-		public Builder<E,V> deleteChanger(NoValueChanger<E, V> changer) {
+		public Builder<E,V> registerDeleteChanger(NoValueChanger<E, V> changer) {
 			changers.put(ChangeMode.DELETE, changer);
 			return this;
 		}
 
 		@Override
 		@Contract(value = "_ -> this", mutates = "this")
-		public Builder<E,V> resetChanger(NoValueChanger<E, V> changer) {
+		public Builder<E,V> registerResetChanger(NoValueChanger<E, V> changer) {
 			changers.put(ChangeMode.RESET, changer);
 			return this;
 		}
