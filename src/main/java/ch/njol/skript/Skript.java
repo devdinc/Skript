@@ -551,7 +551,7 @@ public final class Skript extends JavaPlugin implements Listener {
 		skriptCommand.setTabCompleter(new SkriptCommandTabCompleter());
 
 		// Load Bukkit stuff. It is done after platform check, because something might be missing!
-		new BukkitEventValues();
+		BukkitEventValues.register(eventValueRegistry);
 
 		new DefaultComparators();
 		new DefaultConverters();

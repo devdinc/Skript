@@ -1,6 +1,7 @@
 package org.skriptlang.skript.bukkit.lang.eventvalue;
 
 import ch.njol.skript.classes.Changer.ChangeMode;
+import ch.njol.util.coll.CollectionUtils;
 import org.bukkit.event.Event;
 import org.intellij.lang.annotations.RegExp;
 import org.jetbrains.annotations.Contract;
@@ -295,13 +296,52 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		Builder<E,V> time(int time);
 
 		/**
+		 * Excludes a specific event subclass from using this event value.
+		 *
+		 * @param event event class to exclude
+		 * @return this builder
+		 */
+		@Contract(value = "_ -> this", mutates = "this")
+		default Builder<E, V> excludes(Class<? extends E> event) {
+			excludes(CollectionUtils.array(event));
+			return this;
+		}
+
+		/**
+		 * Excludes specific event subclasses from using this event value.
+		 *
+		 * @param event1 first event class to exclude
+		 * @param event2 second event class to exclude
+		 * @return this builder
+		 */
+		@Contract(value = "_, _ -> this", mutates = "this")
+		default Builder<E, V> excludes(Class<? extends E> event1, Class<? extends E> event2) {
+			excludes(CollectionUtils.array(event1, event2));
+			return this;
+		}
+
+		/**
+		 * Excludes specific event subclasses from using this event value.
+		 *
+		 * @param event1 first event class to exclude
+		 * @param event2 second event class to exclude
+		 * @param event3 third event class to exclude
+		 * @return this builder
+		 */
+		@Contract(value = "_, _, _ -> this", mutates = "this")
+		default Builder<E, V> excludes(Class<? extends E> event1, Class<? extends E> event2, Class<? extends E> event3) {
+			excludes(CollectionUtils.array(event1, event2, event3));
+			return this;
+		}
+
+		/**
 		 * Excludes specific event subclasses from using this event value.
 		 *
 		 * @param events event classes to exclude
 		 * @return this builder
 		 */
 		@Contract(value = "_ -> this", mutates = "this")
-		EventValueImpl.Builder<E, V> excludes(Class<? extends E>... events);
+		Builder<E, V> excludes(Class<? extends E>[] events);
 
 		/**
 		 * Sets an error message to be shown if this event value is selected for an excluded event.
@@ -310,7 +350,7 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		 * @return this builder
 		 */
 		@Contract(value = "_ -> this", mutates = "this")
-		EventValueImpl.Builder<E, V> excludedErrorMessage(String excludedErrorMessage);
+		Builder<E, V> excludedErrorMessage(String excludedErrorMessage);
 
 		/**
 		 * Builds the event value.
