@@ -194,9 +194,8 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 		 * @throws IllegalStateException if the resolution is not unique
 		 */
 		public EventValue<E, V> unique() {
-			if (all.size() != 1) {
+			if (all.size() != 1)
 				throw new IllegalStateException("Resolution is not unique (size: " + all.size() + ")");
-			}
 			return all.getFirst();
 		}
 
@@ -204,7 +203,8 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 		 * @return the single candidate or {@code null} if not unique
 		 */
 		public EventValue<E, V> uniqueOrNull() {
-			if (all.size() != 1) {return null;}
+			if (all.size() != 1)
+				return null;
 			return all.getFirst();
 		}
 
@@ -212,7 +212,8 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 		 * @return the single candidate as an {@link Optional}, empty if not unique
 		 */
 		public Optional<EventValue<E, V>> uniqueOptional() {
-			if (all.size() != 1) {return Optional.empty();}
+			if (all.size() != 1)
+				return Optional.empty();
 			return Optional.of(all.getFirst());
 		}
 
@@ -221,7 +222,8 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 		 * @throws IllegalStateException if the resolution is empty
 		 */
 		public EventValue<E, V> any() {
-			if (all.isEmpty()) {throw new IllegalStateException("Resolution is empty");}
+			if (all.isEmpty())
+				throw new IllegalStateException("Resolution is empty");
 			return all.getFirst();
 		}
 
@@ -229,7 +231,8 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 		 * @return any candidate or {@code null} if none
 		 */
 		public EventValue<E, V> anyOrNull() {
-			if (all.isEmpty()) {return null;}
+			if (all.isEmpty())
+				return null;
 			return all.getFirst();
 		}
 
@@ -237,7 +240,8 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 		 * @return any candidate as an {@link Optional}, empty if none
 		 */
 		public Optional<EventValue<E, V>> anyOptional() {
-			if (all.isEmpty()) {return Optional.empty();}
+			if (all.isEmpty())
+				return Optional.empty();
 			return Optional.of(all.getFirst());
 		}
 
