@@ -2,6 +2,7 @@ package ch.njol.skript.lang.function;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAPIException;
+import ch.njol.skript.util.Utils;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.ApiStatus;
@@ -503,9 +504,7 @@ public final class FunctionRegistry implements Registry<Function<?>> {
 				// make sure all types in the passed array are valid for the array parameter
 				Class<?> arrayType = candidate.args[0].componentType();
 				for (Class<?> arrayArg : provided.args) {
-					if (arrayArg.isArray()) {
-						arrayArg = arrayArg.componentType();
-					}
+					arrayArg = Utils.getComponentType(arrayArg);
           
 					if (!Converters.converterExists(arrayArg, arrayType)) {
 						continue candidates;
@@ -525,12 +524,7 @@ public final class FunctionRegistry implements Registry<Function<?>> {
 			// if the types of the provided arguments do not match the candidate arguments, skip
 			for (int i = 0; i < provided.args.length; i++) {
 				// allows single passed values to still match array type in candidate (e.g. clamp)
-				Class<?> providedType;
-				if (provided.args[i].isArray()) {
-					providedType = provided.args[i].componentType();
-				} else {
-					providedType = provided.args[i];
-				}
+				Class<?> providedType = Utils.getComponentType(provided.args[i]);
 
 				Class<?> candidateType;
 				if (candidate.args[i].isArray()) {

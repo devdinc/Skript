@@ -15,6 +15,7 @@ import ch.njol.skript.log.SkriptLogger;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.Contract;
 import ch.njol.skript.util.LiteralUtils;
+import ch.njol.skript.util.Utils;
 import ch.njol.util.StringUtils;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
@@ -199,7 +200,7 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 		}
 
 		// Validate parameter count
-		singleListParam = sign.getMaxParameters() == 1 && !sign.parameters().getFirst().single();
+		singleListParam = sign.getMaxParameters() == 1 && !sign.parameters().getFirst().isSingle();
 		if (!singleListParam) { // Check that parameter count is within allowed range
 			// Too many parameters
 			if (parameters.length > sign.getMaxParameters()) {
@@ -239,7 +240,7 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 			Parameter<?> parameter = sign.parameters().get(singleListParam ? 0 : i);
 			RetainingLogHandler log = SkriptLogger.startRetainingLog();
 			try {
-				Class<?> target = Function.getComponent(parameter.type());
+				Class<?> target = Utils.getComponentType(parameter.type());
 
 				//noinspection unchecked
 				Expression<?> expr = parameters[i].getConvertedExpression(target);
@@ -260,7 +261,7 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 						function = previousFunction;
 					}
 					return false;
-				} else if (parameter.single() && !expr.isSingle()) {
+				} else if (parameter.isSingle() && !expr.isSingle()) {
 					if (first) {
 						Skript.error("The " + StringUtils.fancyOrderNumber(i + 1) + " argument given to the function '" + functionName + "' is plural, "
 							+ "but a single argument was expected");

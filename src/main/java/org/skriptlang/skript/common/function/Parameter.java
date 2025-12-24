@@ -42,7 +42,7 @@ public interface Parameter<T> {
 	/**
 	 * @return Whether this parameter is for single values.
 	 */
-	default boolean single() {
+	default boolean isSingle() {
 		return !type().isArray();
 	}
 

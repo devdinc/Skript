@@ -163,7 +163,7 @@ public class DynamicFunctionReference<Result>
 		this.checkedInputs.put(input, null); // failure case
 		if (signature == null)
 			return null;
-		boolean varArgs = signature.getMaxParameters() == 1 && !signature.parameters().getFirst().single();
+		boolean varArgs = signature.getMaxParameters() == 1 && !signature.parameters().getFirst().isSingle();
 		Expression<?>[] parameters = input.parameters();
 		// Too many parameters
 		if (parameters.length > signature.getMaxParameters() && !varArgs)
@@ -182,7 +182,7 @@ public class DynamicFunctionReference<Result>
 			Expression<?> expression = parameters[i].getConvertedExpression(target);
 			if (expression == null) {
 				return null;
-			} else if (parameter.single() && !expression.isSingle()) {
+			} else if (parameter.isSingle() && !expression.isSingle()) {
 				return null;
 			}
 			checked[i] = expression;

@@ -3,13 +3,10 @@ package ch.njol.skript.lang.function;
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAPIException;
 import ch.njol.skript.SkriptAddon;
-import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.config.SectionNode;
 import ch.njol.skript.lang.function.FunctionRegistry.Retrieval;
 import ch.njol.skript.lang.function.FunctionRegistry.RetrievalResult;
-import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.structures.StructFunction;
-import ch.njol.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.common.function.DefaultFunction;
 import org.skriptlang.skript.common.function.FunctionReference;
@@ -116,14 +113,6 @@ public abstract class Functions {
 		}
 
 		if (Skript.debug() || node.debug()) {
-			Class<?> returnType = signature.returnType();
-			ClassInfo<?> c;
-			if (returnType != null && returnType.isArray()) {
-				c = Classes.getExactClassInfo(returnType.componentType());
-			} else {
-				c = Classes.getExactClassInfo(returnType);
-			}
-
 			Skript.debug(signature.toString());
 		}
 
@@ -170,7 +159,7 @@ public abstract class Functions {
 		Retrieval<Signature<?>> existing;
 		Parameter<?>[] parameters = signature.parameters().all();
 
-		if (parameters.length == 1 && !parameters[0].single()) {
+		if (parameters.length == 1 && !parameters[0].isSingle()) {
 			existing = FunctionRegistry.getRegistry().getExactSignature(signature.namespace(), signature.getName(), parameters[0].type().arrayType());
 		} else {
 			Class<?>[] types = new Class<?>[parameters.length];

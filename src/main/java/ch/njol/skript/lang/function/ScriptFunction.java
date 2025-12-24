@@ -4,6 +4,7 @@ import ch.njol.skript.config.SectionNode;
 import ch.njol.skript.lang.*;
 import ch.njol.skript.lang.parser.ParserInstance;
 import ch.njol.skript.lang.util.SimpleEvent;
+import ch.njol.skript.util.Utils;
 import ch.njol.skript.variables.HintManager;
 import ch.njol.skript.variables.Variables;
 import org.bukkit.event.Event;
@@ -32,7 +33,7 @@ public class ScriptFunction<T> extends Function<T> implements ReturnHandler<T> {
 			hintManager.enterScope(false);
 			for (Parameter<?> parameter : sign.parameters().all()) {
 				String hintName = parameter.name();
-				if (!parameter.single()) {
+				if (!parameter.isSingle()) {
 					hintName += Variable.SEPARATOR + "*";
 					assert parameter.type().isArray();
 					hintManager.set(hintName, parameter.type().componentType());
@@ -56,7 +57,7 @@ public class ScriptFunction<T> extends Function<T> implements ReturnHandler<T> {
 		int i = 0;
 		for (Parameter<?> parameter :  getSignature().parameters().all()) {
 			Object[] val = params[i];
-			if (parameter.single() && val.length > 0) {
+			if (parameter.isSingle() && val.length > 0) {
 				Variables.setVariable(parameter.name(), val[0], event, true);
 				i++;
 				continue;
@@ -97,7 +98,7 @@ public class ScriptFunction<T> extends Function<T> implements ReturnHandler<T> {
 				continue;
 			}
 
-			if (parameter.single()) {
+			if (parameter.isSingle()) {
 				Variables.setVariable(name, value, newEvent, true);
 			} else {
 				if (value instanceof KeyedValue<?>[] keyedValues) {
@@ -158,12 +159,8 @@ public class ScriptFunction<T> extends Function<T> implements ReturnHandler<T> {
 
 	@Override
 	public final @Nullable Class<? extends T> returnValueType() {
-		if (type() == null) {
-			return null;
-		}
-
 		//noinspection unchecked
-		return (Class<? extends T>) Function.getComponent(type());
+		return (Class<? extends T>) Utils.getComponentType(type());
 	}
 
 }

@@ -272,13 +272,13 @@ public class StructFunction extends Structure {
                     }
                 }
 
-                ClassInfo<?> c = Classes.getClassInfoFromUserInput(matcher.group("type"));
+                ClassInfo<?> classInfo = Classes.getClassInfoFromUserInput(matcher.group("type"));
                 PluralResult result = Utils.isPlural(matcher.group("type"));
 
-                if (c == null)
-                    c = Classes.getClassInfoFromUserInput(result.updated());
+                if (classInfo == null)
+                    classInfo = Classes.getClassInfoFromUserInput(result.updated());
 
-                if (c == null) {
+                if (classInfo == null) {
                     Skript.error("Cannot recognise the type '%s'", matcher.group("type"));
                     return null;
                 }
@@ -288,9 +288,9 @@ public class StructFunction extends Structure {
 
                 Class<?> type;
                 if (result.plural()) {
-                    type = c.getC().arrayType();
+                    type = classInfo.getC().arrayType();
                 } else {
-                    type = c.getC();
+                    type = classInfo.getC();
                 }
 
                 Parameter<?> parameter = ScriptParameter.parse(variableName, type, matcher.group("def"));

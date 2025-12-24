@@ -71,7 +71,7 @@ final class DefaultFunctionImpl<T> extends ch.njol.skript.lang.function.Function
 				}
 			}
 
-			if (arg.length == 1 || parameter.single()) {
+			if (arg.length == 1 || parameter.isSingle()) {
 				assert parameter.type().isAssignableFrom(arg[0].getClass())
 						: "argument type %s does not match parameter type %s".formatted(parameter.type().getSimpleName(),
 						arg[0].getClass().getSimpleName());

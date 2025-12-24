@@ -7,8 +7,6 @@ import org.jetbrains.annotations.ApiStatus.NonExtendable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.SequencedMap;
-
 /**
  * Represents a function signature.
  *
@@ -46,7 +44,7 @@ public interface Signature<T> {
 	/**
 	 * @return Whether this signature returns single values.
 	 */
-	default boolean single() {
+	default boolean isSingle() {
 		if (returnType() == null) {
 			return false;
 		}

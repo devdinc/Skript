@@ -10,6 +10,7 @@ import ch.njol.skript.lang.function.Functions;
 import ch.njol.skript.localization.Language;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.LiteralUtils;
+import ch.njol.skript.util.Utils;
 import com.google.common.base.Preconditions;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
@@ -138,15 +139,15 @@ public final class FunctionReference<T> implements Debuggable {
 				Skript.error("Can't understand this expression: %s", original);
 			} else {
 				Skript.error("Expected type %s for argument '%s', but %s is of type %s.",
-						getName(target.type(), target.single()), target.name(), original,
+						getName(target.type(), target.isSingle()), target.name(), original,
 						getName(original.getReturnType(), original.isSingle()));
 			}
 			return false;
 		}
 
-		if (target.single() && !converted.isSingle()) {
+		if (target.isSingle() && !converted.isSingle()) {
 			Skript.error("Expected type %s for argument '%s', but %s is of type %s.",
-					getName(target.type(), target.single()), target.name(), converted, getName(converted.getReturnType(), converted.isSingle()));
+					getName(target.type(), target.isSingle()), target.name(), converted, getName(converted.getReturnType(), converted.isSingle()));
 			return false;
 		}
 
@@ -157,10 +158,7 @@ public final class FunctionReference<T> implements Debuggable {
 		if (single) {
 			return Classes.getSuperClassInfo(clazz).getName().getSingular();
 		} else {
-			if (clazz.isArray()) {
-				return Classes.getSuperClassInfo(clazz.componentType()).getName().getPlural();
-			}
-			return Classes.getSuperClassInfo(clazz).getName().getPlural();
+			return Classes.getSuperClassInfo(Utils.getComponentType(clazz)).getName().getPlural();
 		}
 	}
 
@@ -306,7 +304,7 @@ public final class FunctionReference<T> implements Debuggable {
 
 			return signature.contract().isSingle(args);
 		} else {
-			return signature.single();
+			return signature.isSingle();
 		}
 	}
 

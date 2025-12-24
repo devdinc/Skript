@@ -105,7 +105,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 		this.parameters = parameters;
 		this.local = local;
 		this.returns = returnType;
-		this.single = single();
+		this.single = this.isSingle();
 		if (returnType != null && returnType.isArray()) {
 			//noinspection unchecked
 			this.returnType = (ClassInfo<T>) Classes.getExactClassInfo(returnType.componentType());
@@ -138,7 +138,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 			return null;
 		}
 
-		ClassInfo<?> classInfo = Classes.getExactClassInfo(Function.getComponent(parameter.type()));
+		ClassInfo<?> classInfo = Classes.getExactClassInfo(Utils.getComponentType(parameter.type()));
 		return new Parameter<>(parameter.name(), classInfo, !parameter.type().isArray(), null,
 				parameter.modifiers().toArray(new Modifier[0]));
 	}
@@ -217,6 +217,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	/**
 	 * @return Whether this signature returns a single or multiple values.
 	 */
+	@Override
 	public boolean isSingle() {
 		return single;
 	}

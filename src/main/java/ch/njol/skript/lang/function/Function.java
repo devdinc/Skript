@@ -24,17 +24,6 @@ import java.util.SequencedMap;
 public abstract class Function<T> implements org.skriptlang.skript.common.function.Function<T> {
 
 	/**
-	 * @param cls The class.
-	 * @return The component of cls if cls is an array, otherwise cls.
-	 */
-	static Class<?> getComponent(Class<?> cls) {
-		if (cls != null && cls.isArray()) {
-			return cls.componentType();
-		}
-		return cls;
-	}
-
-	/**
 	 * Execute functions even when some parameters are not present.
 	 * Field is updated by SkriptConfig in case of reloads.
 	 */
@@ -128,28 +117,28 @@ public abstract class Function<T> implements org.skriptlang.skript.common.functi
 		for (org.skriptlang.skript.common.function.Parameter<?> parameter : parameters.all()) {
 			Object[] parameterValue = parameter.hasModifier(Modifier.KEYED) ? convertToKeyed(parameterValues[i]) : parameterValues[i];
 
-			Expression<?> def;
+			Expression<?> defaultValueExpr;
 			if (parameter instanceof Parameter<?> script) {
-				def = script.def;
+				defaultValueExpr = script.def;
 			} else if (parameter instanceof ScriptParameter<?> script) {
-				def = script.defaultValue();
+				defaultValueExpr = script.defaultValue();
 			} else {
-				def = null;
+				defaultValueExpr = null;
 			}
 
 			// see https://github.com/SkriptLang/Skript/pull/8135
-			if ((parameterValues[i] == null || parameterValues[i].length == 0) && parameter.hasModifier(Modifier.KEYED) && def != null) {
-				Object[] defaultValue = def.getArray(event);
+			if ((parameterValues[i] == null || parameterValues[i].length == 0) && parameter.hasModifier(Modifier.KEYED) && defaultValueExpr != null) {
+				Object[] defaultValue = defaultValueExpr.getArray(event);
 				if (defaultValue.length == 1) {
 					parameterValue = KeyedValue.zip(defaultValue, null);
 				} else {
 					parameterValue = defaultValue;
 				}
 			} else if (parameterValue == null) { // Go for default value
-				assert def != null; // Should've been parse error
-				Object[] defaultValue = def.getArray(event);
-				if (parameter.hasModifier(Modifier.KEYED) && KeyProviderExpression.areKeysRecommended(def)) {
-					String[] keys = ((KeyProviderExpression<?>) def).getArrayKeys(event);
+				assert defaultValueExpr != null; // Should've been parse error
+				Object[] defaultValue = defaultValueExpr.getArray(event);
+				if (parameter.hasModifier(Modifier.KEYED) && KeyProviderExpression.areKeysRecommended(defaultValueExpr)) {
+					String[] keys = ((KeyProviderExpression<?>) defaultValueExpr).getArrayKeys(event);
 					parameterValue = KeyedValue.zip(defaultValue, keys);
 				} else {
 					parameterValue = defaultValue;

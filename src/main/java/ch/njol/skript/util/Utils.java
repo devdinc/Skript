@@ -963,5 +963,14 @@ public abstract class Utils {
 
 		return true;
 	}
-
+	/**
+	 * @param cls The class.
+	 * @return The component of cls if cls is an array, otherwise cls.
+	 */
+	public static Class<?> getComponentType(Class<?> cls) {
+		if (cls != null && cls.isArray()) {
+			return cls.componentType();
+		}
+		return cls;
+	}
 }

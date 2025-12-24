@@ -5,6 +5,7 @@ import ch.njol.skript.lang.*;
 import ch.njol.skript.log.RetainingLogHandler;
 import ch.njol.skript.log.SkriptLogger;
 import ch.njol.skript.util.LiteralUtils;
+import ch.njol.skript.util.Utils;
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,12 +52,7 @@ public record ScriptParameter<T>(String name, Class<T> type, Set<Modifier> modif
 
 		Expression<?> defaultValue = null;
 		if (def != null) {
-			Class<?> target;
-			if (type.isArray()) {
-				target = type.componentType();
-			} else {
-				target = type;
-			}
+			Class<?> target = Utils.getComponentType(type);
 
 			// Parse the default value expression
 			try (RetainingLogHandler log = SkriptLogger.startRetainingLog()) {

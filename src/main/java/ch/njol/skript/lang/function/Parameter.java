@@ -313,7 +313,7 @@ public final class Parameter<T> implements org.skriptlang.skript.common.function
 	}
 
 	@Override
-	public boolean single() {
+	public boolean isSingle() {
 		return single;
 	}
 

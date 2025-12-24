@@ -9,7 +9,7 @@ import java.util.SequencedMap;
 /**
  * Holding class for a parameters of a function.
  */
-public class Parameters {
+public final class Parameters {
 
 	private final SequencedMap<String, Parameter<?>> named;
 	private final Parameter<?>[] indexed;

@@ -1158,7 +1158,7 @@ public final class SkriptParser {
 	private final static Pattern FUNCTION_CALL_PATTERN = Pattern.compile("(" + Functions.functionNamePattern + ")\\((.*)\\)");
 
 	/**
-	 * @deprecated Use {{@link #parseFunctionReference()}} instead.
+	 * @deprecated Use {@link #parseFunctionReference()} instead.
 	 */
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
 	public <T> @Nullable FunctionReference<T> parseFunction(@Nullable Class<? extends T>... types) {
@@ -1231,7 +1231,7 @@ public final class SkriptParser {
 				boolean trySinglePlural = false;
 				for (var signature : signatures) {
 					trySingle |= signature.getMinParameters() <= 1 || signature.getMaxParameters() == 1;
-					trySinglePlural |= trySingle && !signature.getParameter(0).single();
+					trySinglePlural |= trySingle && !signature.getParameter(0).isSingle();
 					for (int i = 0; i < signature.getMaxParameters(); i++) {
 						if (signatureDatas.size() <= i) {
 							signatureDatas.add(new ArrayList<>());

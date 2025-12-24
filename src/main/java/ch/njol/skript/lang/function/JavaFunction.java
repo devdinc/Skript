@@ -69,7 +69,7 @@ public abstract class JavaFunction<T> extends Function<T> implements Documentabl
 					return null;
 				}
 
-				if (parameter.single()) {
+				if (parameter.isSingle()) {
 					params[i] = new Object[] { defaultExpression.getSingle(event) };
 				} else {
 					params[i] = defaultExpression.getArray(event);
