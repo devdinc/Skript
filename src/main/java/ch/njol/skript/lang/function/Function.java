@@ -53,7 +53,7 @@ public abstract class Function<T> implements org.skriptlang.skript.common.functi
 	}
 
 	/**
-	 * @deprecated Use {@link Signature#parameters()} instead.
+	 * @deprecated Use {@link Signature#parameters()} and {@link Parameters#all()} instead.
 	 */
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
 	public org.skriptlang.skript.common.function.Parameter<?>[] getParameters() {
@@ -61,7 +61,7 @@ public abstract class Function<T> implements org.skriptlang.skript.common.functi
 	}
 
 	/**
-	 * @deprecated Use {@link Signature#getParameter(String)}} instead.
+	 * @deprecated Use {@link Signature#parameters()} and {@link Parameters#get(int)} instead.
 	 */
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
 	public org.skriptlang.skript.common.function.Parameter<?> getParameter(int index) {
@@ -72,10 +72,6 @@ public abstract class Function<T> implements org.skriptlang.skript.common.functi
 		return sign.isSingle();
 	}
 
-	/**
-	 * @deprecated Use {@link #type()} instead.
-	 */
-	@Deprecated(forRemoval = true, since = "INSERT VERSION")
 	public @Nullable ClassInfo<T> getReturnType() {
 		return sign.getReturnType();
 	}
@@ -86,8 +82,6 @@ public abstract class Function<T> implements org.skriptlang.skript.common.functi
 	public Class<T> type() {
 		return sign.returnType();
 	}
-
-	// FIXME what happens with a delay in a function?
 
 	/**
 	 * @deprecated Use {@link #execute(FunctionEvent, FunctionArguments)} instead.

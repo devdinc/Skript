@@ -1154,172 +1154,25 @@ public final class SkriptParser {
 		}
 		return null;
 	}
- 
-	private final static Pattern FUNCTION_CALL_PATTERN = Pattern.compile("(" + Functions.functionNamePattern + ")\\((.*)\\)");
 
 	/**
 	 * @deprecated Use {@link #parseFunctionReference()} instead.
 	 */
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
 	public <T> @Nullable FunctionReference<T> parseFunction(@Nullable Class<? extends T>... types) {
-		if (context != ParseContext.DEFAULT && context != ParseContext.EVENT)
+		if (context != ParseContext.DEFAULT && context != ParseContext.EVENT) {
 			return null;
-		try (ParseLogHandler log = SkriptLogger.startParseLogHandler()) {
-			Matcher matcher = FUNCTION_CALL_PATTERN.matcher(expr);
-			if (!matcher.matches()) {
-				log.printLog();
-				return null;
-			}
-
-			String functionName = matcher.group(1);
-			String args = matcher.group(2);
-
-			// Check for incorrect quotes, e.g. "myFunction() + otherFunction()" being parsed as one function
-			// See https://github.com/SkriptLang/Skript/issues/1532
-			for (int i = 0; i < args.length(); i = next(args, i, context)) {
-				if (i == -1) {
-					log.printLog();
-					return null;
-				}
-			}
-
-			if ((flags & PARSE_EXPRESSIONS) == 0) {
-				Skript.error("Functions cannot be used here (or there is a problem with your arguments).");
-				log.printError();
-				return null;
-			}
-
-			SkriptParser skriptParser = new SkriptParser(args, flags | PARSE_LITERALS, context);
-			Expression<?>[] params = args.isEmpty() ? new Expression[0] : null;
-
-			String namespace = null;
-			ParserInstance parser = getParser();
-			if (parser.isActive()) {
-				namespace = parser.getCurrentScript().getConfig().getFileName();
-			}
-
-			if (params == null) { // there are arguments to parse
-				// determine signatures that could match
-				var signatures = FunctionRegistry.getRegistry().getSignatures(namespace, functionName).stream()
-					.filter(signature -> {
-						if (signature.getMaxParameters() == 0) { // we have arguments, but this function doesn't
-							return false;
-						}
-						if (types != null) { // filter signatures based on expected return type
-							if (signature.getReturnType() == null) {
-								return false;
-							}
-							Class<?> signatureType = signature.getReturnType().getC();
-							for (Class<?> type : types) {
-								//noinspection DataFlowIssue - individual elements won't be null
-								if (Converters.converterExists(signatureType, type)) {
-									return true;
-								}
-							}
-							return false;
-						}
-						return true;
-					})
-					.toList();
-
-				// here, we map all signatures into type/plurality collections
-				// for example, all possible types (and whether they are plural) for the first parameter
-				//  will be mapped into the 0-index of both collections
-				record SignatureData(ClassInfo<?> classInfo, boolean plural) { }
-				List<List<SignatureData>> signatureDatas = new ArrayList<>();
-				boolean trySingle = false;
-				boolean trySinglePlural = false;
-				for (var signature : signatures) {
-					trySingle |= signature.getMinParameters() <= 1 || signature.getMaxParameters() == 1;
-					trySinglePlural |= trySingle && !signature.getParameter(0).isSingle();
-					for (int i = 0; i < signature.getMaxParameters(); i++) {
-						if (signatureDatas.size() <= i) {
-							signatureDatas.add(new ArrayList<>());
-						}
-						var parameter = signature.getParameter(i);
-						signatureDatas.get(i).add(new SignatureData(parameter.getType(), !parameter.isSingleValue()));
-					}
-				}
-				ExprInfo[] signatureInfos = new ExprInfo[signatureDatas.size()];
-				for (int infoIndex = 0; infoIndex < signatureInfos.length; infoIndex++) {
-					List<SignatureData> datas = signatureDatas.get(infoIndex);
-					ClassInfo<?>[] infos = new ClassInfo[datas.size()];
-					boolean[] isPlural = new boolean[infos.length];
-					for (int dataIndex = 0; dataIndex < infos.length; dataIndex++) {
-						SignatureData data = datas.get(dataIndex);
-						infos[dataIndex] = data.classInfo;
-						isPlural[dataIndex] = data.plural;
-					}
-					signatureInfos[infoIndex] = new ExprInfo(infos, isPlural);
-				}
-				OrderedExprInfo orderedExprInfo = new OrderedExprInfo(signatureInfos);
-
-				if (trySingle) {
-					params = this.getFunctionArguments(
-						() -> skriptParser.parseSingleExpr(true, null, orderedExprInfo.infos[0]),
-						args);
-					if (params == null && trySinglePlural) {
-						log.clear();
-						log.clearError();
-						try (ParseLogHandler listLog = SkriptLogger.startParseLogHandler()) {
-							params = this.getFunctionArguments(
-								() -> skriptParser.parseExpressionList(listLog, orderedExprInfo.infos[0]),
-								args);
-						}
-					}
-				}
-				if (params == null) {
-					log.clear();
-					log.clearError();
-					try (ParseLogHandler listLog = SkriptLogger.startParseLogHandler()) {
-						params = this.getFunctionArguments(
-							() -> skriptParser.parseExpressionList(listLog, orderedExprInfo),
-							args);
-					}
-				}
-				if (params == null) {
-					log.printError();
-					return null;
-				}
-			}
-
-			FunctionReference<T> functionReference = new FunctionReference<>(functionName, SkriptLogger.getNode(), namespace, types, params);
-			if (!functionReference.validateFunction(true)) {
-				log.printError();
-				return null;
-			}
-			log.printLog();
-			return functionReference;
 		}
-	}
-
-	/**
-	 * @deprecated Use {@link #parseFunctionReference()} instead.
-	 */
-	@Deprecated(forRemoval = true, since = "INSERT VERSION")
-	private Expression<?> @Nullable [] getFunctionArguments(Supplier<Expression<?>> parsing, String args) {
-		if (args.isEmpty()) {
-			return new Expression[0];
-		}
-
-		Expression<?> parsedExpression = parsing.get();
-		if (parsedExpression == null) {
+		var newReference = new FunctionReferenceParser(context, flags).parseFunctionReference(expr);
+		if (newReference == null) {
 			return null;
 		}
 
-		Expression<?>[] params;
-		if (parsedExpression instanceof ExpressionList) {
-			if (!parsedExpression.getAnd()) {
-				Skript.error("Function arguments must be separated by commas and optionally an 'and', but not an 'or'."
-								 + " Put the 'or' into a second set of parentheses if you want to make it a single parameter, e.g. 'give(player, (sword or axe))'");
-				return null;
-			}
-			params = ((ExpressionList<?>) parsedExpression).getExpressions();
-		} else {
-			params = new Expression[] {parsedExpression};
-		}
+		var expressions = Arrays.stream(newReference.arguments())
+				.map(org.skriptlang.skript.common.function.FunctionReference.Argument::value)
+				.toArray(Expression[]::new);
 
-		return params;
+		return new FunctionReference<>(newReference.name(), null, newReference.namespace(), types, expressions);
 	}
 
 	/*

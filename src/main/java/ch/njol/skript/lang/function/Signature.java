@@ -68,22 +68,26 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	 */
 	@Nullable String originClassPath;
 
+	static Class<?> getReturns(boolean single, Class<?> cls) {
+		if (single) {
+			return cls;
+		} else {
+			return cls.arrayType();
+		}
+	}
+
 	public Signature(@Nullable String script, String name, Parameter<?>[] parameters, boolean local, @Nullable ClassInfo<T> returnType, boolean single, @Nullable Contract contract) {
 		this.script = script;
 		this.name = name;
 		this.parameters = initParameters(parameters);
 		this.local = local;
 		this.returnType = returnType;
+		this.single = single;
 		if (returnType == null) {
 			this.returns = null;
 		} else {
-			if (single) {
-				this.returns = returnType.getC();
-			} else {
-				this.returns = returnType.getC().arrayType();
-			}
+			this.returns = getReturns(single, returnType.getC());
 		}
-		this.single = single;
 		this.contract = contract;
 		this.calls = Collections.newSetFromMap(new WeakHashMap<>());
 	}
@@ -106,11 +110,11 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 		this.local = local;
 		this.returns = returnType;
 		this.single = this.isSingle();
-		if (returnType != null && returnType.isArray()) {
+		if (returnType != null) {
 			//noinspection unchecked
-			this.returnType = (ClassInfo<T>) Classes.getExactClassInfo(returnType.componentType());
+			this.returnType = (ClassInfo<T>) Classes.getExactClassInfo(Utils.getComponentType(returnType));
 		} else {
-			this.returnType = Classes.getExactClassInfo(returnType);
+			this.returnType = null;
 		}
 		this.contract = null;
 		this.calls = Collections.newSetFromMap(new WeakHashMap<>());

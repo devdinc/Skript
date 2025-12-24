@@ -97,13 +97,7 @@ public final class FunctionReference<T> implements Debuggable {
 				}
 
 				// try to parse value in the argument
-				Class<?> conversionTarget;
-				if (target.type().isArray()) {
-					conversionTarget = target.type().componentType();
-				} else {
-					conversionTarget = target.type();
-				}
-
+				Class<?> conversionTarget = Utils.getComponentType(target.type());
 				if (argument.value instanceof EmptyExpression) {
 					targetParameters.remove(target.name());
 					continue;
