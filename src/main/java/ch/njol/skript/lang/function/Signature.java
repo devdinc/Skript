@@ -109,12 +109,13 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 		this.parameters = parameters;
 		this.local = local;
 		this.returns = returnType;
-		this.single = this.isSingle();
 		if (returnType != null) {
 			//noinspection unchecked
 			this.returnType = (ClassInfo<T>) Classes.getExactClassInfo(Utils.getComponentType(returnType));
+			this.single = !returnType.isArray();
 		} else {
 			this.returnType = null;
+			this.single = true;
 		}
 		this.contract = null;
 		this.calls = Collections.newSetFromMap(new WeakHashMap<>());
