@@ -37,11 +37,6 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 	}
 
 	@Override
-	public Skript skript() {
-		return skript;
-	}
-
-	@Override
 	public <E extends Event> void register(EventValue<E, ?> eventValue) {
 		if (isRegistered(eventValue)) {
 			throw new SkriptAPIException("Event '"
@@ -419,11 +414,6 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 	}
 
 	private class UnmodifiableView implements EventValueRegistry {
-
-		@Override
-		public Skript skript() {
-			return EventValueRegistryImpl.this.skript();
-		}
 
 		@Override
 		public <E extends Event> void register(EventValue<E, ?> eventValue) {

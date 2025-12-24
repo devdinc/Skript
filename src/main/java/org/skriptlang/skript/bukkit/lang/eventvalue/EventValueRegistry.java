@@ -46,8 +46,6 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	 */
 	int DEFAULT_RESOLVE_FLAGS = FALLBACK_TO_DEFAULT_TIME_STATE | ALLOW_CONVERSION;
 
-	Skript skript();
-
 	/**
 	 * Registers a new {@link EventValue}.
 	 *
