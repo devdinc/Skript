@@ -47,6 +47,7 @@ import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.*;
 import org.bukkit.event.player.PlayerExpCooldownChangeEvent.ChangeReason;
 import org.bukkit.event.player.PlayerQuitEvent.QuitReason;
+import org.bukkit.event.player.PlayerRespawnEvent.RespawnReason;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.vehicle.*;
@@ -57,13 +58,13 @@ import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.event.world.WorldEvent;
 import org.bukkit.inventory.*;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValue;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValueRegistry;
 import org.skriptlang.skript.lang.converter.Converter;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -287,21 +288,6 @@ public final class BukkitEventValues {
 				EntityDamageEvent damageEvent = event.getEntity().getLastDamageCause();
 				return damageEvent == null ? null : damageEvent.getCause();
 			})
-			.build());
-
-		// Entity Potion Effect
-		registry.register(EventValue.builder(EntityPotionEffectEvent.class, PotionEffect.class)
-			.getter(EntityPotionEffectEvent::getOldEffect)
-			.time(TIME_PAST)
-			.build());
-		registry.register(EventValue.builder(EntityPotionEffectEvent.class, PotionEffect.class)
-			.getter(EntityPotionEffectEvent::getNewEffect)
-			.build());
-		registry.register(EventValue.builder(EntityPotionEffectEvent.class, PotionEffectType.class)
-			.getter(EntityPotionEffectEvent::getModifiedType)
-			.build());
-		registry.register(EventValue.builder(EntityPotionEffectEvent.class, EntityPotionEffectEvent.Cause.class)
-			.getter(EntityPotionEffectEvent::getCause)
 			.build());
 
 		// ProjectileHitEvent
@@ -894,6 +880,28 @@ public final class BukkitEventValues {
 		registry.register(EventValue.builder(CreatureSpawnEvent.class, SpawnReason.class)
 			.getter(CreatureSpawnEvent::getSpawnReason)
 			.build());
+		registry.register(EventValue.builder(CreatureSpawnEvent.class, SpawnReason.class)
+			.getter(CreatureSpawnEvent::getSpawnReason)
+			.build());
+		//PlayerRespawnEvent - 1.21.5+ added AbstractRespawnEvent as a base class, where prior to that, getRespawnReason was in PlayerRespawnEvent
+		if (Skript.classExists("org.bukkit.event.player.AbstractRespawnEvent")) {
+			registry.register(EventValue.builder(PlayerRespawnEvent.class, RespawnReason.class)
+				.getter(PlayerRespawnEvent::getRespawnReason)
+				.build());
+		} else {
+			try {
+				Method method = PlayerRespawnEvent.class.getMethod("getRespawnReason");
+				registry.register(EventValue.builder(PlayerRespawnEvent.class, RespawnReason.class)
+					.getter(event -> {
+						try {
+							return (RespawnReason) method.invoke(event);
+						} catch (Exception e) {
+							return null;
+						}
+					})
+					.build());
+			} catch (NoSuchMethodException ignored) {}
+		}
 		//FireworkExplodeEvent
 		registry.register(EventValue.builder(FireworkExplodeEvent.class, Firework.class)
 			.getter(FireworkExplodeEvent::getEntity)

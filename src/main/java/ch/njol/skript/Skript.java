@@ -66,6 +66,7 @@ import org.skriptlang.skript.bukkit.breeding.BreedingModule;
 import org.skriptlang.skript.bukkit.brewing.BrewingModule;
 import org.skriptlang.skript.bukkit.damagesource.DamageSourceModule;
 import org.skriptlang.skript.bukkit.displays.DisplayModule;
+import org.skriptlang.skript.bukkit.entity.EntityModule;
 import org.skriptlang.skript.bukkit.fishing.FishingModule;
 import org.skriptlang.skript.bukkit.furnace.FurnaceModule;
 import org.skriptlang.skript.bukkit.input.InputModule;
@@ -73,10 +74,11 @@ import org.skriptlang.skript.bukkit.itemcomponents.ItemComponentModule;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValueRegistry;
 import org.skriptlang.skript.bukkit.log.runtime.BukkitRuntimeErrorConsumer;
 import org.skriptlang.skript.bukkit.loottables.LootTableModule;
-import org.skriptlang.skript.bukkit.registration.BukkitRegistryKeys;
+import org.skriptlang.skript.bukkit.potion.PotionModule;
 import org.skriptlang.skript.bukkit.registration.BukkitSyntaxInfos;
 import org.skriptlang.skript.bukkit.tags.TagModule;
 import org.skriptlang.skript.common.CommonModule;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.lang.comparator.Comparator;
 import org.skriptlang.skript.lang.comparator.Comparators;
 import org.skriptlang.skript.lang.converter.Converter;
@@ -91,9 +93,10 @@ import org.skriptlang.skript.lang.structure.StructureInfo;
 import org.skriptlang.skript.log.runtime.RuntimeErrorManager;
 import org.skriptlang.skript.registration.DefaultSyntaxInfos;
 import org.skriptlang.skript.registration.SyntaxInfo;
-import org.skriptlang.skript.registration.SyntaxOrigin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
+import org.skriptlang.skript.registration.SyntaxRegistry.Key;
 import org.skriptlang.skript.util.ClassLoader;
+import org.skriptlang.skript.util.Priority;
 
 import java.io.File;
 import java.io.IOException;
@@ -169,7 +172,9 @@ public final class Skript extends JavaPlugin implements Listener {
 		return instance;
 	}
 
-	@ApiStatus.Experimental
+	/**
+	 * @return The modern Skript instance to be used for addon registration.
+	 */
 	public static org.skriptlang.skript.Skript instance() {
 		if (unmodifiableSkript == null) {
 			throw new SkriptAPIException("Skript is still initializing");
@@ -573,11 +578,12 @@ public final class Skript extends JavaPlugin implements Listener {
 			FurnaceModule.load();
 			LootTableModule.load();
 			skript.loadModules(
-					new DamageSourceModule(),
-					new ItemComponentModule(),
-					new BrewingModule(),
-					new CommonModule()
-				);
+				new CommonModule(),
+				new BrewingModule(),
+				new EntityModule(),
+				new DamageSourceModule(),
+				new ItemComponentModule(),
+				new PotionModule());
 		} catch (final Exception e) {
 			exception(e, "Could not load required .class files: " + e.getLocalizedMessage());
 			setEnabled(false);
@@ -1402,7 +1408,10 @@ public final class Skript extends JavaPlugin implements Listener {
 	 * and adding new strings to Skript's localization system (e.g. the required "types.[type]" strings for registered classes).
 	 *
 	 * @param plugin The plugin
+	 * @deprecated Use {@link org.skriptlang.skript.Skript#registerAddon(Class, String)}.
+	 * Obtain a Skript instance with {@link #instance()}.
 	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static SkriptAddon registerAddon(JavaPlugin plugin) {
 		checkAcceptRegistrations();
 		SkriptAddon addon = new SkriptAddon(plugin);
@@ -1410,6 +1419,12 @@ public final class Skript extends JavaPlugin implements Listener {
 		return addon;
 	}
 
+	/**
+	 * @deprecated There is no exact replacement for this method.
+	 * Consider using {@link #getAddon(String)} with the name of the plugin ({@link JavaPlugin#getName()}).
+	 * Obtain a Skript instance with {@link #instance()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static @Nullable SkriptAddon getAddon(JavaPlugin plugin) {
 		if (plugin == Skript.getInstance()) {
 			return Skript.getAddonInstance();
@@ -1422,6 +1437,11 @@ public final class Skript extends JavaPlugin implements Listener {
 		return null;
 	}
 
+	/**
+	 * @deprecated Use {@link org.skriptlang.skript.Skript#addon(String)}.
+	 * Obtain a Skript instance with {@link #instance()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static @Nullable SkriptAddon getAddon(String name) {
 		if (name.equals(Skript.getInstance().getName())) {
 			return Skript.getAddonInstance();
@@ -1434,6 +1454,11 @@ public final class Skript extends JavaPlugin implements Listener {
 		return null;
 	}
 
+	/**
+	 * @deprecated Use {@link org.skriptlang.skript.Skript#addons()}.
+	 * Obtain a Skript instance with {@link #instance()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static @Unmodifiable Collection<SkriptAddon> getAddons() {
 		Set<SkriptAddon> addons = new HashSet<>(Skript.addons);
 		addons.addAll(instance().addons().stream()
@@ -1449,7 +1474,9 @@ public final class Skript extends JavaPlugin implements Listener {
 
 	/**
 	 * @return A {@link SkriptAddon} representing Skript.
+	 * @deprecated Use {@link #instance()} instead.
 	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static SkriptAddon getAddonInstance() {
 		if (addon == null) {
 			addon = SkriptAddon.fromModern(instance());
@@ -1459,38 +1486,24 @@ public final class Skript extends JavaPlugin implements Listener {
 
 	// ================ CONDITIONS & EFFECTS & SECTIONS ================
 
-	private static final class BukkitOrigin implements SyntaxOrigin {
-
-		private final String name;
-
-		private BukkitOrigin(Plugin plugin) {
-			this.name = plugin.getName();
-		}
-
-		@Override
-		public String name() {
-			return name;
-		}
-
-	}
-
 	/**
 	 * Attempts to create a SyntaxOrigin from a provided class.
+	 * @deprecated This method exists solely for compatibility reasons.
 	 */
 	@ApiStatus.Internal
-	@ApiStatus.Experimental
-	public static SyntaxOrigin getSyntaxOrigin(Class<?> source) {
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
+	public static Origin getSyntaxOrigin(Class<?> source) {
 		JavaPlugin plugin;
 		try {
 			plugin = JavaPlugin.getProvidingPlugin(source);
 		} catch (IllegalArgumentException e) { // Occurs when the method fails to determine the providing plugin
-			return () -> source.getName();
+			return Origin.UNKNOWN;
 		}
 		SkriptAddon addon = getAddon(plugin);
 		if (addon != null) {
-			return SyntaxOrigin.of(addon);
+			return Origin.of(addon);
 		}
-		return new BukkitOrigin(plugin);
+		return Origin.UNKNOWN;
 	}
 
 	/**
@@ -1498,7 +1511,11 @@ public final class Skript extends JavaPlugin implements Listener {
 	 *
 	 * @param conditionClass The condition's class
 	 * @param patterns Skript patterns to match this condition
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link SyntaxRegistry#CONDITION}.
+	 * Create a {@link SyntaxInfo} with {@link SyntaxInfo#builder(Class)}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
 	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static <E extends Condition> void registerCondition(Class<E> conditionClass, String... patterns) throws IllegalArgumentException {
 		registerCondition(conditionClass, ConditionType.COMBINED, patterns);
 	}
@@ -1509,7 +1526,12 @@ public final class Skript extends JavaPlugin implements Listener {
 	 * @param conditionClass The condition's class
 	 * @param type The type of condition which affects its priority in the parsing search
 	 * @param patterns Skript patterns to match this condition
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link SyntaxRegistry#CONDITION}.
+	 * Create a {@link SyntaxInfo} with {@link SyntaxInfo#builder(Class)}.
+	 * Specify a custom priority ({@link SyntaxInfo.Builder#priority(Priority)}) to replace {@code type}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
 	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static <E extends Condition> void registerCondition(Class<E> conditionClass, ConditionType type, String... patterns) throws IllegalArgumentException {
 		checkAcceptRegistrations();
 		skript.syntaxRegistry().register(SyntaxRegistry.CONDITION, SyntaxInfo.builder(conditionClass)
@@ -1525,7 +1547,11 @@ public final class Skript extends JavaPlugin implements Listener {
 	 *
 	 * @param effectClass The effect's class
 	 * @param patterns Skript patterns to match this effect
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link SyntaxRegistry#EFFECT}.
+	 * Create a {@link SyntaxInfo} with {@link SyntaxInfo#builder(Class)}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
 	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static <E extends Effect> void registerEffect(Class<E> effectClass, String... patterns) throws IllegalArgumentException {
 		checkAcceptRegistrations();
 		skript.syntaxRegistry().register(SyntaxRegistry.EFFECT, SyntaxInfo.builder(effectClass)
@@ -1541,7 +1567,11 @@ public final class Skript extends JavaPlugin implements Listener {
 	 * @param sectionClass The section's class
 	 * @param patterns Skript patterns to match this section
 	 * @see Section
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link SyntaxRegistry#SECTION}.
+	 * Create a {@link SyntaxInfo} with {@link SyntaxInfo#builder(Class)}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
 	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static <E extends Section> void registerSection(Class<E> sectionClass, String... patterns) throws IllegalArgumentException {
 		checkAcceptRegistrations();
 		skript.syntaxRegistry().register(SyntaxRegistry.SECTION, SyntaxInfo.builder(sectionClass)
@@ -1551,6 +1581,11 @@ public final class Skript extends JavaPlugin implements Listener {
 		);
 	}
 
+	/**
+	 * @deprecated Use {@link SyntaxRegistry#syntaxes(Key)} with {@link SyntaxRegistry#STATEMENT}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static @Unmodifiable Collection<SyntaxElementInfo<? extends Statement>> getStatements() {
 		return instance().syntaxRegistry()
 				.syntaxes(SyntaxRegistry.STATEMENT).stream()
@@ -1558,6 +1593,11 @@ public final class Skript extends JavaPlugin implements Listener {
 				.collect(Collectors.toUnmodifiableList());
 	}
 
+	/**
+	 * @deprecated Use {@link SyntaxRegistry#syntaxes(Key)} with {@link SyntaxRegistry#CONDITION}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static @Unmodifiable Collection<SyntaxElementInfo<? extends Condition>> getConditions() {
 		return instance().syntaxRegistry()
 				.syntaxes(SyntaxRegistry.CONDITION).stream()
@@ -1565,6 +1605,11 @@ public final class Skript extends JavaPlugin implements Listener {
 				.collect(Collectors.toUnmodifiableList());
 	}
 
+	/**
+	 * @deprecated Use {@link SyntaxRegistry#syntaxes(Key)} with {@link SyntaxRegistry#EFFECT}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static @Unmodifiable Collection<SyntaxElementInfo<? extends Effect>> getEffects() {
 		return instance().syntaxRegistry()
 				.syntaxes(SyntaxRegistry.EFFECT).stream()
@@ -1572,6 +1617,11 @@ public final class Skript extends JavaPlugin implements Listener {
 				.collect(Collectors.toUnmodifiableList());
 	}
 
+	/**
+	 * @deprecated Use {@link SyntaxRegistry#syntaxes(Key)} with {@link SyntaxRegistry#SECTION}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static @Unmodifiable Collection<SyntaxElementInfo<? extends Section>> getSections() {
 		return instance().syntaxRegistry()
 				.syntaxes(SyntaxRegistry.SECTION).stream()
@@ -1589,7 +1639,12 @@ public final class Skript extends JavaPlugin implements Listener {
 	 * @param type The expression's {@link ExpressionType type}. This is used to determine in which order to try to parse expressions.
 	 * @param patterns Skript patterns that match this expression
 	 * @throws IllegalArgumentException if returnType is not a normal class
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link SyntaxRegistry#EXPRESSION}.
+	 * Create a {@link SyntaxInfo.Expression} with {@link SyntaxInfo.Expression#builder(Class, Class)}.
+	 * Specify a custom priority ({@link SyntaxInfo.Builder#priority(Priority)}) to replace {@code type}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
 	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static <E extends Expression<T>, T> void registerExpression(
 		Class<E> expressionClass, Class<T> returnType, ExpressionType type, String... patterns
 	) throws IllegalArgumentException {
@@ -1602,6 +1657,11 @@ public final class Skript extends JavaPlugin implements Listener {
 		);
 	}
 
+	/**
+	 * @deprecated Use {@link SyntaxRegistry#syntaxes(Key)} with {@link SyntaxRegistry#EXPRESSION}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static Iterator<ExpressionInfo<?, ?>> getExpressions() {
 		List<ExpressionInfo<?, ?>> list = new ArrayList<>();
 		for (SyntaxInfo.Expression<?, ?> info : instance().syntaxRegistry().syntaxes(SyntaxRegistry.EXPRESSION))
@@ -1609,6 +1669,12 @@ public final class Skript extends JavaPlugin implements Listener {
 		return list.iterator();
 	}
 
+	/**
+	 * @deprecated There is no exact replacement for this method.
+	 * Use {@link SyntaxRegistry#syntaxes(Key)} with {@link SyntaxRegistry#SECTION} and filter the results.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static Iterator<ExpressionInfo<?, ?>> getExpressions(Class<?>... returnTypes) {
 		return new CheckedIterator<>(getExpressions(), info -> {
 			if (info == null || info.returnType == Object.class)
@@ -1633,8 +1699,12 @@ public final class Skript extends JavaPlugin implements Listener {
 	 * @param event The Bukkit event this event applies to
 	 * @param patterns Skript patterns to match this event
 	 * @return A SkriptEventInfo representing the registered event. Used to generate Skript's documentation.
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link BukkitSyntaxInfos.Event#KEY}.
+	 * Create a {@link BukkitSyntaxInfos.Event} with {@link BukkitSyntaxInfos.Event#builder(Class, String)}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
 	 */
 	@SuppressWarnings("unchecked")
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static <E extends SkriptEvent> SkriptEventInfo<E> registerEvent(String name, Class<E> c, Class<? extends Event> event, String... patterns) {
 		return registerEvent(name, c, new Class[] {event}, patterns);
 	}
@@ -1647,8 +1717,12 @@ public final class Skript extends JavaPlugin implements Listener {
 	 * @param events The Bukkit events this event applies to
 	 * @param patterns Skript patterns to match this event
 	 * @return A SkriptEventInfo representing the registered event. Used to generate Skript's documentation.
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link BukkitSyntaxInfos.Event#KEY}.
+	 * Create a {@link BukkitSyntaxInfos.Event} with {@link BukkitSyntaxInfos.Event#builder(Class, String)}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
 	 */
 	@SuppressWarnings("ConstantConditions") // caused by bad array annotations
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static <E extends SkriptEvent> SkriptEventInfo<E> registerEvent(
 		String name, Class<E> eventClass, Class<? extends Event>[] events, String... patterns
 	) {
@@ -1656,10 +1730,16 @@ public final class Skript extends JavaPlugin implements Listener {
 		for (int i = 0; i < patterns.length; i++)
 			patterns[i] = BukkitSyntaxInfos.fixPattern(patterns[i]);
 		var legacy = new SkriptEventInfo.ModernSkriptEventInfo<>(name, patterns, eventClass, "", events);
-		skript.syntaxRegistry().register(BukkitRegistryKeys.EVENT, legacy);
+		skript.syntaxRegistry().register(BukkitSyntaxInfos.Event.KEY, legacy);
 		return legacy;
 	}
 
+	/**
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link SyntaxRegistry#STRUCTURE}.
+	 * Create a {@link SyntaxInfo.Structure} with {@link SyntaxInfo.Structure#builder(Class)}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static <E extends Structure> void registerStructure(Class<E> structureClass, String... patterns) {
 		checkAcceptRegistrations();
 		skript.syntaxRegistry().register(SyntaxRegistry.STRUCTURE, SyntaxInfo.Structure.builder(structureClass)
@@ -1669,6 +1749,12 @@ public final class Skript extends JavaPlugin implements Listener {
 		);
 	}
 
+	/**
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link SyntaxRegistry#STRUCTURE}.
+	 * Create a {@link SyntaxInfo.Structure} with {@link SyntaxInfo.Structure#builder(Class)}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static <E extends Structure> void registerSimpleStructure(Class<E> structureClass, String... patterns) {
 		checkAcceptRegistrations();
 		skript.syntaxRegistry().register(SyntaxRegistry.STRUCTURE, SyntaxInfo.Structure.builder(structureClass)
@@ -1679,12 +1765,24 @@ public final class Skript extends JavaPlugin implements Listener {
 		);
 	}
 
+	/**
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link SyntaxRegistry#STRUCTURE}.
+	 * Create a {@link SyntaxInfo.Structure} with {@link SyntaxInfo.Structure#builder(Class)}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static <E extends Structure> void registerStructure(
 		Class<E> structureClass, EntryValidator entryValidator, String... patterns
 	) {
 		registerStructure(structureClass, entryValidator, DefaultSyntaxInfos.Structure.NodeType.SECTION, patterns);
 	}
 
+	/**
+	 * @deprecated Use {@link SyntaxRegistry#register(Key, SyntaxInfo)} with {@link SyntaxRegistry#STRUCTURE}.
+	 * Create a {@link SyntaxInfo.Structure} with {@link SyntaxInfo.Structure#builder(Class)}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static <E extends Structure> void registerStructure(
 		Class<E> structureClass, EntryValidator entryValidator, DefaultSyntaxInfos.Structure.NodeType nodeType, String... patterns
 	) {
@@ -1698,13 +1796,23 @@ public final class Skript extends JavaPlugin implements Listener {
 		);
 	}
 
+	/**
+	 * @deprecated Use {@link SyntaxRegistry#syntaxes(Key)} with {@link BukkitSyntaxInfos.Event#KEY}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static @Unmodifiable Collection<SkriptEventInfo<?>> getEvents() {
 		return instance().syntaxRegistry()
-				.syntaxes(BukkitRegistryKeys.EVENT).stream()
+				.syntaxes(BukkitSyntaxInfos.Event.KEY).stream()
 				.map(SyntaxElementInfo::<SkriptEventInfo<SkriptEvent>, SkriptEvent>fromModern)
 				.collect(Collectors.toUnmodifiableList());
 	}
 
+	/**
+	 * @deprecated Use {@link SyntaxRegistry#syntaxes(Key)} with {@link SyntaxRegistry#STRUCTURE}.
+	 * Obtain a {@link SyntaxRegistry} through {@link org.skriptlang.skript.addon.SkriptAddon#syntaxRegistry()}.
+	 */
+	@Deprecated(since = "INSERT VERSION", forRemoval = true)
 	public static @Unmodifiable List<StructureInfo<? extends Structure>> getStructures() {
 		return instance().syntaxRegistry()
 				.syntaxes(SyntaxRegistry.STRUCTURE).stream()
