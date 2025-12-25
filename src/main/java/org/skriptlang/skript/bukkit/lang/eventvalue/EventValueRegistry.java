@@ -48,7 +48,8 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	/**
 	 * Registers a new {@link EventValue}.
 	 *
-	 * @throws SkriptAPIException if another value with the same event class, time, and identifier patterns already exists
+	 * @throws SkriptAPIException if another value with the same
+	 * event class, time, and identifier patterns already exists
 	 */
 	<E extends Event> void register(EventValue<E, ?> eventValue);
 
@@ -110,8 +111,8 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	<E extends Event, V> Resolution<E, ? extends V> resolve(
 		Class<E> eventClass,
 		Class<V> valueClass,
-		EventValue.Time time)
-	;
+		EventValue.Time time
+	);
 
 	/**
 	 * Resolves by desired value class with explicit time and flags.
