@@ -76,16 +76,21 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 
 	@Override
 	public <E extends Event, V> Resolution<E, V> resolve(Class<E> eventClass, String identifier, EventValue.Time time) {
-		return resolve(eventClass, identifier, time, DEFAULT_RESOLVE_FLAGS);
+		return resolve(eventClass, identifier, time, Flags.DEFAULT);
 	}
 
 	@Override
-	public <E extends Event, V> Resolution<E, V> resolve(Class<E> eventClass, String identifier, EventValue.Time time, int flags) {
+	public <E extends Event, V> Resolution<E, V> resolve(
+		Class<E> eventClass,
+		String identifier,
+		EventValue.Time time,
+		Flags flags
+	) {
 		Preconditions.checkNotNull(eventClass, "eventClass");
 		Preconditions.checkNotNull(identifier, "identifier");
 
 		if (time == EventValue.Time.NOW)
-			flags &= ~FALLBACK_TO_DEFAULT_TIME_STATE; // only 'past' and 'future' may use the fallback flag
+			flags = flags.without(Flag.FALLBACK_TO_DEFAULT_TIME_STATE); // 'past' and 'future' may use the fallback flag
 
 		var input = Input.of(eventClass, identifier, time, flags);
 		//noinspection unchecked
@@ -105,7 +110,7 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 			return resolution;
 		}
 
-		if ((flags & FALLBACK_TO_DEFAULT_TIME_STATE) != 0)
+		if (flags.has(Flag.FALLBACK_TO_DEFAULT_TIME_STATE))
 			return resolve(eventClass, identifier, EventValue.Time.NOW, flags);
 
 		resolution = Resolution.empty();
@@ -120,7 +125,7 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 
 	@Override
 	public <E extends Event, V> Resolution<E, ? extends V> resolve(Class<E> eventClass, Class<V> valueClass, EventValue.Time time) {
-		return resolve(eventClass, valueClass, time, DEFAULT_RESOLVE_FLAGS);
+		return resolve(eventClass, valueClass, time, Flags.DEFAULT);
 	}
 
 	@Override
@@ -128,13 +133,13 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 		Class<E> eventClass,
 		Class<V> valueClass,
 		EventValue.Time time,
-		int flags
+		Flags flags
 	) {
 		Preconditions.checkNotNull(eventClass, "eventClass");
 		Preconditions.checkNotNull(valueClass, "valueClass");
 
 		if (time == EventValue.Time.NOW)
-			flags &= ~FALLBACK_TO_DEFAULT_TIME_STATE; // only 'past' and 'future' may use the fallback flag
+			flags = flags.without(Flag.FALLBACK_TO_DEFAULT_TIME_STATE); // only 'past' and 'future' may use the fallback flag
 
 		var input = Input.of(eventClass, valueClass, time, flags);
 		//noinspection unchecked
@@ -157,7 +162,7 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 			return resolution;
 		}
 
-		if ((flags & ALLOW_CONVERSION) != 0) {
+		if (flags.has(Flag.ALLOW_CONVERSION)) {
 			resolution = resolveWithDowncastConversion(eventClass, valueClass, time);
 			if (resolution.successful() || resolution.errored()) {
 				eventValuesCache.put(input, resolution);
@@ -171,7 +176,7 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 			}
 		}
 
-		if ((flags & FALLBACK_TO_DEFAULT_TIME_STATE) != 0)
+		if ((flags.has(Flag.FALLBACK_TO_DEFAULT_TIME_STATE)))
 			return resolve(eventClass, valueClass, EventValue.Time.NOW, flags);
 
 		resolution = Resolution.empty();
@@ -268,13 +273,23 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 		Class<E> eventClass,
 		I input,
 		EventValue.Time time,
-		int flags
+		Flags flags
 	) {
-		static <E extends Event> Input<E, String> of(Class<E> eventClass, String input, EventValue.Time time, int flags) {
+		static <E extends Event> Input<E, String> of(
+			Class<E> eventClass,
+			String input,
+			EventValue.Time time,
+			Flags flags
+		) {
 			return new Input<>(eventClass, input, time, flags);
 		}
 
-		static <E extends Event> Input<E, Class<?>> of(Class<E> eventClass, Class<?> input, EventValue.Time time, int flags) {
+		static <E extends Event> Input<E, Class<?>> of(
+			Class<E> eventClass,
+			Class<?> input,
+			EventValue.Time time,
+			Flags flags
+		) {
 			return new Input<>(eventClass, input, time, flags);
 		}
 	}
@@ -312,7 +327,7 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 		}
 
 		@Override
-		public <E extends Event, V> Resolution<E, V> resolve(Class<E> eventClass, String identifier, EventValue.Time time, int flags) {
+		public <E extends Event, V> Resolution<E, V> resolve(Class<E> eventClass, String identifier, EventValue.Time time, Flags flags) {
 			return EventValueRegistryImpl.this.resolve(eventClass, identifier, time, flags);
 		}
 
@@ -327,7 +342,7 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 		}
 
 		@Override
-		public <E extends Event, V> Resolution<E, ? extends V> resolve(Class<E> eventClass, Class<V> valueClass, EventValue.Time time, int flags) {
+		public <E extends Event, V> Resolution<E, ? extends V> resolve(Class<E> eventClass, Class<V> valueClass, EventValue.Time time, Flags flags) {
 			return EventValueRegistryImpl.this.resolve(eventClass, valueClass, time, flags);
 		}
 

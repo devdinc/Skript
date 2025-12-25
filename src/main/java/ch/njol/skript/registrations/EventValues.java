@@ -234,11 +234,11 @@ public class EventValues {
 		Class<E> eventClass, Class<T> valueClass, int time,
 		boolean allowDefault, boolean allowConverting
 	) {
-		int flags = 0;
+		EventValueRegistry.Flags flags = EventValueRegistry.Flags.NONE;
 		if (allowDefault)
-			flags |= EventValueRegistry.FALLBACK_TO_DEFAULT_TIME_STATE;
+			flags = flags.with(EventValueRegistry.Flag.FALLBACK_TO_DEFAULT_TIME_STATE);
 		if (allowConverting)
-			flags |= EventValueRegistry.ALLOW_CONVERSION;
+			flags = flags.with(EventValueRegistry.Flag.ALLOW_CONVERSION);
 		var resolution = registry.resolve(eventClass, valueClass, EventValue.Time.of(time), flags);
 		if (!resolution.successful())
 			return null;

@@ -186,7 +186,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	 * @return The resolution result.
 	 */
 	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass) {
-		return resolve(eventClass, EventValueRegistry.DEFAULT_RESOLVE_FLAGS);
+		return resolve(eventClass, EventValueRegistry.Flags.DEFAULT);
 	}
 
 	/**
@@ -197,7 +197,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	 * @param <E> The event type.
 	 * @return The resolution result.
 	 */
-	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass, int flags) {
+	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass, EventValueRegistry.Flags flags) {
 		return resolve(eventClass, EventValue.Time.of(getTime()), flags);
 	}
 
@@ -214,7 +214,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 		return resolve(
 			eventClass,
 			time,
-			EventValueRegistry.DEFAULT_RESOLVE_FLAGS & ~EventValueRegistry.FALLBACK_TO_DEFAULT_TIME_STATE
+			EventValueRegistry.Flags.DEFAULT.without(EventValueRegistry.Flag.FALLBACK_TO_DEFAULT_TIME_STATE)
 		);
 	}
 
@@ -228,7 +228,11 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	 * @param <E> The event type.
 	 * @return The resolution result.
 	 */
-	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass, EventValue.Time time, int flags) {
+	private <E extends Event> Resolution<E, ? extends T> resolve(
+		Class<E> eventClass,
+		EventValue.Time time,
+		EventValueRegistry.Flags flags
+	) {
 		if (identifier != null) {
 			Resolution<E, ? extends T> resolution = registry.resolve(eventClass, identifier, time, flags);
 			if (type == null)
@@ -268,8 +272,10 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 				assert false;
 				return false;
 			}
+			EventValueRegistry.Flags noConversionFlags = EventValueRegistry.Flags.DEFAULT
+				.without(EventValueRegistry.Flag.ALLOW_CONVERSION);
 			for (Class<? extends Event> event : events) {
-				Resolution<?, ? extends T> resolution = resolve(event, EventValueRegistry.DEFAULT_RESOLVE_FLAGS & ~EventValueRegistry.ALLOW_CONVERSION);
+				Resolution<?, ? extends T> resolution = resolve(event, noConversionFlags);
 				if (resolution.multiple()) {
 					log.printError("There are multiple " + input(true) + " in " + Utils.a(parser.getCurrentEventName()) + " event. " +
 							"You must define which " + input(false) + " to use.");

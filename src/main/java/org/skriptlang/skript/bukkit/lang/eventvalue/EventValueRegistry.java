@@ -4,13 +4,10 @@ import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAPIException;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Unmodifiable;
-import org.skriptlang.skript.lang.converter.Converters;
 import org.skriptlang.skript.util.Registry;
 import org.skriptlang.skript.util.ViewProvider;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Registry and resolver for {@link EventValue} definitions.
@@ -31,19 +28,6 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	static EventValueRegistry empty(Skript skript) {
 		return new EventValueRegistryImpl(skript);
 	}
-
-	/**
-	 * Fallback to {@link EventValue.Time#NOW} if no value is found for the requested time.
-	 */
-	int FALLBACK_TO_DEFAULT_TIME_STATE = 0b01;
-	/**
-	 * Allow converting the resolved value type using {@link Converters}
-	 */
-	int ALLOW_CONVERSION = 0b10;
-	/**
-	 * Default combination of resolution flags: fallback to default time and allow conversion.
-	 */
-	int DEFAULT_RESOLVE_FLAGS = FALLBACK_TO_DEFAULT_TIME_STATE | ALLOW_CONVERSION;
 
 	/**
 	 * Registers a new {@link EventValue}.
@@ -71,16 +55,16 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	boolean isRegistered(Class<? extends Event> eventClass, Class<?> valueClass, EventValue.Time time);
 
 	/**
-	 * Resolve an {@link EventValue} by identifier using {@link EventValue.Time#NOW} and {@link #DEFAULT_RESOLVE_FLAGS}.
+	 * Resolve an {@link EventValue} by identifier using {@link EventValue.Time#NOW} and {@link Flags#DEFAULT}.
 	 *
 	 * @see #resolve(Class, String, EventValue.Time)
 	 */
 	<E extends Event, V> Resolution<E, V> resolve(Class<E> eventClass, String identifier);
 
 	/**
-	 * Resolve an {@link EventValue} by identifier for a specific time using {@link #DEFAULT_RESOLVE_FLAGS}.
+	 * Resolve an {@link EventValue} by identifier for a specific time using {@link Flags#DEFAULT}.
 	 *
-	 * @see #resolve(Class, String, EventValue.Time, int)
+	 * @see #resolve(Class, String, EventValue.Time, Flags)
 	 */
 	<E extends Event, V> Resolution<E, V> resolve(Class<E> eventClass, String identifier, EventValue.Time time);
 
@@ -90,23 +74,23 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	 * @param eventClass the event type to resolve for
 	 * @param identifier user input that identifies the value
 	 * @param time the time state
-	 * @param flags bitwise OR of {@link #FALLBACK_TO_DEFAULT_TIME_STATE} and {@link #ALLOW_CONVERSION}
+	 * @param flags the resolver flags
 	 * @return a {@link Resolution} describing candidates or empty/error state
 	 */
 	<E extends Event, V> Resolution<E, V> resolve(
 		Class<E> eventClass,
 		String identifier,
 		EventValue.Time time,
-		int flags
+		Flags flags
 	);
 
 	/**
-	 * Resolves by desired value class using {@link EventValue.Time#NOW} and {@link #DEFAULT_RESOLVE_FLAGS}.
+	 * Resolves by desired value class using {@link EventValue.Time#NOW} and {@link Flags#DEFAULT}.
 	 */
 	<E extends Event, V> Resolution<E, ? extends V> resolve(Class<E> eventClass, Class<V> valueClass);
 
 	/**
-	 * Resolves by desired value class for a specific time using {@link #DEFAULT_RESOLVE_FLAGS}.
+	 * Resolves by desired value class for a specific time using {@link Flags#DEFAULT}.
 	 */
 	<E extends Event, V> Resolution<E, ? extends V> resolve(
 		Class<E> eventClass,
@@ -120,13 +104,13 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	 * @param eventClass the event type to resolve for
 	 * @param valueClass the desired value type
 	 * @param time the time state
-	 * @param flags bitwise OR of {@link #FALLBACK_TO_DEFAULT_TIME_STATE} and {@link #ALLOW_CONVERSION}
+	 * @param flags the resolver flags
 	 */
 	<E extends Event, V> Resolution<E, ? extends V> resolve(
 		Class<E> eventClass,
 		Class<V> valueClass,
 		EventValue.Time time,
-		int flags
+		Flags flags
 	);
 
 	/**
@@ -259,6 +243,42 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 		 */
 		public int size() {
 			return all.size();
+		}
+
+	}
+
+	enum Flag {
+		FALLBACK_TO_DEFAULT_TIME_STATE,
+		ALLOW_CONVERSION
+	}
+
+	record Flags(Set<Flag> set) {
+
+		public static final Flags DEFAULT = new Flags(Collections.unmodifiableSet(EnumSet.allOf(Flag.class)));
+		public static final Flags NONE = new Flags(Collections.unmodifiableSet(EnumSet.noneOf(Flag.class)));
+
+		public static Flags of(Collection<Flag> flags) {
+			return new Flags(EnumSet.copyOf(flags));
+		}
+
+		public static Flags of(Flag... flags) {
+			return new Flags(EnumSet.noneOf(Flag.class)).with(flags);
+		}
+
+		public boolean has(Flag flag) {
+			return set.contains(flag);
+		}
+
+		public Flags with(Flag... flags) {
+			Set<Flag> newSet = EnumSet.copyOf(set);
+			newSet.addAll(Arrays.asList(flags));
+			return new Flags(newSet);
+		}
+
+		public Flags without(Flag... flags) {
+			Set<Flag> newSet = EnumSet.copyOf(set);
+			Arrays.asList(flags).forEach(newSet::remove);
+			return new Flags(newSet);
 		}
 
 	}
