@@ -36,13 +36,13 @@ public class EventValues {
 
 	/**
 	 * The current time of an event value.
-	 * @deprecated Use {@link EventValue.Time#PAST} instead.
+	 * @deprecated Use {@link EventValue.Time#NOW} instead.
 	 */
 	public static final int TIME_NOW = EventValue.Time.NOW.value();
 
 	/**
 	 * The future time of an event value.
-	 * @deprecated Use {@link EventValue.Time#PAST} instead.
+	 * @deprecated Use {@link EventValue.Time#FUTURE} instead.
 	 */
 	public static final int TIME_FUTURE = EventValue.Time.FUTURE.value();
 
