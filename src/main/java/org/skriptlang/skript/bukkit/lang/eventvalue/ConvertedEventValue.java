@@ -160,7 +160,7 @@ final class ConvertedEventValue<SourceEvent extends Event, ConvertedEvent extend
 	}
 
 	@Override
-	public int time() {
+	public Time time() {
 		return source.time();
 	}
 

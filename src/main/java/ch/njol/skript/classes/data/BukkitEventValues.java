@@ -61,6 +61,7 @@ import org.bukkit.inventory.*;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.potion.PotionType;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValue;
+import org.skriptlang.skript.bukkit.lang.eventvalue.EventValue.Time;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValueRegistry;
 import org.skriptlang.skript.lang.converter.Converter;
 
@@ -69,9 +70,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static org.skriptlang.skript.bukkit.lang.eventvalue.EventValue.TIME_FUTURE;
-import static org.skriptlang.skript.bukkit.lang.eventvalue.EventValue.TIME_PAST;
 
 public final class BukkitEventValues {
 
@@ -100,13 +98,13 @@ public final class BukkitEventValues {
 				}
 				return event.getLocation().getBlock();
 			})
-			.time(TIME_FUTURE)
+			.time(Time.FUTURE)
 			.build());
 		registry.register(EventValue.builder(StructureGrowEvent.class, Block[].class)
 			.getter(event -> event.getBlocks().stream()
 				.map(BlockStateBlock::new)
 				.toArray(Block[]::new))
-			.time(TIME_FUTURE)
+			.time(Time.FUTURE)
 			.build());
 		// WeatherEvent - not a WorldEvent (wtf ô_Ô)
 		registry.register(EventValue.builder(WeatherEvent.class, World.class)
@@ -134,7 +132,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(BlockPlaceEvent.class, ItemStack.class)
 			.getter(BlockPlaceEvent::getItemInHand)
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(BlockPlaceEvent.class, ItemStack.class)
 			.getter(BlockPlaceEvent::getItemInHand)
@@ -146,11 +144,11 @@ public final class BukkitEventValues {
 					item.setAmount(item.getAmount() - 1);
 				return item;
 			})
-			.time(TIME_FUTURE)
+			.time(Time.FUTURE)
 			.build());
 		registry.register(EventValue.builder(BlockPlaceEvent.class, Block.class)
 			.getter(event -> new BlockStateBlock(event.getBlockReplacedState()))
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(BlockPlaceEvent.class, Direction.class)
 			.getter(event -> {
@@ -164,14 +162,14 @@ public final class BukkitEventValues {
 		// BlockFadeEvent
 		registry.register(EventValue.builder(BlockFadeEvent.class, Block.class)
 			.getter(BlockEvent::getBlock)
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(BlockFadeEvent.class, Block.class)
 			.getter(event -> new DelayedChangeBlock(event.getBlock(), event.getNewState()))
 			.build());
 		registry.register(EventValue.builder(BlockFadeEvent.class, Block.class)
 			.getter(event -> new BlockStateBlock(event.getNewState()))
-			.time(TIME_FUTURE)
+			.time(Time.FUTURE)
 			.build());
 		// BlockGrowEvent (+ BlockFormEvent)
 		registry.register(EventValue.builder(BlockGrowEvent.class, Block.class)
@@ -179,7 +177,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(BlockGrowEvent.class, Block.class)
 			.getter(BlockEvent::getBlock)
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		// BlockDamageEvent
 		registry.register(EventValue.builder(BlockDamageEvent.class, Player.class)
@@ -191,7 +189,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(BlockBreakEvent.class, Block.class)
 			.getter(BlockEvent::getBlock)
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(BlockBreakEvent.class, Block.class)
 			.getter(event -> new DelayedChangeBlock(event.getBlock()))
@@ -199,7 +197,7 @@ public final class BukkitEventValues {
 		// BlockFromToEvent
 		registry.register(EventValue.builder(BlockFromToEvent.class, Block.class)
 			.getter(BlockFromToEvent::getToBlock)
-			.time(TIME_FUTURE)
+			.time(Time.FUTURE)
 			.build());
 		// BlockIgniteEvent
 		registry.register(EventValue.builder(BlockIgniteEvent.class, Player.class)
@@ -215,7 +213,7 @@ public final class BukkitEventValues {
 		// BlockCanBuildEvent
 		registry.register(EventValue.builder(BlockCanBuildEvent.class, Block.class)
 			.getter(BlockEvent::getBlock)
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(BlockCanBuildEvent.class, Block.class)
 			.getter(event -> {
@@ -312,7 +310,7 @@ public final class BukkitEventValues {
 				.getter(event -> {
 					BlockFace theHitFace = event.getHitBlockFace();
 					if (theHitFace == null) return null;
-					return new Direction(theHitFace, TIME_FUTURE);
+					return new Direction(theHitFace, 1);
 				})
 				.build());
 		}
@@ -345,7 +343,7 @@ public final class BukkitEventValues {
 		// EntityChangeBlockEvent
 		registry.register(EventValue.builder(EntityChangeBlockEvent.class, Block.class)
 			.getter(EntityChangeBlockEvent::getBlock)
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(EntityChangeBlockEvent.class, Block.class)
 			.getter(EntityChangeBlockEvent::getBlock)
@@ -355,7 +353,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(EntityChangeBlockEvent.class, BlockData.class)
 			.getter(EntityChangeBlockEvent::getBlockData)
-			.time(TIME_FUTURE)
+			.time(Time.FUTURE)
 			.build());
 
 		// AreaEffectCloudApplyEvent
@@ -420,11 +418,11 @@ public final class BukkitEventValues {
 				state.setType(Material.AIR);
 				return new BlockStateBlock(state, true);
 			})
-			.time(TIME_FUTURE)
+			.time(Time.FUTURE)
 			.build());
 		registry.register(EventValue.builder(PlayerBucketEmptyEvent.class, Block.class)
 			.getter(event -> event.getBlockClicked().getRelative(event.getBlockFace()))
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(PlayerBucketEmptyEvent.class, Block.class)
 			.getter(event -> {
@@ -520,14 +518,14 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(PlayerMoveEvent.class, Location.class)
 			.getter(PlayerMoveEvent::getFrom)
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(PlayerMoveEvent.class, Location.class)
 			.getter(PlayerMoveEvent::getTo)
 			.build());
 		registry.register(EventValue.builder(PlayerMoveEvent.class, Chunk.class)
 			.getter(event -> event.getFrom().getChunk())
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(PlayerMoveEvent.class, Chunk.class)
 			.getter(event -> event.getTo().getChunk())
@@ -678,7 +676,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(InventoryDragEvent.class, ItemStack.class)
 			.getter(InventoryDragEvent::getOldCursor)
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(InventoryDragEvent.class, ItemStack.class)
 			.getter(InventoryDragEvent::getCursor)
@@ -828,7 +826,7 @@ public final class BukkitEventValues {
 				book.setItemMeta(event.getPreviousBookMeta());
 				return book;
 			})
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(PlayerEditBookEvent.class, ItemStack.class)
 			.getter(event -> {
@@ -839,7 +837,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(PlayerEditBookEvent.class, String[].class)
 			.getter(event -> event.getPreviousBookMeta().getPages().toArray(new String[0]))
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(PlayerEditBookEvent.class, String[].class)
 			.getter(event -> event.getNewBookMeta().getPages().toArray(new String[0]))
@@ -857,7 +855,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(ItemMergeEvent.class, Item.class)
 			.getter(ItemMergeEvent::getTarget)
-			.time(TIME_FUTURE)
+			.time(Time.FUTURE)
 			.build());
 		registry.register(EventValue.builder(ItemMergeEvent.class, ItemStack.class)
 			.getter(event -> event.getEntity().getItemStack())
@@ -873,7 +871,7 @@ public final class BukkitEventValues {
 				.build());
 			registry.register(EventValue.builder(EntityMoveEvent.class, Location.class)
 				.getter(EntityMoveEvent::getTo)
-				.time(TIME_FUTURE)
+				.time(Time.FUTURE)
 				.build());
 		}
 		//CreatureSpawnEvent
@@ -941,7 +939,7 @@ public final class BukkitEventValues {
 				.build());
 			registry.register(EventValue.builder(PlayerInventorySlotChangeEvent.class, ItemStack.class)
 				.getter(PlayerInventorySlotChangeEvent::getOldItemStack)
-				.time(TIME_PAST)
+				.time(Time.PAST)
 				.build());
 			registry.register(EventValue.builder(PlayerInventorySlotChangeEvent.class, Slot.class)
 				.getter(event -> {
@@ -993,7 +991,7 @@ public final class BukkitEventValues {
 		// PlayerChangedWorldEvent
 		registry.register(EventValue.builder(PlayerChangedWorldEvent.class, World.class)
 			.getter(PlayerChangedWorldEvent::getFrom)
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 
 		// PlayerEggThrowEvent
@@ -1028,7 +1026,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(PlayerItemHeldEvent.class, Slot.class)
 			.getter(event -> new InventorySlot(event.getPlayer().getInventory(), event.getPreviousSlot()))
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 
 		// PlayerPickupArrowEvent
@@ -1090,14 +1088,14 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(InventoryMoveItemEvent.class, Inventory.class)
 			.getter(InventoryMoveItemEvent::getDestination)
-			.time(TIME_FUTURE)
+			.time(Time.FUTURE)
 			.build());
 		registry.register(EventValue.builder(InventoryMoveItemEvent.class, Block.class)
 			.getter(event -> event.getSource().getLocation().getBlock())
 			.build());
 		registry.register(EventValue.builder(InventoryMoveItemEvent.class, Block.class)
 			.getter(event -> event.getDestination().getLocation().getBlock())
-			.time(TIME_FUTURE)
+			.time(Time.FUTURE)
 			.build());
 		registry.register(EventValue.builder(InventoryMoveItemEvent.class, ItemStack.class)
 			.getter(InventoryMoveItemEvent::getItem)
@@ -1119,7 +1117,7 @@ public final class BukkitEventValues {
 		// BlockDropItemEvent
 		registry.register(EventValue.builder(BlockDropItemEvent.class, Block.class)
 			.getter(event -> new BlockStateBlock(event.getBlockState()))
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 		registry.register(EventValue.builder(BlockDropItemEvent.class, Player.class)
 			.getter(BlockDropItemEvent::getPlayer)
@@ -1140,7 +1138,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(PlayerExpCooldownChangeEvent.class, Timespan.class)
 			.getter(event -> new Timespan(Timespan.TimePeriod.TICK, event.getPlayer().getExpCooldown()))
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 
 		// VehicleMoveEvent
@@ -1149,7 +1147,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(VehicleMoveEvent.class, Location.class)
 			.getter(VehicleMoveEvent::getFrom)
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 
 		// BeaconEffectEvent
@@ -1193,7 +1191,7 @@ public final class BukkitEventValues {
 				.build());
 			registry.register(EventValue.builder(WorldBorderBoundsChangeEvent.class, Number.class)
 				.getter(WorldBorderBoundsChangeEvent::getOldSize)
-				.time(TIME_PAST)
+				.time(Time.PAST)
 				.build());
 			registry.register(EventValue.builder(WorldBorderBoundsChangeEvent.class, Timespan.class)
 				.getter(event -> new Timespan(event.getDuration()))
@@ -1205,7 +1203,7 @@ public final class BukkitEventValues {
 				.build());
 			registry.register(EventValue.builder(WorldBorderBoundsChangeFinishEvent.class, Number.class)
 				.getter(WorldBorderBoundsChangeFinishEvent::getOldSize)
-				.time(TIME_PAST)
+				.time(Time.PAST)
 				.build());
 			registry.register(EventValue.builder(WorldBorderBoundsChangeFinishEvent.class, Timespan.class)
 				.getter(event -> new Timespan((long) event.getDuration()))
@@ -1217,7 +1215,7 @@ public final class BukkitEventValues {
 				.build());
 			registry.register(EventValue.builder(WorldBorderCenterChangeEvent.class, Location.class)
 				.getter(WorldBorderCenterChangeEvent::getOldCenter)
-				.time(TIME_PAST)
+				.time(Time.PAST)
 				.build());
 		}
 
@@ -1241,7 +1239,7 @@ public final class BukkitEventValues {
 			.build());
 		registry.register(EventValue.builder(VillagerCareerChangeEvent.class, Villager.Profession.class)
 			.getter(event -> event.getEntity().getProfession())
-			.time(TIME_PAST)
+			.time(Time.PAST)
 			.build());
 
 	}

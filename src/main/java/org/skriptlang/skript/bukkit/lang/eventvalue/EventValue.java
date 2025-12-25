@@ -39,21 +39,6 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 	}
 
 	/**
-	 * The past value of an event value.
-	 */
-	int TIME_PAST = -1;
-
-	/**
-	 * The current time of an event value.
-	 */
-	int TIME_NOW = 0;
-
-	/**
-	 * The future time of an event value.
-	 */
-	int TIME_FUTURE = 1;
-
-	/**
 	 * The event class this value applies to.
 	 *
 	 * @return the event type this event value is defined for
@@ -125,11 +110,10 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 
 	/**
 	 * The time state this event value is registered for.
-	 * One of {@link #TIME_PAST}, {@link #TIME_NOW}, or {@link #TIME_FUTURE}.
 	 *
 	 * @return the time state
 	 */
-	int time();
+	Time time();
 
 	/**
 	 * Event types explicitly excluded from using this event value.
@@ -235,6 +219,32 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		Converter<V, NewValue> converter,
 		@Nullable Converter<NewValue, V> reverseConverter
 	);
+
+	enum Time {
+		PAST(-1),
+		NOW(0),
+		FUTURE(1);
+
+		private final int value;
+
+		Time(int value) {
+			this.value = value;
+		}
+
+		public int value() {
+			return value;
+		}
+
+		public static Time of(int value) {
+			return switch (value) {
+				case -1 -> PAST;
+				case 0 -> NOW;
+				case 1 -> FUTURE;
+				default -> throw new IllegalArgumentException("Invalid time value: " + value);
+			};
+		}
+
+	}
 
 	@FunctionalInterface
 	interface Changer<E, V> {
@@ -361,11 +371,11 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		/**
 		 * Sets the time state for which this event value is registered.
 		 *
-		 * @param time one of {@link #TIME_PAST}, {@link #TIME_NOW} or {@link #TIME_FUTURE}
+		 * @param time the time state
 		 * @return this builder
 		 */
 		@Contract(value = "_ -> this", mutates = "this")
-		Builder<E,V> time(int time);
+		Builder<E,V> time(Time time);
 
 		/**
 		 * Excludes a specific event subclass from using this event value.

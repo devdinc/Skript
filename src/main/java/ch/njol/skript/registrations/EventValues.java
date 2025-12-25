@@ -1,30 +1,20 @@
 package ch.njol.skript.registrations;
 
-import ch.njol.skript.Skript;
 import ch.njol.skript.classes.Changer.ChangeMode;
-import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.expressions.base.EventValueExpression;
 import ch.njol.util.Kleenean;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import io.papermc.paper.event.player.PlayerTradeEvent;
-import org.bukkit.entity.AbstractVillager;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValue;
 import org.skriptlang.skript.bukkit.lang.eventvalue.EventValueRegistry;
-import org.skriptlang.skript.bukkit.lang.eventvalue.EventValueRegistry.Resolution;
 import org.skriptlang.skript.lang.converter.Converter;
-import org.skriptlang.skript.lang.converter.Converters;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Use {@link EventValueRegistry} instead.
@@ -40,21 +30,21 @@ public class EventValues {
 
 	/**
 	 * The past value of an event value. Represented by "past" or "former".
-	 * @deprecated Use {@link EventValue#TIME_PAST} instead.
+	 * @deprecated Use {@link EventValue.Time#PAST} instead.
 	 */
-	public static final int TIME_PAST = EventValue.TIME_PAST;
+	public static final int TIME_PAST = EventValue.Time.PAST.value();
 
 	/**
 	 * The current time of an event value.
-	 * @deprecated Use {@link EventValue#TIME_PAST} instead.
+	 * @deprecated Use {@link EventValue.Time#PAST} instead.
 	 */
-	public static final int TIME_NOW = EventValue.TIME_NOW;
+	public static final int TIME_NOW = EventValue.Time.NOW.value();
 
 	/**
 	 * The future time of an event value.
-	 * @deprecated Use {@link EventValue#TIME_PAST} instead.
+	 * @deprecated Use {@link EventValue.Time#PAST} instead.
 	 */
-	public static final int TIME_FUTURE = EventValue.TIME_FUTURE;
+	public static final int TIME_FUTURE = EventValue.Time.FUTURE.value();
 
 	private static EventValueRegistry registry;
 
@@ -70,11 +60,11 @@ public class EventValues {
 	 * @param time The time of the event values. One of
 	 * {@link EventValues#TIME_PAST}, {@link EventValues#TIME_NOW} or {@link EventValues#TIME_FUTURE}.
 	 * @return An immutable copy of the event values list for the specified time
-	 * @deprecated Use {@link EventValueRegistry#elements(int)} instead.
+	 * @deprecated Use {@link EventValueRegistry#elements(EventValue.Time)} instead.
 	 */
 	public static @Unmodifiable List<EventValueInfo<?, ?>> getEventValuesListForTime(int time) {
 		//noinspection unchecked,rawtypes
-		return (List) registry.elements(time).stream()
+		return (List) registry.elements(EventValue.Time.of(time)).stream()
 			.map(EventValueInfo::fromModern)
 			.toList();
 	}
@@ -137,7 +127,7 @@ public class EventValues {
 	) {
 		EventValue.Builder<E, T> builder = EventValue.builder(eventClass, valueClass)
 			.getter(converter)
-			.time(time)
+			.time(EventValue.Time.of(time))
 			.excludedErrorMessage(excludeErrorMessage)
 			.excludes(excludes);
 		if (converter instanceof EventConverter<E,T> eventConverter)
@@ -156,11 +146,11 @@ public class EventValues {
 	 *            default to the default state in this case.
 	 * @return The event's value
 	 * @see #registerEventValue(Class, Class, Converter, int)
+	 * @deprecated Use {@link EventValueRegistry#resolve(Class, Class, EventValue.Time)} instead.
 	 */
 	public static <T, E extends Event> @Nullable T getEventValue(E event, Class<T> valueClass, int time) {
-		// TODO replace with a method in registry?
 		//noinspection unchecked
-		return registry.resolve(event.getClass(), valueClass, time).uniqueOptional()
+		return registry.resolve(event.getClass(), valueClass, EventValue.Time.of(time)).uniqueOptional()
 			.map(eventValue -> ((EventValue<E, T>) eventValue).get(event))
 			.orElse(null);
 	}
@@ -174,13 +164,13 @@ public class EventValues {
 	 * @return A getter to get values for a given type of events
 	 * @see #registerEventValue(Class, Class, Converter, int)
 	 * @see EventValueExpression#EventValueExpression(Class)
-	 * @deprecated Use {@link EventValueRegistry#resolveExact(Class, Class, int)} instead.
+	 * @deprecated Use {@link EventValueRegistry#resolveExact(Class, Class, EventValue.Time)} instead.
 	 */
 	@Nullable
 	public static <E extends Event, T> Converter<? super E, ? extends T> getExactEventValueConverter(
 		Class<E> eventClass, Class<T> valueClass, int time
 	) {
-		return registry.resolveExact(eventClass, valueClass, time).anyOptional()
+		return registry.resolveExact(eventClass, valueClass, EventValue.Time.of(time)).anyOptional()
 			.map(EventValue::converter)
 			.orElse(null);
 	}
@@ -211,7 +201,7 @@ public class EventValues {
 	 * @return A getter to get values for a given type of events.
 	 * @see #registerEventValue(Class, Class, Converter, int)
 	 * @see EventValueExpression#EventValueExpression(Class)
-	 * @deprecated Use {@link EventValueRegistry#resolve(Class, Class, int)} instead.
+	 * @deprecated Use {@link EventValueRegistry#resolve(Class, Class, EventValue.Time)} instead.
 	 */
 	public static <T, E extends Event> @Nullable Converter<? super E, ? extends T> getEventValueConverter(
 		Class<E> eventClass, Class<T> valueClass, int time
@@ -249,92 +239,13 @@ public class EventValues {
 			flags |= EventValueRegistry.FALLBACK_TO_DEFAULT_TIME_STATE;
 		if (allowConverting)
 			flags |= EventValueRegistry.ALLOW_CONVERSION;
-		Resolution<E, ? extends T> resolution = registry.resolve(eventClass, valueClass, time, flags);
+		var resolution = registry.resolve(eventClass, valueClass, EventValue.Time.of(time), flags);
 		if (!resolution.successful())
 			return null;
 		//noinspection unchecked,rawtypes
 		return (List) resolution.all().stream()
 			.map(EventValue::converter)
 			.toList();
-	}
-
-	/**
-	 * <p>
-	 *  In this method we can strip converters that are able to be obtainable through their own 'event-classinfo'.
-	 *  For example, {@link PlayerTradeEvent} has a {@link Player} value (player who traded)
-	 *  	and an {@link AbstractVillager} value (villager traded from).
-	 *  Beforehand, since there is no {@link Entity} value, it was grabbing both values as they both can be casted as an {@link Entity},
-	 *  	resulting in a parse error of "multiple entities".
-	 * 	Now, we filter out the values that can be obtained using their own classinfo, such as 'event-player'
-	 * 		which leaves us only the {@link AbstractVillager} for 'event-entity'.
-	 * </p>
-	 */
-	private static <E extends Event, T> List<Converter<? super E, ? extends T>> stripConverters(
-		Class<E> eventClass,
-		Class<T> valueClass,
-		Map<EventValueInfo<?, ?>, Converter<? super E, ? extends T>> infoConverterMap,
-		List<Converter<? super E, ? extends T>> converters
-	) {
-		if (converters.size() == 1)
-			return converters;
-		ClassInfo<T> valueClassInfo = Classes.getExactClassInfo(valueClass);
-		List<Converter<? super E, ? extends T>> stripped = new ArrayList<>();
-		for (EventValueInfo<?, ?> eventValueInfo : infoConverterMap.keySet()) {
-			ClassInfo<?> thisClassInfo = Classes.getExactClassInfo(eventValueInfo.valueClass);
-			if (thisClassInfo != null && !thisClassInfo.equals(valueClassInfo))
-				continue;
-			stripped.add(infoConverterMap.get(eventValueInfo));
-		}
-		if (stripped.isEmpty())
-			return converters;
-		return stripped;
-	}
-
-	/**
-	 * Check if the event value states to exclude events.
-	 * False if the current EventValueInfo cannot operate in the provided eventClass.
-	 *
-	 * @param info The event value info that will be used to grab the value from
-	 * @param eventClass The event class to check the excludes against.
-	 * @return boolean if true the event value passes for the events.
-	 */
-	private static boolean checkExcludes(EventValueInfo<?, ?> info, Class<? extends Event> eventClass) {
-		if (info.excludes == null)
-			return true;
-		for (Class<? extends Event> ex : (Class<? extends Event>[]) info.excludes) {
-			if (ex.isAssignableFrom(eventClass)) {
-				Skript.error(info.excludeErrorMessage);
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Return a converter wrapped in a getter that will grab the requested value by converting from the given event value info.
-	 *
-	 * @param info The event value info that will be used to grab the value from
-	 * @param valueClass The class that the converter will look for to convert the type from the event value to
-	 * @param checkInstanceOf If the eventClass must be an exact instance of the event value info's eventClass or not.
-	 * @return The found Converter wrapped in a Getter object, or null if no Converter was found.
-	 */
-	@Nullable
-	private static <E extends Event, F, T> Converter<? super E, ? extends T> getConvertedConverter(
-		EventValueInfo<E, F> info, Class<T> valueClass, boolean checkInstanceOf
-	) {
-		Converter<? super F, ? extends T> converter = Converters.getConverter(info.valueClass, valueClass);
-
-		if (converter == null)
-			return null;
-
-		return event -> {
-			if (checkInstanceOf && !info.eventClass.isInstance(event))
-				return null;
-			F f = info.converter.convert(event);
-			if (f == null)
-				return null;
-			return converter.convert(f);
-		};
 	}
 
 	public static boolean doesExactEventValueHaveTimeStates(Class<? extends Event> eventClass, Class<?> valueClass) {
@@ -404,7 +315,7 @@ public class EventValues {
 					.orElse(eventValue.converter()),
 				eventValue.excludedErrorMessage(),
 				eventValue.excludedEvents(),
-				eventValue.time()
+				eventValue.time().value()
 			);
 		}
 

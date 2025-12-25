@@ -3,7 +3,6 @@ package org.skriptlang.skript.bukkit.lang.eventvalue;
 import ch.njol.skript.Skript;
 import ch.njol.skript.SkriptAPIException;
 import org.bukkit.event.Event;
-import org.jetbrains.annotations.Range;
 import org.jetbrains.annotations.Unmodifiable;
 import org.skriptlang.skript.lang.converter.Converters;
 import org.skriptlang.skript.util.Registry;
@@ -34,7 +33,7 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	}
 
 	/**
-	 * When resolving a value for {@link EventValue#TIME_PAST}
+	 * Fallback to {@link EventValue.Time#NOW} if no value is found for the requested time.
 	 */
 	int FALLBACK_TO_DEFAULT_TIME_STATE = 0b01;
 	/**
@@ -68,55 +67,64 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	/**
 	 * Checks whether a value for the exact event/value class and time is registered.
 	 */
-	boolean isRegistered(Class<? extends Event> eventClass, Class<?> valueClass, int time);
+	boolean isRegistered(Class<? extends Event> eventClass, Class<?> valueClass, EventValue.Time time);
 
 	/**
-	 * Resolve an {@link EventValue} by identifier using {@link EventValue#TIME_NOW} and {@link #DEFAULT_RESOLVE_FLAGS}.
+	 * Resolve an {@link EventValue} by identifier using {@link EventValue.Time#NOW} and {@link #DEFAULT_RESOLVE_FLAGS}.
 	 *
-	 * @see #resolve(Class, String, int)
+	 * @see #resolve(Class, String, EventValue.Time)
 	 */
 	<E extends Event, V> Resolution<E, V> resolve(Class<E> eventClass, String identifier);
 
 	/**
 	 * Resolve an {@link EventValue} by identifier for a specific time using {@link #DEFAULT_RESOLVE_FLAGS}.
 	 *
-	 * @see #resolve(Class, String, int, int)
+	 * @see #resolve(Class, String, EventValue.Time, int)
 	 */
-	<E extends Event, V> Resolution<E, V> resolve(Class<E> eventClass, String identifier, int time);
+	<E extends Event, V> Resolution<E, V> resolve(Class<E> eventClass, String identifier, EventValue.Time time);
 
 	/**
 	 * Resolve an {@link EventValue} by identifier with explicit time and flags.
 	 *
 	 * @param eventClass the event type to resolve for
 	 * @param identifier user input that identifies the value
-	 * @param time       one of {@link EventValue#TIME_PAST}, {@link EventValue#TIME_NOW}, {@link EventValue#TIME_FUTURE}
-	 * @param flags      bitwise OR of {@link #FALLBACK_TO_DEFAULT_TIME_STATE} and {@link #ALLOW_CONVERSION}
+	 * @param time the time state
+	 * @param flags bitwise OR of {@link #FALLBACK_TO_DEFAULT_TIME_STATE} and {@link #ALLOW_CONVERSION}
 	 * @return a {@link Resolution} describing candidates or empty/error state
 	 */
-	<E extends Event, V> Resolution<E, V> resolve(Class<E> eventClass, String identifier, int time, int flags);
+	<E extends Event, V> Resolution<E, V> resolve(
+		Class<E> eventClass,
+		String identifier,
+		EventValue.Time time,
+		int flags
+	);
 
 	/**
-	 * Resolves by desired value class using {@link EventValue#TIME_NOW} and {@link #DEFAULT_RESOLVE_FLAGS}.
+	 * Resolves by desired value class using {@link EventValue.Time#NOW} and {@link #DEFAULT_RESOLVE_FLAGS}.
 	 */
 	<E extends Event, V> Resolution<E, ? extends V> resolve(Class<E> eventClass, Class<V> valueClass);
 
 	/**
 	 * Resolves by desired value class for a specific time using {@link #DEFAULT_RESOLVE_FLAGS}.
 	 */
-	<E extends Event, V> Resolution<E, ? extends V> resolve(Class<E> eventClass, Class<V> valueClass, int time);
+	<E extends Event, V> Resolution<E, ? extends V> resolve(
+		Class<E> eventClass,
+		Class<V> valueClass,
+		EventValue.Time time)
+	;
 
 	/**
 	 * Resolves by desired value class with explicit time and flags.
 	 *
 	 * @param eventClass the event type to resolve for
 	 * @param valueClass the desired value type
-	 * @param time       one of {@link EventValue#TIME_PAST}, {@link EventValue#TIME_NOW}, {@link EventValue#TIME_FUTURE}
-	 * @param flags      bitwise OR of {@link #FALLBACK_TO_DEFAULT_TIME_STATE} and {@link #ALLOW_CONVERSION}
+	 * @param time the time state
+	 * @param flags bitwise OR of {@link #FALLBACK_TO_DEFAULT_TIME_STATE} and {@link #ALLOW_CONVERSION}
 	 */
 	<E extends Event, V> Resolution<E, ? extends V> resolve(
 		Class<E> eventClass,
 		Class<V> valueClass,
-		int time,
+		EventValue.Time time,
 		int flags
 	);
 
@@ -126,7 +134,7 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	<E extends Event, V> Resolution<E, V> resolveExact(
 		Class<E> eventClass,
 		Class<V> valueClass,
-		int time
+		EventValue.Time time
 	);
 
 	/**
@@ -139,10 +147,10 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	/**
 	 * Returns a snapshot of event values for the given time state.
 	 *
-	 * @param time one of {@link EventValue#TIME_PAST}, {@link EventValue#TIME_NOW}, {@link EventValue#TIME_FUTURE}
+	 * @param time the time state
 	 */
 	@Unmodifiable
-	List<EventValue<?, ?>> elements(@Range(from = -1, to = 1) int time);
+	List<EventValue<?, ?>> elements(EventValue.Time time);
 
 	@Override
 	EventValueRegistry unmodifiableView();

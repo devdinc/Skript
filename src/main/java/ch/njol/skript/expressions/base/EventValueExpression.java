@@ -198,7 +198,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	 * @return The resolution result.
 	 */
 	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass, int flags) {
-		return resolve(eventClass, getTime(), flags);
+		return resolve(eventClass, EventValue.Time.of(getTime()), flags);
 	}
 
 	/**
@@ -210,7 +210,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	 * @param <E> The event type.
 	 * @return The resolution result.
 	 */
-	private <E extends Event> Resolution<E, ? extends T> resolveForTime(Class<E> eventClass, int time) {
+	private <E extends Event> Resolution<E, ? extends T> resolveForTime(Class<E> eventClass, EventValue.Time time) {
 		return resolve(
 			eventClass,
 			time,
@@ -228,7 +228,7 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 	 * @param <E> The event type.
 	 * @return The resolution result.
 	 */
-	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass, int time, int flags) {
+	private <E extends Event> Resolution<E, ? extends T> resolve(Class<E> eventClass, EventValue.Time time, int flags) {
 		if (identifier != null) {
 			Resolution<E, ? extends T> resolution = registry.resolve(eventClass, identifier, time, flags);
 			if (type == null)
@@ -388,8 +388,8 @@ public class EventValueExpression<T> extends SimpleExpression<T> implements Defa
 		}
 		for (Class<? extends Event> event : events) {
 			assert event != null;
-			if (resolveForTime(event, EventValue.TIME_PAST).successful()
-				|| resolveForTime(event, EventValue.TIME_FUTURE).successful()) {
+			if (resolveForTime(event, EventValue.Time.PAST).successful()
+				|| resolveForTime(event, EventValue.Time.FUTURE).successful()) {
 				super.setTime(time);
 				// Since the time was changed, we now need to re-initialize the parse time events we already got. START
 				this.events.clear();

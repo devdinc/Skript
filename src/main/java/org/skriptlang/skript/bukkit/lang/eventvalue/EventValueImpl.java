@@ -27,7 +27,7 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 	private final @Nullable Predicate<Class<?>> eventValidator;
 	private final Converter<E, V> converter;
 	private final Map<ChangeMode, Changer<E, V>> changers;
-	private final int time;
+	private final Time time;
 	private final Class<? extends E> @Nullable [] excludedEvents;
 	private final @Nullable String excludedErrorMessage;
 
@@ -39,7 +39,7 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 		@Nullable Predicate<Class<?>> eventValidator,
 		Converter<E, V> converter,
 		Map<ChangeMode, Changer<E, V>> changers,
-		int time,
+		Time time,
 		Class<? extends E> @Nullable [] excludedEvents,
 		@Nullable String excludedErrorMessage
 	) {
@@ -114,7 +114,7 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 	}
 
 	@Override
-	public int time() {
+	public Time time() {
 		return time;
 	}
 
@@ -165,7 +165,7 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 		private @Nullable Predicate<String> inputValidator;
 		private @Nullable Predicate<Class<?>> eventValidator;
 		private Converter<E, V> converter;
-		private int time = EventValue.TIME_NOW;
+		private Time time = Time.NOW;
 		private Class<? extends E> @Nullable [] excludedEvents;
 		private @Nullable String excludedErrorMessage;
 
@@ -246,7 +246,7 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 
 		@Override
 		@Contract(value = "_ -> this", mutates = "this")
-		public Builder<E,V> time(int time) {
+		public Builder<E,V> time(Time time) {
 			this.time = time;
 			return this;
 		}
