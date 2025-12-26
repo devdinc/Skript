@@ -52,6 +52,7 @@ public class EvtPlayerPickItem extends SkriptEvent {
 					send "You cannot pick diamond blocks!" to the player
 				""")
 			.addSince("INSERT VERSION")
+			.addRequiredPlugin("1.21.5+")
 			.build());
 
 		EventValues.registerEventValue(PlayerPickItemEvent.class, Slot.class, new EventConverter<>() {
