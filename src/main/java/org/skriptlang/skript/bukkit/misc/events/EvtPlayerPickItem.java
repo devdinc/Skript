@@ -7,7 +7,9 @@ import ch.njol.skript.lang.Literal;
 import ch.njol.skript.lang.SkriptEvent;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.SyntaxStringBuilder;
+import ch.njol.skript.registrations.EventConverter;
 import ch.njol.skript.registrations.EventValues;
+import ch.njol.skript.util.Patterns;
 import ch.njol.skript.util.slot.InventorySlot;
 import ch.njol.skript.util.slot.Slot;
 import io.papermc.paper.event.player.PlayerPickBlockEvent;
@@ -25,18 +27,25 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 
 public class EvtPlayerPickItem extends SkriptEvent {
 
+	private static final Patterns<PickType> PATTERNS = new Patterns<>(new Object[][]{
+		{"[player] pick[ing] [of] [an|any] item", PickType.ANY},
+		{"[player] pick[ing] [of] [a|any] block", PickType.BLOCK},
+		{"[player] pick[ing] [of] [an|any] entity", PickType.ENTITY},
+		{"[player] pick[ing] [of] %entitydata/itemtype/blockdata%", null}
+	});
+
 	public static void register(SyntaxRegistry registry, Origin origin) {
 		registry.register(BukkitSyntaxInfos.Event.KEY, BukkitSyntaxInfos.Event.builder(EvtPlayerPickItem.class, "Player Pick Item")
 			.supplier(EvtPlayerPickItem::new)
 			.origin(origin)
 			.addEvent(PlayerPickBlockEvent.class)
 			.addEvent(PlayerPickEntityEvent.class)
-			.addPattern("[player] pick[ing] [an|any] item")
-			.addPattern("[player] pick[ing] [a|any] block")
-			.addPattern("[player] pick[ing] [an|any] entity")
-			.addPattern("[player] pick[ing] %entitydata/itemtype/blockdata%")
-			.addDescription("Called when a player picks an item, block or an entity" +
-				" using the pick block key (default middle mouse button).")
+			.addPatterns(PATTERNS.getPatterns())
+			.addDescription("Called when a player picks an item, block or an entity" + 
+					" using the pick block key (default middle mouse button).",
+				"The past event-slot represents the slot in which the item that will be put into the players hotbar is located." +
+					" Or nothing, if the item is not in the inventory. (May be changed)",
+				"The event-slot represents the slot in the hotbar where the picked item will be placed. (May be changed)")
 			.addExample("""
 				on player picking a diamond block:
 					cancel event
@@ -45,13 +54,35 @@ public class EvtPlayerPickItem extends SkriptEvent {
 			.addSince("INSERT VERSION")
 			.build());
 
-		EventValues.registerEventValue(PlayerPickItemEvent.class, Slot.class, event -> {
-			int source = event.getSourceSlot();
-			if (source == -1)
-				return null;
-			return new InventorySlot(event.getPlayer().getInventory(), source);
+		EventValues.registerEventValue(PlayerPickItemEvent.class, Slot.class, new EventConverter<>() {
+			@Override
+			public void set(PlayerPickItemEvent event, @Nullable Slot slot) {
+				if (!(slot instanceof InventorySlot inventorySlot) || inventorySlot.getInventory() != event.getPlayer().getInventory())
+					return;
+				event.setSourceSlot(inventorySlot.getIndex());
+			}
+
+			@Override
+			public @Nullable Slot convert(PlayerPickItemEvent event) {
+				int source = event.getSourceSlot();
+				if (source == -1)
+					return null;
+				return new InventorySlot(event.getPlayer().getInventory(), source);
+			}
 		}, EventValues.TIME_PAST);
-		EventValues.registerEventValue(PlayerPickItemEvent.class, Slot.class, event -> new InventorySlot(event.getPlayer().getInventory(), event.getTargetSlot()));
+		EventValues.registerEventValue(PlayerPickItemEvent.class, Slot.class, new EventConverter<>() {
+			@Override
+			public void set(PlayerPickItemEvent event, @Nullable Slot slot) {
+				if (!(slot instanceof InventorySlot inventorySlot) || inventorySlot.getInventory() != event.getPlayer().getInventory())
+					return;
+				event.setTargetSlot(inventorySlot.getIndex());
+			}
+
+			@Override
+			public Slot convert(PlayerPickItemEvent event) {
+				return new InventorySlot(event.getPlayer().getInventory(), event.getTargetSlot());
+			}
+		});
 	}
 
 	private @Nullable PickType pickType;
@@ -59,11 +90,9 @@ public class EvtPlayerPickItem extends SkriptEvent {
 
 	@Override
 	public boolean init(Literal<?>[] args, int matchedPattern, ParseResult parseResult) {
-		if (matchedPattern < 3) {
-			pickType = PickType.values()[matchedPattern];
-		} else {
+		pickType = PATTERNS.getInfo(matchedPattern);
+		if (pickType == null)
 			type = args[0];
-		}
 		return true;
 	}
 
