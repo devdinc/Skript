@@ -142,13 +142,7 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 
 		StringJoiner args = new StringJoiner(", ");
 		for (Class<?> parameterType : parameterTypes) {
-			Class<?> searchType;
-			if (parameterType.isArray()) {
-				searchType = parameterType.componentType();
-			} else {
-				searchType = parameterType;
-			}
-			args.add(Classes.getSuperClassInfo(searchType).getCodeName());
+			args.add(Classes.getSuperClassInfo(Utils.getComponentType(parameterType)).getCodeName());
 		}
 		String stringified = "%s(%s)".formatted(functionName, args);
 
@@ -249,7 +243,7 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 						if (LiteralUtils.hasUnparsedLiteral(parameters[i])) {
 							Skript.error("Can't understand this expression: " + parameters[i].toString());
 						} else {
-							String type = Classes.toString(getClassInfo(target));
+							String type = Classes.toString(Classes.getSuperClassInfo(Utils.getComponentType(target)));
 
 							Skript.error("The " + StringUtils.fancyOrderNumber(i + 1) + " argument given to the function '" + stringified + "' is not of the required type " + type + "."
 								+ " Check the correct order of the arguments and put lists into parentheses if appropriate (e.g. 'give(player, (iron ore and gold ore))')."
@@ -293,24 +287,6 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 			this.contract = contract;
 
 		return true;
-	}
-
-	/**
-	 * Returns the {@link ClassInfo} of the non-array type of {@code cls}.
-	 *
-	 * @param cls The class.
-	 * @param <T> The type of class.
-	 * @return The non-array {@link ClassInfo} of {@code cls}.
-	 */
-	private static <T> ClassInfo<? super T> getClassInfo(Class<T> cls) {
-		ClassInfo<? super T> classInfo;
-		if (cls.isArray()) {
-			//noinspection unchecked
-			classInfo = (ClassInfo<? super T>) Classes.getSuperClassInfo(cls.componentType());
-		} else {
-			classInfo = Classes.getSuperClassInfo(cls);
-		}
-		return classInfo;
 	}
 
 	// attempt to get the types of the parameters for this function reference

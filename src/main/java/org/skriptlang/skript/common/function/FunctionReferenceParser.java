@@ -1,6 +1,7 @@
 package org.skriptlang.skript.common.function;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.lang.Expression;
 import ch.njol.skript.lang.ExpressionList;
 import ch.njol.skript.lang.ParseContext;
@@ -14,6 +15,7 @@ import ch.njol.skript.log.ParseLogHandler;
 import ch.njol.skript.log.SkriptLogger;
 import ch.njol.skript.registrations.Classes;
 import ch.njol.skript.util.LiteralUtils;
+import ch.njol.skript.util.Utils;
 import ch.njol.util.StringUtils;
 import ch.njol.util.coll.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
@@ -231,13 +233,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 					parseArguments[i] = new Argument<>(ArgumentType.UNNAMED, parameter.name(), null);
 				}
 
-				Class<?> targetType;
-				if (parameter.type().isArray()) {
-					targetType = parameter.type().componentType();
-				} else {
-					targetType = parameter.type();
-				}
-
+				Class<?> targetType = Utils.getComponentType(parameter.type());
 				Expression<?> fallback;
 				if (parameter instanceof ScriptParameter<?> sp) {
 					fallback = sp.defaultValue();
@@ -417,10 +413,11 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 				continue;
 			}
 
+			ClassInfo<?> classInfo = Classes.getSuperClassInfo(expression.getReturnType());
 			if (expression.isSingle()) {
-				joiner.add(argumentName + Classes.getSuperClassInfo(expression.getReturnType()).getName().getSingular());
+				joiner.add(argumentName + classInfo.getName().getSingular());
 			} else {
-				joiner.add(argumentName + Classes.getSuperClassInfo(expression.getReturnType()).getName().getPlural());
+				joiner.add(argumentName + classInfo.getName().getPlural());
 			}
 		}
 
