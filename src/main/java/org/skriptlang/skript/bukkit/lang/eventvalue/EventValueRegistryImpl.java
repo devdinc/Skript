@@ -18,9 +18,9 @@ final class EventValueRegistryImpl implements EventValueRegistry {
 
 	@SuppressWarnings("unchecked")
 	private final List<EventValue<?, ?>>[] eventValues = new List[]{
-		new ArrayList<>(),
-		new ArrayList<>(),
-		new ArrayList<>(),
+		new ArrayList<>(), // PAST
+		new ArrayList<>(), // NOW
+		new ArrayList<>(), // FUTURE
 	};
 
 	private final transient Map<Input<?, ?>, Resolution<?, ?>> eventValuesCache = new ConcurrentHashMap<>();

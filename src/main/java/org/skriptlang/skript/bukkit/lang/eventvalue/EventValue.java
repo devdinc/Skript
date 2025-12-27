@@ -10,6 +10,7 @@ import org.skriptlang.skript.lang.converter.Converter;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -64,9 +65,9 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 	 * Validates that this event value can be used in the provided event context.
 	 *
 	 * @param event the concrete event class to validate against
-	 * @return {@code true} if this event value can be used for the given event class
+	 * @return the validation status
 	 */
-	boolean validate(Class<?> event);
+	Validation validate(Class<?> event);
 
 	/**
 	 * Checks whether the provided input matches one of {@link #identifierPatterns()} and
@@ -220,9 +221,21 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		@Nullable Converter<NewValue, V> reverseConverter
 	);
 
+	/**
+	 * Represents the time state an event value is registered for.
+	 */
 	enum Time {
+		/**
+		 * The value as it was in the past (e.g. before the event occurred).
+		 */
 		PAST(-1),
+		/**
+		 * The value as it is now (during the event).
+		 */
 		NOW(0),
+		/**
+		 * The value as it will be in the future (e.g. after the event).
+		 */
 		FUTURE(1);
 
 		private final int value;
@@ -231,10 +244,20 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 			this.value = value;
 		}
 
+		/**
+		 * @return the integer value of this time state
+		 */
 		public int value() {
 			return value;
 		}
 
+		/**
+		 * Obtains the time state from its integer value.
+		 *
+		 * @param value the integer value
+		 * @return the corresponding time state
+		 * @throws IllegalArgumentException if the value is invalid
+		 */
 		public static Time of(int value) {
 			return switch (value) {
 				case -1 -> PAST;
@@ -244,6 +267,25 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 			};
 		}
 
+	}
+
+	/**
+	 * Represents the validation status of an event value against an event context.
+	 */
+	enum Validation {
+		/**
+		 * The event value is valid for the given event context.
+		 */
+		VALID,
+		/**
+		 * The event value is invalid for the given event context and should be ignored.
+		 */
+		INVALID,
+		/**
+		 * The event value is invalid for the given event context and indicates an error
+		 * that should stop the resolution process.
+		 */
+		ABORT,
 	}
 
 	@FunctionalInterface
@@ -303,7 +345,7 @@ public sealed interface EventValue<E extends Event, V> permits EventValueImpl, C
 		 * @return this builder
 		 */
 		@Contract(value = "_ -> this", mutates = "this")
-		Builder<E,V> eventValidator(Predicate<Class<?>> eventValidator);
+		Builder<E,V> eventValidator(Function<Class<?>, Validation> eventValidator);
 
 		/**
 		 * Sets the converter used to obtain the value from the event.

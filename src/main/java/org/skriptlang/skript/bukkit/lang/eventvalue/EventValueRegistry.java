@@ -143,7 +143,7 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 	/**
 	 * Result of a registry resolve operation. May contain multiple candidates or be empty.
 	 * When {@link #errored()} is {@code true}, at least one candidate failed validation
-	 * and no result should be used.
+	 * with {@link EventValue.Validation#ABORT} and no result should be used.
 	 */
 	record Resolution<E extends Event, V>(List<EventValue<E, V>> all, boolean errored) {
 
@@ -247,11 +247,23 @@ public interface EventValueRegistry extends Registry<EventValue<?, ?>>, ViewProv
 
 	}
 
+	/**
+	 * Flags used during event value resolution.
+	 */
 	enum Flag {
+		/**
+		 * If resolution fails for the requested time state, fall back to the default time state (NOW).
+		 */
 		FALLBACK_TO_DEFAULT_TIME_STATE,
+		/**
+		 * Allow converters to be used to satisfy the requested value type.
+		 */
 		ALLOW_CONVERSION
 	}
 
+	/**
+	 * A set of {@link Flag}s.
+	 */
 	record Flags(Set<Flag> set) {
 
 		public static final Flags DEFAULT = new Flags(Collections.unmodifiableSet(EnumSet.allOf(Flag.class)));

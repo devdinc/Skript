@@ -113,7 +113,7 @@ final class ConvertedEventValue<SourceEvent extends Event, ConvertedEvent extend
 	}
 
 	@Override
-	public boolean validate(Class<?> event) {
+	public Validation validate(Class<?> event) {
 		return source.validate(event);
 	}
 

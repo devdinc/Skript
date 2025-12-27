@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.lang.converter.Converter;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
@@ -24,7 +25,7 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 	private final Class<V> valueClass;
 	private final Pattern[] identifierPatterns;
 	private final @Nullable Predicate<String> inputValidator;
-	private final @Nullable Predicate<Class<?>> eventValidator;
+	private final @Nullable Function<Class<?>, Validation> eventValidator;
 	private final Converter<E, V> converter;
 	private final Map<ChangeMode, Changer<E, V>> changers;
 	private final Time time;
@@ -36,7 +37,7 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 		Class<V> valueClass,
 		Pattern[] identifierPatterns,
 		@Nullable Predicate<String> inputValidator,
-		@Nullable Predicate<Class<?>> eventValidator,
+		@Nullable Function<Class<?>, Validation> eventValidator,
 		Converter<E, V> converter,
 		Map<ChangeMode, Changer<E, V>> changers,
 		Time time,
@@ -71,17 +72,19 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 	}
 
 	@Override
-	public boolean validate(Class<?> event) {
+	public Validation validate(Class<?> event) {
 		if (excludedEvents != null) {
 			for (Class<? extends E> excludedEvent : excludedEvents) {
 				if (!excludedEvent.isAssignableFrom(event))
 					continue;
 				if (excludedErrorMessage != null)
 					Skript.error(excludedErrorMessage);
-				return false;
+				return Validation.ABORT;
 			}
 		}
-		return eventValidator == null || eventValidator.test(event);
+		if (eventValidator == null)
+			return Validation.VALID;
+		return eventValidator.apply(event);
 	}
 
 	@Override
@@ -163,7 +166,7 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 		private final Map<ChangeMode, Changer<E, V>> changers = new EnumMap<>(ChangeMode.class);
 		private String @Nullable [] identifierPatterns;
 		private @Nullable Predicate<String> inputValidator;
-		private @Nullable Predicate<Class<?>> eventValidator;
+		private @Nullable Function<Class<?>, Validation> eventValidator;
 		private Converter<E, V> converter;
 		private Time time = Time.NOW;
 		private Class<? extends E> @Nullable [] excludedEvents;
@@ -190,7 +193,7 @@ final class EventValueImpl<E extends Event, V> implements EventValue<E, V> {
 
 		@Override
 		@Contract(value = "_ -> this", mutates = "this")
-		public Builder<E,V> eventValidator(Predicate<Class<?>> eventValidator) {
+		public Builder<E,V> eventValidator(Function<Class<?>, Validation> eventValidator) {
 			this.eventValidator = eventValidator;
 			return this;
 		}

@@ -74,7 +74,7 @@ class Resolver<E extends Event, V> {
 	 * Resolves the given list of {@link EventValue}s.
 	 *
 	 * @param eventValues The event values to resolve.
-	 * @return The resolution.
+	 * @return The resolution containing the best candidates.
 	 */
 	public EventValueRegistry.Resolution<E, V> resolve(List<EventValue<?, ?>> eventValues) {
 		List<EventValue<E, V>> best = new ArrayList<>();
@@ -83,8 +83,14 @@ class Resolver<E extends Event, V> {
 			if (!filter.test(eventValue))
 				continue;
 
-			if (!eventValue.validate(eventClass))
-				return EventValueRegistry.Resolution.error();
+			switch (eventValue.validate(eventClass)) {
+				case INVALID -> {
+					continue;
+				}
+				case ABORT -> {
+					return EventValueRegistry.Resolution.error();
+				}
+			}
 
 			int comparison = bestMatch != null ? comparator.compare(eventValue, bestMatch) : -1;
 			if (comparison < 0) {
