@@ -21,8 +21,6 @@ import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
-import static org.skriptlang.skript.registration.DefaultSyntaxInfos.Expression.builder;
-
 @Name("Game Effects with Data")
 @Description("""
 	Creates game effects that require some extra information, such as colors, particle counts, or block data.
@@ -49,7 +47,7 @@ public class ExprGameEffectWithData extends SimpleExpression<GameEffect> {
 		}
 		PATTERNS = new Patterns<>(patterns);
 
-		registry.register(SyntaxRegistry.EXPRESSION, builder(ExprGameEffectWithData.class, GameEffect.class)
+		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprGameEffectWithData.class, GameEffect.class)
 				.addPatterns(PATTERNS.getPatterns())
 				.supplier(ExprGameEffectWithData::new)
 				.priority(SyntaxInfo.COMBINED)
