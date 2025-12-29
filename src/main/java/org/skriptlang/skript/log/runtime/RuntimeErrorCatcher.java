@@ -48,6 +48,7 @@ public class RuntimeErrorCatcher implements RuntimeErrorConsumer, AutoCloseable 
 	 * @return This {@link RuntimeErrorCatcher}
 	 */
 	public RuntimeErrorCatcher start() {
+		stopped = false;
 		storedConsumers = getManager().removeAllConsumers();
 		getManager().addConsumer(this);
 		return this;
