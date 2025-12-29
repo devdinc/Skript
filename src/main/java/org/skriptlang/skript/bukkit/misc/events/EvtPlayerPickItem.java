@@ -43,9 +43,10 @@ public class EvtPlayerPickItem extends SkriptEvent {
 			.addPatterns(PATTERNS.getPatterns())
 			.addDescription("Called when a player picks an item, block or an entity" + 
 					" using the pick block key (default middle mouse button).",
-				"The past event-slot represents the slot in which the item that will be put into the players hotbar is located." +
-					" Or nothing, if the item is not in the inventory. (May be changed)",
-				"The event-slot represents the slot in the hotbar where the picked item will be placed. (May be changed)")
+				"The past event-slot represents the slot containing the item that will be put into the players hotbar," +
+					" or nothing, if the item is not in the inventory.",
+				"The event-slot represents the slot in the hotbar where the picked item will be placed.",
+				"Both event-slots may be set to new slots.)
 			.addExample("""
 				on player picking a diamond block:
 					cancel event
