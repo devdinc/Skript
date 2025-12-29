@@ -46,7 +46,7 @@ public class EvtPlayerPickItem extends SkriptEvent {
 				"The past event-slot represents the slot containing the item that will be put into the players hotbar," +
 					" or nothing, if the item is not in the inventory.",
 				"The event-slot represents the slot in the hotbar where the picked item will be placed.",
-				"Both event-slots may be set to new slots.)
+				"Both event-slots may be set to new slots.")
 			.addExample("""
 				on player picking a diamond block:
 					cancel event
