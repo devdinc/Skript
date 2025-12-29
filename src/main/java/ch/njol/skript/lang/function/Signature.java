@@ -90,6 +90,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 		}
 		this.contract = contract;
 		this.calls = Collections.newSetFromMap(new WeakHashMap<>());
+		this.originClassPath = "";
 	}
 
 	public Signature(@Nullable String script, String name, Parameter<?>[] parameters, boolean local, @Nullable ClassInfo<T> returnType, boolean single, String stacktrace) {
@@ -138,7 +139,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	 * @param parameter The parameter to use to convert.
 	 * @return The converted parameter.
 	 */
-	private static Parameter<?> toOldParameter(org.skriptlang.skript.common.function.Parameter<?> parameter) {
+	static Parameter<?> toOldParameter(org.skriptlang.skript.common.function.Parameter<?> parameter) {
 		if (parameter == null) {
 			return null;
 		}

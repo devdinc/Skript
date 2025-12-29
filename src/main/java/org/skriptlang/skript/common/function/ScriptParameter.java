@@ -22,7 +22,7 @@ import java.util.Set;
  * @param defaultValue The default value, or null if there is no default value.
  * @param <T>          The type.
  */
-public record ScriptParameter<T>(String name, Class<T> type, Set<Modifier> modifiers, Expression<?> defaultValue)
+public record ScriptParameter<T>(String name, Class<T> type, Set<Modifier> modifiers, @Nullable Expression<?> defaultValue)
 	implements Parameter<T> {
 
 	public ScriptParameter(String name, Class<T> type, Modifier... modifiers) {

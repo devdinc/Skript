@@ -526,13 +526,7 @@ public final class FunctionRegistry implements Registry<Function<?>> {
 				// allows single passed values to still match array type in candidate (e.g. clamp)
 				Class<?> providedType = Utils.getComponentType(provided.args[i]);
 
-				Class<?> candidateType;
-				if (candidate.args[i].isArray()) {
-					candidateType = candidate.args[i].componentType();
-				} else {
-					candidateType = candidate.args[i];
-				}
-
+				Class<?> candidateType = Utils.getComponentType(candidate.args[i]);
 				Class<?> providedArg = provided.args[i];
 				if (exact) {
 					if (providedArg != candidateType) {

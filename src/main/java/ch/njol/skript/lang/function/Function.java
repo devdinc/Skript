@@ -56,16 +56,18 @@ public abstract class Function<T> implements org.skriptlang.skript.common.functi
 	 * @deprecated Use {@link Signature#parameters()} and {@link Parameters#all()} instead.
 	 */
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
-	public org.skriptlang.skript.common.function.Parameter<?>[] getParameters() {
-		return sign.getParameters();
+	public Parameter<?>[] getParameters() {
+		return Arrays.stream(sign.getParameters()).map(
+				Signature::toOldParameter)
+				.toArray(Parameter[]::new);
 	}
 
 	/**
 	 * @deprecated Use {@link Signature#parameters()} and {@link Parameters#get(int)} instead.
 	 */
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
-	public org.skriptlang.skript.common.function.Parameter<?> getParameter(int index) {
-		return sign.getParameter(index);
+	public Parameter<?> getParameter(int index) {
+		return Signature.toOldParameter(sign.getParameter(index));
 	}
 
 	public boolean isSingle() {

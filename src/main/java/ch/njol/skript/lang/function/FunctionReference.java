@@ -243,7 +243,7 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 						if (LiteralUtils.hasUnparsedLiteral(parameters[i])) {
 							Skript.error("Can't understand this expression: " + parameters[i].toString());
 						} else {
-							String type = Classes.toString(Classes.getSuperClassInfo(Utils.getComponentType(target)));
+							String type = Classes.toString(Classes.getSuperClassInfo(target));
 
 							Skript.error("The " + StringUtils.fancyOrderNumber(i + 1) + " argument given to the function '" + stringified + "' is not of the required type " + type + "."
 								+ " Check the correct order of the arguments and put lists into parentheses if appropriate (e.g. 'give(player, (iron ore and gold ore))')."

@@ -47,6 +47,14 @@ public interface Parameter<T> {
 	}
 
 	/**
+	 * @deprecated Use {@link #isSingle()} instead.
+	 */
+	@Deprecated(forRemoval = true, since = "INSERT VERSION")
+	default boolean single() {
+		return isSingle();
+	}
+
+	/**
 	 * Represents a modifier that can be applied to a parameter
 	 * when constructing one using {@link Builder#parameter(String, Class, Modifier[])}.
 	 */

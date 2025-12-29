@@ -111,9 +111,10 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 			return null;
 		}
 
+		ParserInstance parser = ParserInstance.get();
 		String namespace;
-		if (ParserInstance.get().isActive()) {
-			namespace = ParserInstance.get().getCurrentScript().getConfig().getFileName();
+		if (parser.isActive()) {
+			namespace = parser.getCurrentScript().getConfig().getFileName();
 		} else {
 			namespace = null;
 		}
