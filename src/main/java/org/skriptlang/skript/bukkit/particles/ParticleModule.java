@@ -36,12 +36,15 @@ import java.util.Arrays;
 public class ParticleModule implements AddonModule {
 
 	@Override
-	public void load(SkriptAddon addon) {
+	public void init(SkriptAddon addon) {
 		registerClasses();
 		registerDataSerializers();
 		DataGameEffects.getGameEffectInfos();
 		DataParticles.getParticleInfos();
+	}
 
+	@Override
+	public void load(SkriptAddon addon) {
 		// load elements!
 		SyntaxRegistry registry = addon.syntaxRegistry();
 		ModuleOrigin origin = AddonModule.origin(addon, "particles");

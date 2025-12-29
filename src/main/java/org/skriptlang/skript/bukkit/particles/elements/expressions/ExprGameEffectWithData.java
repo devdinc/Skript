@@ -14,10 +14,10 @@ import org.bukkit.Effect;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.addon.AddonModule.ModuleOrigin;
 import org.skriptlang.skript.bukkit.particles.GameEffect;
 import org.skriptlang.skript.bukkit.particles.registration.DataGameEffects;
 import org.skriptlang.skript.bukkit.particles.registration.EffectInfo;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
@@ -38,7 +38,7 @@ public class ExprGameEffectWithData extends SimpleExpression<GameEffect> {
 
 	private static Patterns<EffectInfo<Effect, Object>> PATTERNS;
 
-	public static void register(@NotNull SyntaxRegistry registry, @NotNull ModuleOrigin origin) {
+	public static void register(@NotNull SyntaxRegistry registry, @NotNull Origin origin) {
 		// create Patterns object
 		Object[][] patterns = new Object[DataGameEffects.getGameEffectInfos().size()][2];
 		int i = 0;

@@ -608,7 +608,7 @@ public final class Skript extends JavaPlugin implements Listener {
 				new DamageSourceModule(),
 				new ItemComponentModule(),
 				new PotionModule(),
-        new ParticleModule());
+				new ParticleModule());
 		} catch (final Exception e) {
 			exception(e, "Could not load required .class files: " + e.getLocalizedMessage());
 			setEnabled(false);

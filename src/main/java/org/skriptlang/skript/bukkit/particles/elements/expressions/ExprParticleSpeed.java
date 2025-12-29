@@ -9,8 +9,8 @@ import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Particle Speed/Extra Value")
@@ -27,7 +27,7 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 @Since("INSERT VERSION")
 public class ExprParticleSpeed extends SimplePropertyExpression<ParticleEffect, Number> {
 
-	public static void register(@NotNull SyntaxRegistry registry, @NotNull AddonModule.ModuleOrigin origin) {
+	public static void register(@NotNull SyntaxRegistry registry, @NotNull Origin origin) {
 		registry.register(SyntaxRegistry.EXPRESSION,
 			infoBuilder(ExprParticleSpeed.class, Number.class, "(speed|extra) [value]", "particles", false)
 				.supplier(ExprParticleSpeed::new)

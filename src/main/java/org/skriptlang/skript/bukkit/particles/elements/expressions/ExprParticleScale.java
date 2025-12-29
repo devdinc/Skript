@@ -9,8 +9,8 @@ import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ScalableEffect;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Particle Scale")
@@ -28,7 +28,7 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 @Since("INSERT VERSION")
 public class ExprParticleScale extends SimplePropertyExpression<ScalableEffect, Number> {
 
-	public static void register(@NotNull SyntaxRegistry registry, @NotNull AddonModule.ModuleOrigin origin) {
+	public static void register(@NotNull SyntaxRegistry registry, @NotNull Origin origin) {
 		registry.register(SyntaxRegistry.EXPRESSION,
 			infoBuilder(ExprParticleScale.class, Number.class, "scale [value]", "scalableparticles", false)
 				.supplier(ExprParticleScale::new)

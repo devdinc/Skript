@@ -9,8 +9,8 @@ import ch.njol.skript.expressions.base.SimplePropertyExpression;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.skriptlang.skript.addon.AddonModule.ModuleOrigin;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Particle Count")
@@ -29,7 +29,7 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 @Since("INSERT VERSION")
 public class ExprParticleCount extends SimplePropertyExpression<ParticleEffect, Number> {
 
-	public static void register(@NotNull SyntaxRegistry registry, @NotNull ModuleOrigin origin) {
+	public static void register(@NotNull SyntaxRegistry registry, @NotNull Origin origin) {
 		registry.register(SyntaxRegistry.EXPRESSION,
 			infoBuilder(ExprParticleCount.class, Number.class, "particle count", "particles", false)
 				.supplier(ExprParticleCount::new)
@@ -53,7 +53,7 @@ public class ExprParticleCount extends SimplePropertyExpression<ParticleEffect, 
 	@Override
 	public void change(Event event, Object @Nullable [] delta, ChangeMode mode) {
 		ParticleEffect[] particleEffect = getExpr().getArray(event);
-		if (particleEffect == null)
+		if (particleEffect.length == 0)
 			return;
 		int countDelta = delta == null ? 0 : ((Number) delta[0]).intValue();
 

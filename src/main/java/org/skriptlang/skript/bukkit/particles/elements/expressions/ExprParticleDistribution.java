@@ -11,8 +11,8 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
-import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
+import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 @Name("Particle Distribution")
@@ -39,7 +39,7 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 @Since("INSERT VERSION")
 public class ExprParticleDistribution extends SimplePropertyExpression<ParticleEffect, Vector> {
 
-	public static void register(@NotNull SyntaxRegistry registry, @NotNull AddonModule.ModuleOrigin origin) {
+	public static void register(@NotNull SyntaxRegistry registry, @NotNull Origin origin) {
 		registry.register(SyntaxRegistry.EXPRESSION,
 			infoBuilder(ExprParticleDistribution.class, Vector.class, "particle distribution", "particles", false)
 				.supplier(ExprParticleDistribution::new)
