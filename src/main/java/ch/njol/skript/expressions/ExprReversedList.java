@@ -18,6 +18,10 @@ import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 @Name("Reversed List")
 @Description("Reverses given list.")
@@ -58,6 +62,24 @@ public class ExprReversedList extends SimpleExpression<Object> {
 		System.arraycopy(inputArray, 0, array, 0, inputArray.length);
 		reverse(array);
 		return array;
+	}
+
+	@Override
+	public @Nullable Iterator<?> iterator(Event event) {
+		List<?> list = Arrays.asList(this.list.getArray(event).clone());
+		return new Iterator<>() {
+			private final ListIterator<?> listIterator = list.listIterator(list.size());
+
+			@Override
+			public boolean hasNext() {
+				return listIterator.hasPrevious();
+			}
+
+			@Override
+			public Object next() {
+				return listIterator.previous();
+			}
+		};
 	}
 
 	@Override
