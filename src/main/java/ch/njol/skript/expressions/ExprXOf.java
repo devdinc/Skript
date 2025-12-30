@@ -74,7 +74,7 @@ public class ExprXOf extends PropertyExpression<Object, Object> {
 		if (amount == null)
 			return (Object[]) Array.newInstance(getReturnType(), 0);
 
-		long absAmount = Math.abs(amount.longValue());
+		long absAmount = Math.max(amount.longValue(), 0);
 
 		return get(source, object -> {
 			if (object instanceof ItemStack itemStack) {

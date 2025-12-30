@@ -44,9 +44,10 @@ public class ExprVelocity extends SimplePropertyExpression<Object, Vector> {
 
 	@Override
 	public Class<?> @Nullable [] acceptChange(ChangeMode mode) {
-		if ((mode == ChangeMode.ADD || mode == ChangeMode.REMOVE || mode == ChangeMode.SET || mode == ChangeMode.DELETE || mode == ChangeMode.RESET))
-			return CollectionUtils.array(Vector.class);
-		return null;
+		return switch (mode) {
+			case ADD, REMOVE, SET, RESET, DELETE -> CollectionUtils.array(Vector.class);
+			default -> null;
+		};
 	}
 
 	@Override

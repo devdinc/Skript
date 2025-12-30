@@ -1,6 +1,7 @@
 package org.skriptlang.skript.bukkit.particles;
 
 import ch.njol.skript.Skript;
+import ch.njol.skript.classes.Changer.ChangeMode;
 import ch.njol.skript.classes.ClassInfo;
 import ch.njol.skript.classes.EnumClassInfo;
 import ch.njol.skript.classes.Parser;
@@ -13,6 +14,8 @@ import ch.njol.yggdrasil.Fields;
 import ch.njol.yggdrasil.SimpleClassSerializer;
 import ch.njol.yggdrasil.SimpleClassSerializer.NonInstantiableClassSerializer;
 import org.bukkit.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.addon.AddonModule;
 import org.skriptlang.skript.addon.SkriptAddon;
 import org.skriptlang.skript.bukkit.particles.elements.effects.EffPlayEffect;
@@ -23,6 +26,8 @@ import org.skriptlang.skript.bukkit.particles.particleeffects.ParticleEffect;
 import org.skriptlang.skript.bukkit.particles.particleeffects.ScalableEffect;
 import org.skriptlang.skript.bukkit.particles.registration.DataGameEffects;
 import org.skriptlang.skript.bukkit.particles.registration.DataParticles;
+import org.skriptlang.skript.lang.properties.Property;
+import org.skriptlang.skript.lang.properties.handlers.base.ExpressionPropertyHandler;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
 import java.io.NotSerializableException;
@@ -53,7 +58,7 @@ public class ParticleModule implements AddonModule {
 		ExprParticleCount.register(registry, origin);
 		ExprParticleDistribution.register(registry, origin);
 		ExprParticleOffset.register(registry, origin);
-		ExprParticleScale.register(registry, origin);
+//		ExprParticleScale.register(registry, origin);
 		ExprParticleSpeed.register(registry, origin);
 		ExprParticleWithData.register(registry, origin);
 		ExprParticleWithOffset.register(registry, origin);
@@ -227,7 +232,53 @@ public class ParticleModule implements AddonModule {
 				.map(ScalableEffect::new)
 				.iterator())
 			.serializer(new ParticleSerializer())
-			.defaultExpression(new EventValueExpression<>(ScalableEffect.class)));
+			.defaultExpression(new EventValueExpression<>(ScalableEffect.class))
+			.property(Property.SCALE,
+				"The scale multiplier to use for a particle. Generally larger numbers will result in larger particles.",
+				Skript.instance(),
+				//<editor-fold desc="scale handler" default-state=collapsed>
+				new ExpressionPropertyHandler<ScalableEffect, Number>() {
+					@Override
+					public @Nullable Number convert(ScalableEffect propertyHolder) {
+						return propertyHolder.hasScale() ? propertyHolder.scale() : null;
+					}
+
+					@Override
+					public Class<?> @Nullable [] acceptChange(ChangeMode mode) {
+						return switch (mode) {
+							case SET, ADD, REMOVE, RESET -> new Class[]{Number.class};
+							default -> null;
+						};
+					}
+
+					@Override
+					public void change(ScalableEffect propertyHolder, Object @Nullable [] delta, ChangeMode mode) {
+						double scaleDelta = delta == null ? 1 : ((Number) delta[0]).doubleValue();
+						switch (mode) {
+							case REMOVE:
+								scaleDelta = -scaleDelta;
+								// fallthrough
+							case ADD:
+								if (propertyHolder.hasScale()) // don't set scale if it doesn't have one
+									propertyHolder.scale(propertyHolder.scale() + scaleDelta);
+								break;
+							case SET:
+								propertyHolder.scale(scaleDelta);
+								break;
+							case RESET:
+								if (propertyHolder.hasScale()) // don't reset scale if it doesn't have one
+									propertyHolder.scale(scaleDelta);
+								break;
+						}
+					}
+
+					@Override
+					public @NotNull Class<Number> returnType() {
+						return Number.class;
+					}
+				}
+				//</editor-fold>
+			));
 	}
 
 	/**

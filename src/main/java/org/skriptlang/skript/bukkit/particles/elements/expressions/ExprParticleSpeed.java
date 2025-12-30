@@ -23,13 +23,14 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 	More detailed information on particle behavior can be found at \
 	<a href="https://docs.papermc.io/paper/dev/particles/#count-argument-behavior">Paper's particle documentation</a>.
 	""")
-@Example("set the speed of {_my-flame-particle} to 2")
+@Example("set the extra value of {_my-flame-particle} to 2")
+@Example("set the particle speed of {_my-flame-particle} to 0")
 @Since("INSERT VERSION")
 public class ExprParticleSpeed extends SimplePropertyExpression<ParticleEffect, Number> {
 
 	public static void register(@NotNull SyntaxRegistry registry, @NotNull Origin origin) {
 		registry.register(SyntaxRegistry.EXPRESSION,
-			infoBuilder(ExprParticleSpeed.class, Number.class, "(speed|extra) [value]", "particles", false)
+			infoBuilder(ExprParticleSpeed.class, Number.class, "(particle speed [value]|extra value)", "particles", false)
 				.supplier(ExprParticleSpeed::new)
 				.origin(origin)
 				.build());
@@ -77,7 +78,7 @@ public class ExprParticleSpeed extends SimplePropertyExpression<ParticleEffect, 
 
 	@Override
 	protected String getPropertyName() {
-		return "speed value";
+		return "particle speed";
 	}
 
 }

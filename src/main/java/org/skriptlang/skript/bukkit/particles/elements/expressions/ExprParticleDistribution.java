@@ -55,7 +55,7 @@ public class ExprParticleDistribution extends SimplePropertyExpression<ParticleE
 	@Override
 	public Class<?> @Nullable [] acceptChange(ChangeMode mode) {
 		return switch (mode) {
-			case SET, RESET -> new Class[]{Vector.class};
+			case SET, ADD, REMOVE, RESET -> new Class[]{Vector.class};
 			default -> null;
 		};
 	}
@@ -65,10 +65,20 @@ public class ExprParticleDistribution extends SimplePropertyExpression<ParticleE
 		ParticleEffect[] particleEffect = getExpr().getArray(event);
 		if (particleEffect.length == 0)
 			return;
-
-		Vector3d newVector = delta == null ? new Vector3d(0,0,0) : ((Vector) delta[0]).toVector3d();
-		for (ParticleEffect effect : particleEffect)
-			effect.distribution(newVector);
+		Vector3d vectorDelta = delta == null ? new Vector3d() : ((Vector) delta[0]).toVector3d();
+		switch (mode) {
+			case REMOVE:
+				vectorDelta.mul(-1);
+				// fallthrough
+			case ADD:
+				for (ParticleEffect effect : particleEffect)
+					effect.distribution(vectorDelta.add(effect.offset()));
+				break;
+			case SET, RESET:
+				for (ParticleEffect effect : particleEffect)
+					effect.distribution(vectorDelta);
+				break;
+		}
 	}
 
 	@Override

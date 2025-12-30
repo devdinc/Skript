@@ -106,9 +106,6 @@ public final class VectorMath {
 		return ExprVectorFromYawAndPitch.wrapAngleDeg(angle);
 	}
 
-	/**
-	 * Copies vector components of {@code vector2} into {@code vector1}.
-	 */
 	public static void copyVector(Vector vector1, Vector vector2) {
 		vector1.copy(vector2);
 	}
