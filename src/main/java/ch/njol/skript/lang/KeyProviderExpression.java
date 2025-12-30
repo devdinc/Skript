@@ -72,7 +72,7 @@ import java.util.Iterator;
  * @see KeyReceiverExpression
  * @see KeyedValue
  */
-public interface KeyProviderExpression<T> extends Expression<T> {
+public interface KeyProviderExpression<T> extends Expression<T>, KeyedIterableExpression<T> {
 
 	/**
 	 * A set of keys, matching the length and order of the immediately-previous
@@ -126,6 +126,7 @@ public interface KeyProviderExpression<T> extends Expression<T> {
 	 * @param event The event context
 	 * @return An iterator over the key-value pairs of this expression
 	 */
+	@Override
 	default Iterator<KeyedValue<T>> keyedIterator(Event event) {
 		return new ArrayIterator<>(KeyedValue.zip(getArray(event), getArrayKeys(event)));
 	}
@@ -149,6 +150,11 @@ public interface KeyProviderExpression<T> extends Expression<T> {
 		return true;
 	}
 
+	@Override
+	default boolean canIterateWithKeys() {
+		return canReturnKeys();
+	}
+
 	/**
 	 * While all keyed expressions may <i>offer</i> their keys,
 	 * some may prefer that they are not used unless strictly required (e.g. variables).
@@ -157,22 +163,6 @@ public interface KeyProviderExpression<T> extends Expression<T> {
 	 */
 	default boolean areKeysRecommended() {
 		return true;
-	}
-
-	@Override
-	default boolean isLoopOf(String input) {
-		return canReturnKeys() && isIndexLoop(input);
-	}
-
-	/**
-	 * Checks whether the 'loop-...' expression should match this loop's index,
-	 * e.g. loop-index matches the index of a loop that iterates over a list variable.
-	 *
-	 * @param input the input to check
-	 * @return true if the input matches the index loop, false otherwise
-	 */
-	default boolean isIndexLoop(String input) {
-		return input.equalsIgnoreCase("index");
 	}
 
 	/**

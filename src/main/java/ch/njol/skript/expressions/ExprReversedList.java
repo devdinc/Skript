@@ -2,35 +2,38 @@ package ch.njol.skript.expressions;
 
 import ch.njol.skript.Skript;
 import ch.njol.skript.doc.Description;
-import ch.njol.skript.doc.Examples;
+import ch.njol.skript.doc.Example;
 import ch.njol.skript.doc.Name;
 import ch.njol.skript.doc.Since;
-import ch.njol.skript.lang.Expression;
-import ch.njol.skript.lang.ExpressionType;
-import ch.njol.skript.lang.Literal;
+import ch.njol.skript.lang.*;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.simplification.SimplifiedLiteral;
 import ch.njol.skript.lang.util.SimpleExpression;
 import ch.njol.skript.util.LiteralUtils;
 import ch.njol.util.Kleenean;
 import ch.njol.util.coll.CollectionUtils;
+import com.google.common.collect.Iterators;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.ListIterator;
 
 @Name("Reversed List")
 @Description("Reverses given list.")
-@Examples({"set {_list::*} to reversed {_list::*}"})
-@Since("2.4")
-public class ExprReversedList extends SimpleExpression<Object> {
+@Example("set {_list::*} to reversed {_list::*}")
+@Since("2.4, INSERT VERSION (retain indices when looping)")
+public class ExprReversedList extends SimpleExpression<Object> implements KeyedIterableExpression<Object> {
 
 	static {
 		Skript.registerExpression(ExprReversedList.class, Object.class, ExpressionType.COMBINED, "reversed %objects%");
 	}
 
-	@SuppressWarnings("NotNullFieldNotInitialized")
 	private Expression<?> list;
+	private boolean keyed;
 
 	@SuppressWarnings("unused")
 	public ExprReversedList() {
@@ -38,6 +41,7 @@ public class ExprReversedList extends SimpleExpression<Object> {
 
 	public ExprReversedList(Expression<?> list) {
 		this.list = list;
+		this.keyed = KeyedIterableExpression.canIterateWithKeys(list);
 	}
 
 	@Override
@@ -47,17 +51,45 @@ public class ExprReversedList extends SimpleExpression<Object> {
 			Skript.error("A single object cannot be reversed.");
 			return false;
 		}
+		keyed = KeyedIterableExpression.canIterateWithKeys(list);
 		return LiteralUtils.canInitSafely(list);
 	}
 
 	@Override
-	@Nullable
-	protected Object[] get(Event e) {
-		Object[] inputArray = list.getArray(e).clone();
+	protected Object @Nullable [] get(Event event) {
+		Object[] inputArray = list.getArray(event).clone();
 		Object[] array = (Object[]) Array.newInstance(getReturnType(), inputArray.length);
 		System.arraycopy(inputArray, 0, array, 0, inputArray.length);
 		reverse(array);
 		return array;
+	}
+
+	@Override
+	public boolean canIterateWithKeys() {
+		return keyed;
+	}
+
+	@Override
+	public Iterator<KeyedValue<Object>> keyedIterator(Event event) {
+		if (!keyed)
+			throw new UnsupportedOperationException();
+		Iterator<? extends KeyedValue<?>> iterator = ((KeyedIterableExpression<?>) list).keyedIterator(event);
+		//noinspection unchecked
+		List<KeyedValue<?>> list = Arrays.asList(Iterators.toArray(iterator, KeyedValue.class));
+		return new Iterator<>() {
+			private final ListIterator<KeyedValue<?>> listIterator = list.listIterator(list.size());
+
+			@Override
+			public boolean hasNext() {
+				return listIterator.hasPrevious();
+			}
+
+			@Override
+			public KeyedValue<Object> next() {
+				//noinspection unchecked
+				return (KeyedValue<Object>) listIterator.previous();
+			}
+		};
 	}
 
 	@Override
@@ -102,8 +134,20 @@ public class ExprReversedList extends SimpleExpression<Object> {
 	public boolean canReturn(Class<?> returnType) {
 		return list.canReturn(returnType);
 	}
-  
-  @Override
+
+	@Override
+	public boolean isIndexLoop(String input) {
+		if (!keyed)
+			throw new IllegalStateException();
+		return ((KeyedIterableExpression<?>) list).isIndexLoop(input);
+	}
+
+	@Override
+	public boolean isLoopOf(String input) {
+		return list.isLoopOf(input);
+	}
+
+	@Override
 	public Expression<?> simplify() {
 		if (list instanceof Literal<?>)
 			return SimplifiedLiteral.fromExpression(this);
@@ -111,8 +155,8 @@ public class ExprReversedList extends SimpleExpression<Object> {
   }
     
 	@Override
-	public String toString(@Nullable Event e, boolean debug) {
-		return "reversed " + list.toString(e, debug);
+	public String toString(@Nullable Event event, boolean debug) {
+		return "reversed " + list.toString(event, debug);
 	}
 
 }
