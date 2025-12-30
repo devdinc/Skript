@@ -197,6 +197,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 		Set<FunctionReference<T>> exactReferences = new HashSet<>();
 
 		signatures:
+		// TODO! cache results
 		for (Signature<?> signature : signatures) {
 			// if arguments arent possible, skip
 			if (arguments.length > signature.getMaxParameters() || arguments.length < signature.getMinParameters()) {

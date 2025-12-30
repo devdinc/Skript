@@ -1,6 +1,7 @@
 package org.skriptlang.skript.common.function;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -69,7 +70,7 @@ public final class Parameters {
 	/**
 	 * @return A copy of the backing sequenced map.
 	 */
-	public SequencedMap<String, Parameter<?>> sequencedMap() {
+	public @UnmodifiableView SequencedMap<String, Parameter<?>> sequencedMap() {
 		return Collections.unmodifiableSequencedMap(named);
 	}
 
