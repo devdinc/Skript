@@ -35,7 +35,6 @@ public class ExprReversedList extends SimpleExpression<Object> implements KeyedI
 	private Expression<?> list;
 	private boolean keyed;
 
-	@SuppressWarnings("unused")
 	public ExprReversedList() {
 	}
 
@@ -45,8 +44,8 @@ public class ExprReversedList extends SimpleExpression<Object> implements KeyedI
 	}
 
 	@Override
-	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
-		list = LiteralUtils.defendExpression(exprs[0]);
+	public boolean init(Expression<?>[] expressions, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+		list = LiteralUtils.defendExpression(expressions[0]);
 		if (list.isSingle()) {
 			Skript.error("A single object cannot be reversed.");
 			return false;
@@ -93,14 +92,15 @@ public class ExprReversedList extends SimpleExpression<Object> implements KeyedI
 	}
 
 	@Override
-	@Nullable
-	@SuppressWarnings("unchecked")
-	public <R> Expression<? extends R> getConvertedExpression(Class<R>... to) {
+	@SafeVarargs
+	public final <R> @Nullable Expression<? extends R> getConvertedExpression(Class<R>... to) {
 		if (CollectionUtils.containsSuperclass(to, getReturnType()))
+			//noinspection unchecked
 			return (Expression<? extends R>) this;
 
 		Expression<? extends R> convertedList = list.getConvertedExpression(to);
 		if (convertedList != null)
+			//noinspection unchecked
 			return (Expression<? extends R>) new ExprReversedList(convertedList);
 
 		return null;
@@ -116,11 +116,6 @@ public class ExprReversedList extends SimpleExpression<Object> implements KeyedI
 	}
 
 	@Override
-	public boolean isSingle() {
-		return false;
-	}
-
-	@Override
 	public Class<?> getReturnType() {
 		return list.getReturnType();
 	}
@@ -133,6 +128,11 @@ public class ExprReversedList extends SimpleExpression<Object> implements KeyedI
 	@Override
 	public boolean canReturn(Class<?> returnType) {
 		return list.canReturn(returnType);
+	}
+
+	@Override
+	public boolean isSingle() {
+		return false;
 	}
 
 	@Override
@@ -152,7 +152,7 @@ public class ExprReversedList extends SimpleExpression<Object> implements KeyedI
 		if (list instanceof Literal<?>)
 			return SimplifiedLiteral.fromExpression(this);
 		return this;
-  }
+	}
     
 	@Override
 	public String toString(@Nullable Event event, boolean debug) {

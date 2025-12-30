@@ -41,7 +41,6 @@ public class ExprSortedList extends SimpleExpression<Object> implements KeyedIte
 	private Expression<?> list;
 	private boolean keyed;
 
-	@SuppressWarnings("unused")
 	public ExprSortedList() {
 	}
 
@@ -51,8 +50,8 @@ public class ExprSortedList extends SimpleExpression<Object> implements KeyedIte
 	}
 
 	@Override
-	public boolean init(Expression<?>[] exprs, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
-		list = LiteralUtils.defendExpression(exprs[0]);
+	public boolean init(Expression<?>[] expressions, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
+		list = LiteralUtils.defendExpression(expressions[0]);
 		if (list.isSingle()) {
 			Skript.error("A single object cannot be sorted.");
 			return false;
@@ -91,34 +90,32 @@ public class ExprSortedList extends SimpleExpression<Object> implements KeyedIte
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public static <A, B> int compare(A a, B b) throws IllegalArgumentException, ClassCastException {
 		if (a instanceof String && b instanceof String)
 			return Relation.get(((String) a).compareToIgnoreCase((String) b)).getRelation();
+		//noinspection unchecked
 		Comparator<A, B> comparator = Comparators.getComparator((Class<A>) a.getClass(), (Class<B>) b.getClass());
         if (comparator != null && comparator.supportsOrdering())
 			return comparator.compare(a, b).getRelation();
 		if (!(a instanceof Comparable))
 			throw new IllegalArgumentException("Cannot compare " + a.getClass());
+		//noinspection unchecked
 		return ((Comparable<B>) a).compareTo(b);
     }
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <R> @Nullable Expression<? extends R> getConvertedExpression(Class<R>... to) {
+	@SafeVarargs
+	public final <R> @Nullable Expression<? extends R> getConvertedExpression(Class<R>... to) {
 		if (CollectionUtils.containsSuperclass(to, getReturnType()))
+			//noinspection unchecked
 			return (Expression<? extends R>) this;
 
 		Expression<? extends R> convertedList = list.getConvertedExpression(to);
 		if (convertedList != null)
+			//noinspection unchecked
 			return (Expression<? extends R>) new ExprSortedList(convertedList);
 
 		return null;
-	}
-
-	@Override
-	public boolean isSingle() {
-		return false;
 	}
 
 	@Override
@@ -134,6 +131,11 @@ public class ExprSortedList extends SimpleExpression<Object> implements KeyedIte
 	@Override
 	public boolean canReturn(Class<?> returnType) {
 		return list.canReturn(returnType);
+	}
+
+	@Override
+	public boolean isSingle() {
+		return false;
 	}
 
 	@Override
