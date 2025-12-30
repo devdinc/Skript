@@ -17,7 +17,6 @@ import ch.njol.util.coll.CollectionUtils;
 import org.bukkit.event.Event;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -57,16 +56,14 @@ public class ExprReversedList extends SimpleExpression<Object> {
 	@Override
 	@Nullable
 	protected Object[] get(Event e) {
-		Object[] inputArray = list.getArray(e).clone();
-		Object[] array = (Object[]) Array.newInstance(getReturnType(), inputArray.length);
-		System.arraycopy(inputArray, 0, array, 0, inputArray.length);
+		Object[] array = list.getArray(e);
 		reverse(array);
 		return array;
 	}
 
 	@Override
 	public @Nullable Iterator<?> iterator(Event event) {
-		List<?> list = Arrays.asList(this.list.getArray(event).clone());
+		List<?> list = Arrays.asList(this.list.getArray(event));
 		return new Iterator<>() {
 			private final ListIterator<?> listIterator = list.listIterator(list.size());
 
