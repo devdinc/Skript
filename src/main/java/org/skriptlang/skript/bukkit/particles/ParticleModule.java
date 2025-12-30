@@ -58,7 +58,6 @@ public class ParticleModule implements AddonModule {
 		ExprParticleCount.register(registry, origin);
 		ExprParticleDistribution.register(registry, origin);
 		ExprParticleOffset.register(registry, origin);
-//		ExprParticleScale.register(registry, origin);
 		ExprParticleSpeed.register(registry, origin);
 		ExprParticleWithData.register(registry, origin);
 		ExprParticleWithOffset.register(registry, origin);
