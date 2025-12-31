@@ -38,7 +38,7 @@ public class ExprParticleWithSpeed extends PropertyExpression<ParticleEffect, Pa
 
 	public static void register(@NotNull SyntaxRegistry registry, @NotNull Origin origin) {
 		registry.register(SyntaxRegistry.EXPRESSION, builder(ExprParticleWithSpeed.class, ParticleEffect.class)
-			.addPatterns("%particles% with ([a] speed|[an] extra) [value] [of] %number%")
+			.addPatterns("%particles% with ([a] particle speed [value]|[an] extra value) [of] %number%")
 			.supplier(ExprParticleWithSpeed::new)
 			.priority(SyntaxInfo.COMBINED)
 			.origin(origin)
