@@ -168,7 +168,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 	}
 
 	@Override
-	public Class<T> returnType() {
+	public @Nullable Class<T> returnType() {
 		//noinspection unchecked
 		return (Class<T>) returns;
 	}

@@ -9,6 +9,7 @@ import ch.njol.skript.lang.function.FunctionRegistry.RetrievalResult;
 import ch.njol.skript.structures.StructFunction;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.common.function.DefaultFunction;
+import org.skriptlang.skript.common.function.FunctionParser;
 import org.skriptlang.skript.common.function.FunctionReference;
 import org.skriptlang.skript.common.function.Parameter;
 import org.skriptlang.skript.lang.script.Script;
@@ -142,11 +143,11 @@ public abstract class Functions {
 	}
 
 	/**
-	 * @deprecated Use {@link StructFunction.FunctionParser#parse(String, String, String, String, boolean)} instead.
+	 * @deprecated Use {@link FunctionParser#parse(String, String, String, String, boolean)} instead.
 	 */
 	@Deprecated(forRemoval = true, since = "INSERT VERSION")
 	public static @Nullable Signature<?> parseSignature(String script, String name, String args, @Nullable String returnType, boolean local) {
-		return StructFunction.FunctionParser.parse(script, name, args, returnType, local);
+		return FunctionParser.parse(script, name, args, returnType, local);
 	}
 
 	/**
@@ -279,7 +280,7 @@ public abstract class Functions {
 
 	/**
 	 * Gets a signature of function with given name.
-	 * 
+	 *
 	 * @deprecated in favour of {@link #getGlobalSignature(String)} for proper name.
 	 * @param name Name of function.
 	 * @return Signature, or null if function does not exist.
@@ -291,7 +292,7 @@ public abstract class Functions {
 
 	/**
 	 * Gets a signature of function with given name.
-	 * 
+	 *
 	 * @param name Name of function.
 	 * @return Signature, or null if function does not exist.
 	 */
@@ -304,7 +305,7 @@ public abstract class Functions {
 
 	/**
 	 * Gets a signature of function with given name.
-	 * 
+	 *
 	 * @param name Name of function.
 	 * @param script The script where the function is declared in. Used to get local functions.
 	 * @return Signature, or null if function does not exist.

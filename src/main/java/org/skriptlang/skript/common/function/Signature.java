@@ -5,6 +5,7 @@ import org.jetbrains.annotations.ApiStatus.Experimental;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
 /**
@@ -21,7 +22,7 @@ public interface Signature<T> {
 	/**
 	 * @return The type of this parameter.
 	 */
-	Class<T> returnType();
+	@Nullable Class<T> returnType();
 
 	/**
 	 * @return An unmodifiable view of all the parameters that this signature has.
