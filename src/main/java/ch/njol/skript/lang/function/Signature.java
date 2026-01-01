@@ -104,7 +104,7 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 		this.originClassPath = stacktrace;
 	}
 
-	public Signature(@Nullable String script, String name, Parameters parameters, Class<T> returnType, boolean local) {
+	public Signature(@Nullable String script, String name, Parameters parameters, Class<T> returnType, boolean local, @Nullable Contract contract) {
 		this.script = script;
 		this.name = name;
 		this.parameters = parameters;
@@ -118,12 +118,16 @@ public class Signature<T> implements org.skriptlang.skript.common.function.Signa
 			this.returnType = null;
 			this.single = true;
 		}
-		this.contract = null;
+		this.contract = contract;
 		this.calls = Collections.newSetFromMap(new WeakHashMap<>());
 	}
 
+	public Signature(@Nullable String script, String name, Parameters parameters, Class<T> returnType, boolean local) {
+		this(script, name, parameters, returnType, local, null);
+	}
+
 	public Signature(String namespace, String name, org.skriptlang.skript.common.function.Parameter<?>[] parameters, Class<T> returnType, boolean single, @Nullable Contract contract) {
-		this(namespace, name, initParameters(parameters), returnType, false);
+		this(namespace, name, initParameters(parameters), returnType, false, contract);
 	}
 
 	private static Parameters initParameters(org.skriptlang.skript.common.function.Parameter<?>[] params) {

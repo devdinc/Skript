@@ -13,8 +13,6 @@ import ch.njol.skript.expressions.ExprParse;
 import ch.njol.skript.lang.DefaultExpressionUtils.DefaultExpressionError;
 import ch.njol.skript.lang.function.ExprFunctionCall;
 import ch.njol.skript.lang.function.FunctionReference;
-import ch.njol.skript.lang.function.FunctionRegistry;
-import ch.njol.skript.lang.function.Functions;
 import ch.njol.skript.lang.parser.DefaultValueData;
 import ch.njol.skript.lang.parser.ParseStackOverflowException;
 import ch.njol.skript.lang.parser.ParserInstance;
@@ -59,7 +57,6 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -677,7 +674,7 @@ public final class SkriptParser {
 				// If it wasn't variable, do same for function call
 				org.skriptlang.skript.common.function.FunctionReference<?> functionReference = parseFunctionReference();
 				if (functionReference != null) {
-					if (onlySingular && !functionReference.single()) {
+					if (onlySingular && !functionReference.isSingle()) {
 						Skript.error("'" + expr + "' can only be a single "
 							+ Classes.toString(Stream.of(exprInfo.classes).map(classInfo -> classInfo.getName().toString()).toArray(), false)
 							+ ", not more.");

@@ -113,7 +113,7 @@ public class ExprFunctionCall<T> extends SimpleExpression<T> implements KeyProvi
 
 	@Override
 	public boolean isSingle() {
-		return reference.single();
+		return reference.isSingle();
 	}
 
 	@Override

@@ -290,7 +290,7 @@ public final class FunctionReference<T> implements Debuggable {
 	/**
 	 * @return Whether this reference returns a single or multiple values.
 	 */
-	public boolean single() {
+	public boolean isSingle() {
 		if (signature.contract() != null) {
 			Expression<?>[] args = Arrays.stream(arguments)
 					.map(it -> it.value)

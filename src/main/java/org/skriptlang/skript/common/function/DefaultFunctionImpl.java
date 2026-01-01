@@ -80,9 +80,10 @@ final class DefaultFunctionImpl<T> extends ch.njol.skript.lang.function.Function
 			}
 
 			// check parameter plurality before arg length, since plural params accept arrays of length 1
-			if (parameter.single()) {
-				if (arg.length != 1)
+			if (parameter.isSingle()) {
+				if (arg.length != 1) {
 					return null;
+				}
 
 				assert parameter.type().isAssignableFrom(arg[0].getClass())
 						: "argument type %s does not match parameter type %s".formatted(parameter.type().getSimpleName(),
