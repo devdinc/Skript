@@ -391,7 +391,7 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 			params[0] = evaluateSingleListParameter(function.signature().parameters().getFirst(), parameters, event);
 		} else { // Use parameters in normal way
 			for (int i = 0; i < parameters.length; i++)
-				//noinspection rawtypes
+				//noinspection rawtypes,unchecked
 				params[i] = function.signature().parameters().get(i).evaluate((Expression) parameters[i], event);
 		}
 

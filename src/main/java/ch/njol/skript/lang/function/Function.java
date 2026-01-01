@@ -131,7 +131,8 @@ public abstract class Function<T> implements org.skriptlang.skript.common.functi
 				}
 			} else if (parameterValue == null && !(this instanceof DefaultFunction<?>)) { // Go for default value
 				assert defaultValueExpr != null; // Should've been parse error
-				parameterValue = parameter.evaluateDefault(event);
+				//noinspection unchecked,rawtypes
+				parameterValue = parameter.evaluate((Expression) defaultValueExpr, event);
 			}
 
 			/*
