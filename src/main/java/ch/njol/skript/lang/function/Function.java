@@ -129,15 +129,9 @@ public abstract class Function<T> implements org.skriptlang.skript.common.functi
 				} else {
 					parameterValue = defaultValue;
 				}
-			} else if (parameterValue == null) { // Go for default value
+			} else if (parameterValue == null && !(this instanceof DefaultFunction<?>)) { // Go for default value
 				assert defaultValueExpr != null; // Should've been parse error
-				Object[] defaultValue = defaultValueExpr.getArray(event);
-				if (parameter.hasModifier(Modifier.KEYED) && KeyProviderExpression.areKeysRecommended(defaultValueExpr)) {
-					String[] keys = ((KeyProviderExpression<?>) defaultValueExpr).getArrayKeys(event);
-					parameterValue = KeyedValue.zip(defaultValue, keys);
-				} else {
-					parameterValue = defaultValue;
-				}
+				parameterValue = parameter.evaluateDefault(event);
 			}
 
 			/*
@@ -166,7 +160,10 @@ public abstract class Function<T> implements org.skriptlang.skript.common.functi
 	}
 
 	private KeyedValue<Object> @Nullable [] convertToKeyed(Object[] values) {
-		if (values == null || values.length == 0)
+		if (values == null)
+			return null;
+
+		if (values.length == 0)
 			//noinspection unchecked
 			return new KeyedValue[0];
 

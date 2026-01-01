@@ -171,3 +171,11 @@ test "named function arguments with single list params":
 	parse:
 		nfa_incorrect_list(ns: 1, ns: 2, ns: 3)
 	assert first element of last parse logs contains "A value has already been assigned to parameter 'ns'"
+
+local function duplicate_keys_test(x: strings) :: strings:
+	return {_x::*}
+
+test "duplicate keys in function arguments":
+	set {_a::foo} to "first"
+	set {_b::foo} to "second"
+	assert duplicate_keys_test(keyed {_a::*}, keyed {_b::*}) is "first"
