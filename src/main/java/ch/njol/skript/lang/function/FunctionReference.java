@@ -388,13 +388,11 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 		// Prepare parameter values for calling
 		Object[][] params = new Object[singleListParam ? 1 : parameters.length][];
 		if (singleListParam) { // All parameters to one list
-			params[0] = evaluateSingleListParameter(function.getParameter(0), parameters, event);
+			params[0] = evaluateSingleListParameter(function.signature().parameters().getFirst(), parameters, event);
 		} else { // Use parameters in normal way
-			Parameter<?>[] values = function.getSignature().parameters().all();
-
 			for (int i = 0; i < parameters.length; i++)
-				//noinspection unchecked,rawtypes
-				params[i] = function.getParameter(i).evaluate((Expression) parameters[i], event);
+				//noinspection rawtypes
+				params[i] = function.signature().parameters().get(i).evaluate((Expression) parameters[i], event);
 		}
 
 		// Execute the function

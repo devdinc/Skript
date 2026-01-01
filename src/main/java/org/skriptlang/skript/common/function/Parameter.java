@@ -1,8 +1,14 @@
 package org.skriptlang.skript.common.function;
 
+import ch.njol.skript.lang.Expression;
+import ch.njol.skript.lang.KeyProviderExpression;
+import ch.njol.skript.lang.KeyedValue;
+import ch.njol.skript.registrations.Classes;
 import com.google.common.base.Preconditions;
+import org.bukkit.event.Event;
 import org.jetbrains.annotations.ApiStatus.NonExtendable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.skriptlang.skript.common.function.DefaultFunction.Builder;
 import org.skriptlang.skript.lang.converter.Converter;
@@ -53,6 +59,39 @@ public interface Parameter<T> {
 			.map(modifierClass::cast)
 			.findFirst()
 			.orElse(null);
+	}
+
+	/**
+	 * Evaluates the provided argument expression and returns the resulting values, taking into account this parameter's modifiers.
+	 *
+	 * <p>If this parameter has the {@link org.skriptlang.skript.common.function.Parameter.Modifier#KEYED} modifier,
+	 * the returned array will contain {@link ch.njol.skript.lang.KeyedValue} objects, pairing each value with its corresponding key.
+	 * If the argument expression does not provide keys, numerical indices (1, 2, 3, ...) will be used as keys;
+	 * otherwise, the returned array will contain only the values.</p>
+	 *
+	 * @param argument the argument passed to this parameter; or {@code null} to use the default value if present
+	 * @param event the event in which to evaluate the expression
+	 * @return an object array containing either value-only elements or {@code KeyedValue[]} when keyed
+	 * @throws IllegalStateException if the argument is {@code null} and this parameter does not have a default value
+	 */
+	default Object[] evaluate(@Nullable Expression<? extends T> argument, Event event) {
+		if (argument == null) {
+			return null;
+		}
+
+		Object[] values = argument.getArray(event);
+
+		// Don't allow mutating across function boundary; same hack is applied to variables
+		for (int i = 0; i < values.length; i++)
+			values[i] = Classes.clone(values[i]);
+
+		if (!hasModifier(Modifier.KEYED))
+			return values;
+
+		String[] keys = KeyProviderExpression.areKeysRecommended(argument)
+				? ((KeyProviderExpression<?>) argument).getArrayKeys(event)
+				: null;
+		return KeyedValue.zip(values, keys);
 	}
 
 	/**
