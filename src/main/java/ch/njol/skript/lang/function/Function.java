@@ -16,7 +16,6 @@ import org.skriptlang.skript.common.function.Parameters;
 import org.skriptlang.skript.common.function.ScriptParameter;
 
 import java.util.Arrays;
-import java.util.SequencedMap;
 
 /**
  * Functions can be called using arguments.

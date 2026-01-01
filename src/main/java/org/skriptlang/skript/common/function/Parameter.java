@@ -1,7 +1,7 @@
 package org.skriptlang.skript.common.function;
 
-import org.jetbrains.annotations.ApiStatus.NonExtendable;
 import com.google.common.base.Preconditions;
+import org.jetbrains.annotations.ApiStatus.NonExtendable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 import org.skriptlang.skript.common.function.DefaultFunction.Builder;
