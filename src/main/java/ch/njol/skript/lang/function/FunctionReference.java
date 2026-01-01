@@ -23,6 +23,8 @@ import org.skriptlang.skript.common.function.FunctionReference.Argument;
 import org.skriptlang.skript.common.function.FunctionReference.ArgumentType;
 import org.skriptlang.skript.common.function.Parameter;
 import org.skriptlang.skript.common.function.Parameter.Modifier;
+import org.skriptlang.skript.common.function.Parameter.Modifier;
+import org.skriptlang.skript.common.function.Parameter.Modifier.RangedModifier;
 import org.skriptlang.skript.lang.converter.Converters;
 import org.skriptlang.skript.util.Executable;
 
@@ -231,14 +233,14 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 
 		// Check parameter types
 		for (int i = 0; i < parameters.length; i++) {
-			Parameter<?> parameter = sign.parameters().get(singleListParam ? 0 : i);
+			Parameter<?> signatureParam = sign.parameters().get(singleListParam ? 0 : i);
 			RetainingLogHandler log = SkriptLogger.startRetainingLog();
 			try {
-				Class<?> target = Utils.getComponentType(parameter.type());
+				Class<?> target = Utils.getComponentType(signatureParam.type());
 
 				//noinspection unchecked
-				Expression<?> expr = parameters[i].getConvertedExpression(target);
-				if (expr == null) {
+				Expression<?> exprParam = parameters[i].getConvertedExpression(target);
+				if (exprParam == null) {
 					if (first) {
 						if (LiteralUtils.hasUnparsedLiteral(parameters[i])) {
 							Skript.error("Can't understand this expression: " + parameters[i].toString());
@@ -255,7 +257,7 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 						function = previousFunction;
 					}
 					return false;
-				} else if (parameter.isSingle() && !expr.isSingle()) {
+				} else if (signatureParam.single && !exprParam.isSingle()) {
 					if (first) {
 						Skript.error("The " + StringUtils.fancyOrderNumber(i + 1) + " argument given to the function '" + functionName + "' is plural, "
 							+ "but a single argument was expected");
@@ -266,7 +268,19 @@ public class FunctionReference<T> implements Contract, Executable<Event, T[]> {
 					}
 					return false;
 				}
-				parameters[i] = expr;
+
+				// check ranged parameters
+				if (signatureParam.hasModifier(Modifier.RANGED) && exprParam instanceof Literal<?> literalParam) {
+					RangedModifier<?> range = signatureParam.getModifier(RangedModifier.class);
+					if (!range.inRange(literalParam.getArray())) {
+						Skript.error("The argument '" + signatureParam.name() +"' only accepts values between "
+							+ Classes.toString(range.getMin()) + " and " + Classes.toString(range.getMax()) + ". "
+							+ "Provided: " + literalParam.toString(null, Skript.debug()));
+						return false;
+					}
+				}
+
+				parameters[i] = exprParam;
 			} finally {
 				log.printLog();
 			}
