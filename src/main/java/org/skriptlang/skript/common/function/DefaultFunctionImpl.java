@@ -118,8 +118,18 @@ final class DefaultFunctionImpl<T> extends ch.njol.skript.lang.function.Function
 	@Override
 	public T execute(@NotNull FunctionEvent<?> event, @NotNull FunctionArguments arguments) {
 		for (String name : arguments.names()) {
-			if (arguments.get(name) == null && !parameters.get(name).hasModifier(Modifier.OPTIONAL)) {
+			Parameter<?> parameter = parameters.get(name);
+			Object value = arguments.get(name);
+
+			if (value == null && !parameter.hasModifier(Modifier.OPTIONAL)) {
 				return null;
+			}
+
+			if (parameter.hasModifier(Modifier.RANGED)) {
+				RangedModifier<?> range = parameter.getModifier(RangedModifier.class);
+				if (!range.inRange(value)) {
+					return null;
+				}
 			}
 		}
 
