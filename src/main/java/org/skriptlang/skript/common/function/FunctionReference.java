@@ -208,33 +208,36 @@ public final class FunctionReference<T> implements Debuggable {
 					? ((KeyProviderExpression<?>) parameter).getArrayKeys(event)
 					: null;
 
-			// Don't allow mutating across function boundary; same hack is applied to variables
-			for (Object value : valuesArray)
-				values.add(Classes.clone(value));
-
-			if (keysArray != null) {
-				keys.addAll(Arrays.asList(keysArray));
-				continue;
-			}
-
 			for (int i = 0; i < valuesArray.length; i++) {
-				while (keys.contains(String.valueOf(keyIndex)))
-					keyIndex++;
-				keys.add(String.valueOf(keyIndex++));
+				if (keysArray == null) {
+					while (keys.contains(String.valueOf(keyIndex)))
+						keyIndex++;
+					keys.add(String.valueOf(keyIndex++));
+				} else if (!keys.add(keysArray[i])) {
+					continue;
+				}
+				// Don't allow mutating across function boundary; same hack is applied to variables
+				values.add(Classes.clone(valuesArray[i]));
 			}
 		}
 		return KeyedValue.zip(values.toArray(), keys.toArray(new String[0]));
 	}
 
-	private KeyedValue<?>[] evaluateParameter(Expression<?> parameter, Event event) {
-		Object[] values = parameter.getArray(event);
+	private KeyedValue<?>[] evaluateParameter(Expression<?> argument, Event event) {
+		if (argument == null)
+			return null;
+
+		Object[] values = argument.getAll(event);
 
 		// Don't allow mutating across function boundary; same hack is applied to variables
 		for (int i = 0; i < values.length; i++)
 			values[i] = Classes.clone(values[i]);
 
-		String[] keys = KeyProviderExpression.areKeysRecommended(parameter)
-				? ((KeyProviderExpression<?>) parameter).getArrayKeys(event)
+		if (!(argument instanceof KeyProviderExpression<?> kpe))
+			return KeyedValue.zip(values, null);
+
+		String[] keys = KeyProviderExpression.areKeysRecommended(argument)
+				? kpe.getArrayKeys(event)
 				: null;
 		return KeyedValue.zip(values, keys);
 	}
