@@ -233,7 +233,7 @@ public final class FunctionReference<T> implements Debuggable {
 		if (KeyProviderExpression.areKeysRecommended(argument))
 			argument.returnNestedStructures(true);
 
-		Object[] values = argument.getAll(event);
+		Object[] values = argument.getArray(event);
 
 		// Don't allow mutating across function boundary; same hack is applied to variables
 		for (int i = 0; i < values.length; i++)
