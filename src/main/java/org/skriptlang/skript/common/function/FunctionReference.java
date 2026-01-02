@@ -198,14 +198,17 @@ public final class FunctionReference<T> implements Debuggable {
 		return evaluateParameter(expression, event);
 	}
 
-	private KeyedValue<?>[] evaluateSingleListParameter(Expression<?>[] parameters, Event event) {
+	private KeyedValue<?>[] evaluateSingleListParameter(Expression<?>[] arguments, Event event) {
 		List<Object> values = new ArrayList<>();
 		Set<String> keys = new LinkedHashSet<>();
 		int keyIndex = 1;
-		for (Expression<?> parameter : parameters) {
-			Object[] valuesArray = parameter.getArray(event);
-			String[] keysArray = KeyProviderExpression.areKeysRecommended(parameter)
-					? ((KeyProviderExpression<?>) parameter).getArrayKeys(event)
+		for (Expression<?> argument : arguments) {
+			if (KeyProviderExpression.areKeysRecommended(argument))
+				argument.returnNestedStructures(true);
+
+			Object[] valuesArray = argument.getArray(event);
+			String[] keysArray = KeyProviderExpression.areKeysRecommended(argument)
+					? ((KeyProviderExpression<?>) argument).getArrayKeys(event)
 					: null;
 
 			for (int i = 0; i < valuesArray.length; i++) {
@@ -226,6 +229,9 @@ public final class FunctionReference<T> implements Debuggable {
 	private KeyedValue<?>[] evaluateParameter(Expression<?> argument, Event event) {
 		if (argument == null)
 			return null;
+
+		if (KeyProviderExpression.areKeysRecommended(argument))
+			argument.returnNestedStructures(true);
 
 		Object[] values = argument.getAll(event);
 
