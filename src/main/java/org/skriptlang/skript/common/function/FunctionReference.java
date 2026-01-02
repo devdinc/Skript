@@ -116,6 +116,10 @@ public final class FunctionReference<T> implements Debuggable {
 					return false;
 				}
 
+				// allows "keyed x" to pass all recursive values of x
+				if (converted != null && KeyProviderExpression.areKeysRecommended(converted))
+					converted.returnNestedStructures(true);
+
 				// all good
 				cachedArguments.put(target.name(), new ArgInfo(converted, target.type(), target.modifiers()));
 				targetParameters.remove(target.name());
@@ -203,9 +207,6 @@ public final class FunctionReference<T> implements Debuggable {
 		Set<String> keys = new LinkedHashSet<>();
 		int keyIndex = 1;
 		for (Expression<?> argument : arguments) {
-			if (KeyProviderExpression.areKeysRecommended(argument))
-				argument.returnNestedStructures(true);
-
 			Object[] valuesArray = argument.getArray(event);
 			String[] keysArray = KeyProviderExpression.areKeysRecommended(argument)
 					? ((KeyProviderExpression<?>) argument).getArrayKeys(event)
@@ -229,9 +230,6 @@ public final class FunctionReference<T> implements Debuggable {
 	private KeyedValue<?>[] evaluateParameter(Expression<?> argument, Event event) {
 		if (argument == null)
 			return null;
-
-		if (KeyProviderExpression.areKeysRecommended(argument))
-			argument.returnNestedStructures(true);
 
 		Object[] values = argument.getArray(event);
 
