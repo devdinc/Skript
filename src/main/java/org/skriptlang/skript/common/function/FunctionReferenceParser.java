@@ -207,33 +207,37 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 			// all remaining arguments to parse
 			// if a passed argument is named it bypasses the regular argument order of unnamed arguments
 			SequencedMap<String, Parameter<?>> parameters = signature.parameters().sequencedMap();
-			LinkedHashSet<String> remaining = new LinkedHashSet<>(parameters.keySet());
 
 			// if a parameter is not passed, we need to create a dummy argument to allow parsing in parseFunctionArguments
 			//noinspection unchecked
-			FunctionReference.Argument<String>[] parseArguments = (FunctionReference.Argument<String>[]) new FunctionReference.Argument[parameters.size()];
+			Argument<String>[] parseArguments = (Argument<String>[]) new Argument[parameters.size()];
 			ArgumentParseTarget[] parseTargets = new ArgumentParseTarget[parameters.size()];
-			for (int i = 0; i < parameters.size(); i++) {
-				if (remaining.isEmpty()) {
-					break;
-				}
 
-				Parameter<?> parameter;
-				if (i < arguments.length && arguments[i].type() == ArgumentType.NAMED) {
-					parameter = parameters.get(arguments[i].name());
-				} else {
-					parameter = parameters.get(remaining.getFirst());
-				}
+			// fill in named arguments, placeholders for unnamed arguments
+			int index = 0;
+			boolean hasNames = true;
+			boolean hasPlaceholders = false;
+			for (var entry : parameters.entrySet()) {
+				Parameter<?> parameter = entry.getValue();
 
-				if (parameter == null) {
-					continue signatures;
+				Argument<String> argument = null;
+				if (hasNames) {
+					hasNames = false;
+					for (var candidate : arguments) {
+						hasNames |= candidate.type() == ArgumentType.NAMED;
+						if (entry.getKey().equals(candidate.name())) { // exact match
+							argument = candidate;
+							break;
+						}
+					}
+				} else if (index < arguments.length) {
+					argument = arguments[index];
 				}
-
-				if (i < arguments.length) {
-					parseArguments[i] = arguments[i];
-				} else {
-					parseArguments[i] = new Argument<>(ArgumentType.UNNAMED, parameter.name(), null);
+				if (argument == null) { // placeholder for now
+					argument = new Argument<>(ArgumentType.UNNAMED, entry.getKey(), null);
+					hasPlaceholders = true;
 				}
+				parseArguments[index] = argument;
 
 				Class<?> targetType = Utils.getComponentType(parameter.type());
 				Expression<?> fallback;
@@ -244,9 +248,53 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 				} else {
 					fallback = null;
 				}
-				parseTargets[i] = new ArgumentParseTarget(targetType, fallback);
+				parseTargets[index] = new ArgumentParseTarget(targetType, fallback);
 
-				remaining.remove(parameter.name());
+				index++;
+			}
+			if (hasPlaceholders) { // fill in placeholder arguments as necessary
+				List<String> priorNames = new ArrayList<>();
+				int lastCheck = -1;
+				int lastFilled = -1;
+				fill: for (int i = 0; i < arguments.length; i++) {
+					Argument<String> argument = arguments[i];
+					if (argument.type() == ArgumentType.NAMED) {
+						priorNames.add(argument.name());
+						if (i > 0 && arguments[i - 1].type() == ArgumentType.NAMED) {
+							// since the last argument was named, the position of this one has not been verified
+							// thus, search through the parse arguments again
+							lastCheck = -1;
+						}
+						continue;
+					}
+					// find next unnamed argument
+					String nextName = null;
+					for (int j = i + 1; j < arguments.length; j++) {
+						Argument<String> nextArgument = arguments[j];
+						if (nextArgument.type() == ArgumentType.NAMED) {
+							nextName = nextArgument.name();
+							break;
+						}
+					}
+					// fill in using this unnamed argument
+					for (int j = lastCheck + 1; j < parseArguments.length; j++) {
+						Argument<String> parseArgument = parseArguments[j];
+						if (parseArgument.type() == ArgumentType.NAMED) {
+							if (parseArgument.name().equals(nextName)) {
+								break;
+							}
+							priorNames.remove(parseArgument.name());
+						} else if (j > lastFilled && priorNames.isEmpty()) { // can occupy this slot
+							parseArguments[j] = new Argument<>(ArgumentType.UNNAMED, parseArgument.name(), argument.value());
+							lastCheck = j;
+							lastFilled = j;
+							continue fill;
+						}
+					}
+					// unable to find a slot for this argument
+					Skript.error(Language.get("functions.mixing named and unnamed arguments"));
+					return null;
+				}
 			}
 
 			ArgumentParseResult result = parseFunctionArguments(parseArguments, parseTargets);
@@ -493,11 +541,12 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 			if (argument.value() != null) { // if passed, attempt to parse
 				SkriptParser parser = new SkriptParser(argument.value(), flags | SkriptParser.PARSE_LITERALS, context);
 
-				Expression<?> attempt = parser.parseExpression(targetData.type());
-				if (attempt != null) {
-					expression = attempt;
-				} else {
-					expression = targetData.fallback;
+				try (ParseLogHandler logHandler = new ParseLogHandler().start()) {
+					expression = parser.parseExpression(targetData.type());
+					if (expression == null) {
+						logHandler.printError("Can't understand the argument for %s parameter '%s': %s"
+							.formatted(Classes.getSuperClassInfo(targetData.type()).getName().getSingular(), argument.name(), argument.value()));
+					}
 				}
 			} else {
 				expression = targetData.fallback;
