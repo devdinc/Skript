@@ -5,8 +5,6 @@ import ch.njol.skript.SkriptAPIException;
 import ch.njol.skript.util.Utils;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
-import org.jetbrains.annotations.*;
-import com.google.common.collect.ImmutableSet;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
