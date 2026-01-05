@@ -43,7 +43,7 @@ test "function section":
 	parse:
 		set {_x} to function esf_two with arguments:
 			x set to firework
-	assert first element of last parse logs contains "The function esf(x: item type) does not exist"
+	assert first element of last parse logs contains "The function esf_two(x: item type) does not exist"
 
 	parse:
 		set {_x} to function esf with arguments:
