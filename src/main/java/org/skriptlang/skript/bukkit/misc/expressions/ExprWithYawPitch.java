@@ -59,7 +59,10 @@ public class ExprWithYawPitch extends PropertyExpression<Location, Location> {
 		return get(source, location -> {
 			float finalYaw = yaw != null ? yaw.floatValue() : location.getYaw();
 			float finalPitch = pitch != null ? pitch.floatValue() : location.getPitch();
-			return location.clone().setRotation(finalYaw, finalPitch);
+			Location clone = location.clone();
+			clone.setYaw(finalYaw);
+			clone.setPitch(finalPitch);
+			return clone;
 		});
 	}
 
