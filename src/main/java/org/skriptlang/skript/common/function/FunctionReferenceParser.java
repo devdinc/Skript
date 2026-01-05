@@ -281,7 +281,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 						}
 						continue;
 					}
-					// find the next unnamed argument
+					// find the next named argument
 					String nextName = null;
 					for (int j = i + 1; j < arguments.length; j++) {
 						Argument<String> nextArgument = arguments[j];
