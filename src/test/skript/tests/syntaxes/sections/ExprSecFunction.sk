@@ -48,7 +48,7 @@ test "function section":
 	parse:
 		set {_x} to function esf with arguments:
 			x set to agasgasfgadsfg
-	assert first element of last parse logs contains "The function esf(x: ?) does not exist"
+	assert first element of last parse logs contains "Can't understand this expression: 'agasgasfgadsfg'"
 
 	set {_x} to function esf_two with arguments:
 		x set to 1

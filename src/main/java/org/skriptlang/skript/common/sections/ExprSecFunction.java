@@ -94,7 +94,7 @@ public class ExprSecFunction extends SectionExpression<Object> {
 
 		String name = result.regexes.getFirst().group();
 		if (!FUNCTION_NAME_PATTERN.matcher(name).matches()) {
-			Skript.error("The function %s does not exist.", name);
+			Skript.error("The function '%s' does not exist.", name);
 			return false;
 		}
 
@@ -111,7 +111,7 @@ public class ExprSecFunction extends SectionExpression<Object> {
 		}
 
 		if (reference.signature().returnType() == null) {
-			Skript.error("The function %s does not return anything.", name);
+			Skript.error("The function '%s' does not return anything.", name);
 			return false;
 		}
 
@@ -143,7 +143,7 @@ public class ExprSecFunction extends SectionExpression<Object> {
 			}
 		}
 
-		Skript.error("The function %s(%s) does not exist.", name, joiner);
+		Skript.error("The function '%s(%s)' does not exist.", name, joiner);
 	}
 
 	@Override
