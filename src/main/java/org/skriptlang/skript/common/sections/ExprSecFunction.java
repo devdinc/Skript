@@ -12,6 +12,7 @@ import ch.njol.skript.expressions.base.SectionExpression;
 import ch.njol.skript.lang.*;
 import ch.njol.skript.lang.SkriptParser.ParseResult;
 import ch.njol.skript.lang.function.Functions;
+import ch.njol.skript.localization.Language;
 import ch.njol.skript.localization.Noun;
 import ch.njol.skript.log.ParseLogHandler;
 import ch.njol.skript.log.SkriptLogger;
@@ -79,13 +80,13 @@ public class ExprSecFunction extends SectionExpression<Object> {
 
 		for (Node child : node) {
 			if (!(child instanceof SimpleNode) || child.getKey() == null) {
-				Skript.error("Invalid argument declaration for a function section: ", child.getKey());
+				Skript.error(Language.get("functions.invalid argument in section"), child.getKey());
 				return false;
 			}
 
 			Matcher matcher = ARGUMENT_PATTERN.matcher(child.getKey());
 			if (!matcher.matches()) {
-				Skript.error("Invalid argument declaration for a function section: ", child.getKey());
+				Skript.error(Language.get("functions.invalid argument in section"), child.getKey());
 				return false;
 			}
 
@@ -94,7 +95,7 @@ public class ExprSecFunction extends SectionExpression<Object> {
 
 		String name = result.regexes.getFirst().group();
 		if (!FUNCTION_NAME_PATTERN.matcher(name).matches()) {
-			Skript.error("The function '%s' does not exist.", name);
+			Skript.error(Language.get("functions.does not exist"), name);
 			return false;
 		}
 
@@ -111,7 +112,7 @@ public class ExprSecFunction extends SectionExpression<Object> {
 		}
 
 		if (reference.signature().returnType() == null) {
-			Skript.error("The function '%s' does not return anything.", name);
+			Skript.error(Language.get("functions.does not return"), name);
 			return false;
 		}
 
@@ -143,7 +144,7 @@ public class ExprSecFunction extends SectionExpression<Object> {
 			}
 		}
 
-		Skript.error("The function '%s(%s)' does not exist.", name, joiner);
+		Skript.error(Language.get("functions.does not exist"), "%s(%s)".formatted(name, joiner));
 	}
 
 	@Override

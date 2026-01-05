@@ -423,7 +423,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 			}
 		}
 
-		Skript.error("The function %s(%s) does not exist.", name, joiner);
+		Skript.error(Language.get("functions.does not exist"), "%s(%s)".formatted(name, joiner));
 	}
 
 	/**
