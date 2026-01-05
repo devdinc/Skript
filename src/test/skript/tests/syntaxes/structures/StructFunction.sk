@@ -157,6 +157,10 @@ test "named function arguments":
 		location(x: 1, y: 2, z: 3, pitch: 4, 5)
 	assert first element of last parse logs contains "Mixing named and unnamed arguments is not allowed"
 
+	parse:
+		location(x: 1, y: 2, z: 3, 4, world: "world", 5)
+	assert first element of last parse logs contains "Mixing named and unnamed arguments is not allowed"
+
 local function nfa_incorrect_list(ns: numbers):
 	stop
 
