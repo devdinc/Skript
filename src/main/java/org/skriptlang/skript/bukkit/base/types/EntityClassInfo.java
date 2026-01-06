@@ -51,10 +51,15 @@ public class EntityClassInfo extends ClassInfo<Entity> {
 			.defaultExpression(new EventValueExpression<>(Entity.class))
 			.parser(new EntityParser())
 			.changer(new EntityChanger())
+			.property(Property.NAME,
+				"The entity's name, if it has one, as text." +
+					"Note that the regular name cannot be changed, meaning the entity's custom (display) name will be changed instead.",
+				Skript.instance(),
+				new EntityNameHandler(false))
 			.property(Property.DISPLAY_NAME,
 				"The entity's custom name, if it has one, as text. Can be set or reset.",
 				Skript.instance(),
-				new EntityNameHandler());
+				new EntityNameHandler(true));
 	}
 
 	private static class EntityParser extends Parser<Entity> {
@@ -151,15 +156,24 @@ public class EntityClassInfo extends ClassInfo<Entity> {
 
 	private static class EntityNameHandler implements ExpressionPropertyHandler<Entity, Component> {
 		//<editor-fold desc="entity name handler" defaultstate="collapsed">
+		private final boolean isDisplayName;
+
+		public EntityNameHandler(boolean isDisplayName) {
+			this.isDisplayName = isDisplayName;
+		}
+
 		@Override
 		public Component convert(Entity entity) {
-			return entity.customName();
+			if (isDisplayName) {
+				return entity.customName();
+			}
+			return entity.name();
 		}
 
 		@Override
 		public Class<?> @Nullable [] acceptChange(ChangeMode mode) {
 			if (mode == ChangeMode.SET || mode == ChangeMode.RESET)
-				return CollectionUtils.array(String.class);
+				return CollectionUtils.array(Component.class);
 			return null;
 		}
 
