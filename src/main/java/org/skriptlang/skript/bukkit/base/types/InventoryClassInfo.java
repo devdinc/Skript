@@ -25,9 +25,9 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.skriptlang.skript.lang.properties.Property;
-import org.skriptlang.skript.lang.properties.PropertyHandler;
-import org.skriptlang.skript.lang.properties.PropertyHandler.ConditionPropertyHandler;
-import org.skriptlang.skript.lang.properties.PropertyHandler.ContainsHandler;
+import org.skriptlang.skript.lang.properties.handlers.ContainsHandler;
+import org.skriptlang.skript.lang.properties.handlers.base.ConditionPropertyHandler;
+import org.skriptlang.skript.lang.properties.handlers.base.ExpressionPropertyHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -231,7 +231,7 @@ public class InventoryClassInfo extends ClassInfo<Inventory> {
 		//</editor-fold>
 	}
 
-	private static class InventoryNameHandler implements PropertyHandler.ExpressionPropertyHandler<Inventory, Component> {
+	private static class InventoryNameHandler implements ExpressionPropertyHandler<Inventory, Component> {
 		//<editor-fold desc="inventory name property" defaultstate="collapsed">
 
 		@Override

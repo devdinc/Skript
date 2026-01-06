@@ -25,11 +25,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Name("Item/Inventory Type With Name")
-@Description({
-	"Returns a copy of an item with a new name or creates a new inventory with a specific name.",
-	"If you want to change the name of an existing item or inventory, use the <a href='#PropExprName'>name</a> expression.",
-})
+@Name("Named Item/Inventory")
+@Description("Directly names an item/inventory, useful for defining a named item/inventory in a script. " +
+		"If you want to (re)name existing items/inventories you can either use this expression or use <code>set <a href='#PropExprName'>name of &lt;item/inventory&gt;</a> to &lt;text&gt;</code>.")
 @Example("give a diamond sword of sharpness 100 named \"<gold>Excalibur\" to the player")
 @Example("set tool of player to the player's tool named \"<gold>Wand\"")
 @Example("set the name of the player's tool to \"<gold>Wand\"")
