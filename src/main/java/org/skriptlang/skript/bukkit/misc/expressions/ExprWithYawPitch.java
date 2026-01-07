@@ -26,27 +26,23 @@ public class ExprWithYawPitch extends PropertyExpression<Location, Location> {
 		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprWithYawPitch.class, Location.class)
 			.supplier(ExprWithYawPitch::new)
 			.origin(origin)
-			.addPattern("%locations% with (:yaw|:pitch) %number%")
-			.addPattern("%locations% with yaw %number% and pitch %number%")
+			.addPattern("%locations% with [a] (:yaw|:pitch) [of] %number%")
+			.addPattern("%locations% with [a] yaw [of] %number% and [a] pitch [of] %number%")
 			.build());
 	}
 
 	private Expression<Number> yaw, pitch;
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public boolean init(Expression<?>[] expressions, int matchedPattern, Kleenean isDelayed, ParseResult parseResult) {
-		//noinspection unchecked
 		setExpr((Expression<? extends Location>) expressions[0]);
 		if (parseResult.hasTag("yaw")) {
-			//noinspection unchecked
 			yaw = (Expression<Number>) expressions[1];
 		} else if (parseResult.hasTag("pitch")) {
-			//noinspection unchecked
 			pitch = (Expression<Number>) expressions[1];
 		} else {
-			//noinspection unchecked
 			yaw = (Expression<Number>) expressions[1];
-			//noinspection unchecked
 			pitch = (Expression<Number>) expressions[2];
 		}
 		return true;
