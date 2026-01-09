@@ -260,6 +260,22 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 				index++;
 			}
 			if (hasPlaceholders) { // fill in placeholder arguments as necessary
+				// some arguments may be erroneously interpreted as name, but their value just contains a colon
+				// for example, minecraft:stone
+				// convert these unexpected named arguments to unnamed arguments
+				boolean copied = false;
+				for (int i = 0; i < arguments.length; i++) {
+					Argument<String> argument = arguments[i];
+					if (argument.type() == ArgumentType.NAMED && !parameters.containsKey(argument.name())) {
+						if (!copied) {
+							arguments = Arrays.copyOf(arguments, arguments.length);
+							copied = true;
+						}
+						// we retain the name for later purposes, such as logging
+						arguments[i] = new Argument<>(ArgumentType.UNNAMED, argument.name(), argument.raw());
+					}
+				}
+
 				// we track named arguments as we encounter them
 				// we use this to avoid inserting the next unnamed argument too early
 				// for example, consider func(x, optional y, z, optional aa)
@@ -306,26 +322,31 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 						}
 					}
 					// unable to find a slot for this argument
-					Skript.error(Language.get("functions.mixing named and unnamed arguments"));
+					if (argument.name() != null) { // this was originally a named argument, error as if it is
+						Skript.error(Language.get("functions.unexpected argument"), argument.name());
+					} else {
+						Skript.error(Language.get("functions.mixing named and unnamed arguments"));
+					}
 					return null;
 				}
 			}
 
 			ArgumentParseResult result = parseFunctionArguments(parseArguments, parseTargets);
-
-			if (result.type() == ArgumentParseResultType.LIST_ERROR) {
-				return null;
-			}
-
-			if (result.type() == ArgumentParseResultType.OK) {
-				//noinspection unchecked
-				FunctionReference<T> reference = new FunctionReference<>(namespace, name, (Signature<T>) signature, result.parsed());
-
-				if (!reference.validate()) {
-					continue;
+			switch (result.type()) {
+				case LIST_ERROR -> {
+					return null;
 				}
-
-				exactReferences.add(reference);
+				case OK -> {
+					//noinspection unchecked
+					FunctionReference<T> reference = new FunctionReference<>(namespace, name, (Signature<T>) signature, result.parsed());
+					if (!reference.validate()) {
+						continue;
+					}
+					exactReferences.add(reference);
+				}
+				default -> {
+					// continue
+				}
 			}
 		}
 		return exactReferences;
@@ -551,22 +572,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 			FunctionReference.Argument<String> argument = arguments[i];
 			ArgumentParseTarget targetData = targets[i];
 
-			Expression<?> expression;
-			if (argument.value() != null) { // if passed, attempt to parse
-				SkriptParser parser = new SkriptParser(argument.value(), flags | SkriptParser.PARSE_LITERALS, context);
-
-				try (ParseLogHandler logHandler = new ParseLogHandler().start()) {
-					expression = parser.parseExpression(targetData.type());
-					if (expression == null) {
-						logHandler.printError(INVALID_ARGUMENT.toString(
-							Classes.getSuperClassInfo(targetData.type()).getName().getSingular(), argument.name(), argument.value()
-						));
-					}
-				}
-			} else {
-				expression = targetData.fallback;
-			}
-
+			Expression<?> expression = parseExpression(argument, targetData);
 			if (expression == null) {
 				return new ArgumentParseResult(ArgumentParseResultType.PARSE_FAIL, null);
 			}
@@ -580,6 +586,33 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 		}
 
 		return new ArgumentParseResult(ArgumentParseResultType.OK, parsed);
+	}
+
+	/**
+	 * Attempts to parse an argument into an expression.
+	 * This method will log parsing errors.
+	 *
+	 * @param argument The argument.
+	 * @param targetData The target type to parse to, and the fallback value.
+	 * @return {@code targetData.fallback} if the argument does not have a value.
+	 * 	Otherwise, the parsed expression or null if parsing failed.
+	 */
+	private Expression<?> parseExpression(Argument<String> argument, ArgumentParseTarget targetData) {
+		if (argument.value() == null) {
+			return targetData.fallback;
+		}
+
+		SkriptParser parser = new SkriptParser(argument.value(), flags | SkriptParser.PARSE_LITERALS, context);
+
+		try (ParseLogHandler logHandler = new ParseLogHandler().start()) {
+			Expression<?> expression = parser.parseExpression(targetData.type());
+			if (expression == null) {
+				logHandler.printError(INVALID_ARGUMENT.toString(
+					Classes.getSuperClassInfo(targetData.type()).getName().getSingular(), argument.name(), argument.value()
+				));
+			}
+			return expression;
+		}
 	}
 
 	/**

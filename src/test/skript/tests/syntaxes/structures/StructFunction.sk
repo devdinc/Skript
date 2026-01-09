@@ -134,11 +134,11 @@ test "named function arguments":
 
 	parse:
 		nfa(a: 1, b: 2, d: 2)
-	assert first element of last parse logs contains "The function nfa(a: integer, b: integer, d: integer) does not exist"
+	assert first element of last parse logs contains "Can't understand the argument for integer parameter 'c': d: 2"
 
 	parse:
 		nfa(a: 1, d: 2, b: 2)
-	assert first element of last parse logs contains "The function nfa(a: integer, d: integer, b: integer) does not exist"
+	assert first element of last parse logs contains "The argument named 'd' is unexpected"
 
 	parse:
 		nfa(a: 1, a: 2, c: 2)
