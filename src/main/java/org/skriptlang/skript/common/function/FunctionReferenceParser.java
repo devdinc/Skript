@@ -41,6 +41,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 	private final static Pattern FUNCTION_CALL_PATTERN =
 			Pattern.compile("(?<name>[\\p{IsAlphabetic}_][\\p{IsAlphabetic}\\d_]*)\\((?<args>.*)\\)");
 
+	private static final ArgsMessage UNEXPECTED_ARGUMENT = new ArgsMessage("functions.unexpected argument");
 	private static final ArgsMessage INVALID_ARGUMENT = new ArgsMessage("functions.invalid argument");
 
 	/**
@@ -323,7 +324,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 					}
 					// unable to find a slot for this argument
 					if (argument.name() != null) { // this was originally a named argument, error as if it is
-						Skript.error(Language.get("functions.unexpected argument"), argument.name());
+						Skript.error(UNEXPECTED_ARGUMENT.toString(argument.name()));
 					} else {
 						Skript.error(Language.get("functions.mixing named and unnamed arguments"));
 					}
