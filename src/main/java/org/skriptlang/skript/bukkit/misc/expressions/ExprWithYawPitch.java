@@ -12,7 +12,6 @@ import ch.njol.util.Kleenean;
 import org.bukkit.Location;
 import org.bukkit.event.Event;
 import org.jspecify.annotations.Nullable;
-import org.skriptlang.skript.docs.Origin;
 import org.skriptlang.skript.registration.SyntaxInfo;
 import org.skriptlang.skript.registration.SyntaxRegistry;
 
@@ -22,10 +21,9 @@ import org.skriptlang.skript.registration.SyntaxRegistry;
 @Since("INSERT VERSION")
 public class ExprWithYawPitch extends PropertyExpression<Location, Location> {
 
-	public static void register(SyntaxRegistry registry, Origin origin) {
+	public static void register(SyntaxRegistry registry) {
 		registry.register(SyntaxRegistry.EXPRESSION, SyntaxInfo.Expression.builder(ExprWithYawPitch.class, Location.class)
 			.supplier(ExprWithYawPitch::new)
-			.origin(origin)
 			.addPattern("%locations% with [a] (:yaw|:pitch) [of] %number%")
 			.addPattern("%locations% with [a] yaw [of] %number% and [a] pitch [of] %number%")
 			.build());
