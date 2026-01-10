@@ -69,7 +69,7 @@ public class ExprWithYawPitch extends PropertyExpression<Location, Location> {
 
 	@Override
 	public String toString(@Nullable Event event, boolean debug) {
-		new SyntaxStringBuilder(event, debug)
+		return new SyntaxStringBuilder(event, debug)
 			.append(getExpr(), "with")
 			.appendIf(yaw != null, "yaw", yaw)
 			.appendIf(yaw != null && pitch != null, "and")
