@@ -15,4 +15,9 @@ public class BlockModule implements AddonModule {
 		ExprSignText.register(syntaxRegistry);
 	}
 
+	@Override
+	public String name() {
+		return "block";
+	}
+
 }

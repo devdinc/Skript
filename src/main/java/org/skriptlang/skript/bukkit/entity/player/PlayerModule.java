@@ -18,4 +18,9 @@ public class PlayerModule implements AddonModule {
 		ExprQuitMessage.register(syntaxRegistry);
 	}
 
+	@Override
+	public String name() {
+		return "player";
+	}
+
 }

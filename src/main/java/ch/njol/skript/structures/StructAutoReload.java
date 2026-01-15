@@ -159,7 +159,6 @@ public class StructAutoReload extends Structure {
 	}
 
 	private void reloading(RedirectingLogHandler logHandler) {
-		// TODO update usages
 		String prefix = Language.get("skript.prefix");
 		String what = PluralizingArgsMessage.format(Language.format("log.auto reload.script", script.getConfig().getFileName()));
 		String message = StringUtils.fixCapitalization(PluralizingArgsMessage.format(Language.format("log.auto reload.reloading", what)));

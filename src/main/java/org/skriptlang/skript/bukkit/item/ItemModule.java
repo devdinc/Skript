@@ -22,4 +22,9 @@ public class ItemModule implements AddonModule {
 		ExprLore.register(syntaxRegistry);
 	}
 
+	@Override
+	public String name() {
+		return "item";
+	}
+
 }

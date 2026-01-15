@@ -117,4 +117,9 @@ public class TextModule implements AddonModule {
 		ExprStringColor.register(syntaxRegistry);
 	}
 
+	@Override
+	public String name() {
+		return "text";
+	}
+
 }

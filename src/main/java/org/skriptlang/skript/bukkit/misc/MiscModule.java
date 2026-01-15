@@ -16,4 +16,9 @@ public class MiscModule implements AddonModule {
 		ExprMOTD.register(syntaxRegistry);
 	}
 
+	@Override
+	public String name() {
+		return "miscellaneous";
+	}
+
 }
