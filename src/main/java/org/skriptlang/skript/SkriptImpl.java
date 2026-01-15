@@ -131,6 +131,7 @@ final class SkriptImpl implements Skript {
 		private final Class<?> source;
 		private final String name;
 		private final Localizer localizer;
+		private final Origin origin = Origin.of(this);
 
 		SkriptAddonImpl(Skript skript, Class<?> source, String name, @Nullable Localizer localizer) {
 			this.skript = skript;
@@ -169,7 +170,7 @@ final class SkriptImpl implements Skript {
 			R registry = skript.registry(registryClass);
 			if (registryClass == SyntaxRegistry.class) {
 				//noinspection unchecked
-				return (R) SyntaxRegistry.withOrigin((SyntaxRegistry) registry, Origin.of(this));
+				return (R) SyntaxRegistry.withOrigin((SyntaxRegistry) registry, origin);
 			}
 			return registry;
 		}
