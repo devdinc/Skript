@@ -51,4 +51,9 @@ public class EntityModule implements AddonModule {
 		ExprDeathMessage.register(syntaxRegistry);
 	}
 
+	@Override
+	public String name() {
+		return "entity";
+	}
+
 }
