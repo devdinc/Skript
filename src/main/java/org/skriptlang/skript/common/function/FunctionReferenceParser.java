@@ -245,7 +245,7 @@ public record FunctionReferenceParser(ParseContext context, int flags) {
 						}
 					}
 				} else if (index < arguments.length) { // if there are no named arguments, simply take the next provided one
-					argument = arguments[index];
+					argument = new Argument<>(ArgumentType.UNNAMED, entry.getKey(), arguments[index].value());
 				}
 				if (argument == null) { // could not resolve an argument, use a placeholder
 					argument = new Argument<>(ArgumentType.UNNAMED, entry.getKey(), null);
