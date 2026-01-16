@@ -180,8 +180,27 @@ public class Environment {
 		for (Resource resource : resources) {
 			Path source = dataRoot.resolve(resource.getSource());
 			Path target = env.resolve(resource.getTarget());
-			Files.createDirectories(target.getParent());
-			Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+
+			if (Files.isDirectory(source)) {
+				Files.walk(source).forEach(path -> {
+					try {
+						Path relative = source.relativize(path);
+						Path dest = target.resolve(relative);
+
+						if (Files.isDirectory(path)) {
+							Files.createDirectories(dest);
+						} else {
+							Files.createDirectories(dest.getParent());
+							Files.copy(path, dest, StandardCopyOption.REPLACE_EXISTING);
+						}
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				});
+			} else {
+				Files.createDirectories(target.getParent());
+				Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+			}
 		}
 
 		List<Resource> downloads = new ArrayList<>();
